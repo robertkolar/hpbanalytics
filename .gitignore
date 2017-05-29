@@ -1,0 +1,9 @@
+/target
+/*/target
+/*.log
+/.idea
+/*.iml
+/*/*.iml
+**/src/main/webapp/app/.sencha/
+/**/build
+/**/ext
