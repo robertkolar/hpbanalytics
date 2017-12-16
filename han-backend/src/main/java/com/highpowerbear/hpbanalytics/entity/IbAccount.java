@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
-import com.highpowerbear.hpbanalytics.model.IbConnection;
+import com.highpowerbear.hpbanalytics.iblogger.IbConnection;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.model;
+package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -9,7 +9,7 @@ import com.ib.client.EClientSocket;
 import org.slf4j.LoggerFactory;
 
 /**
- * Created by robertk on 4/4/15.
+ * Created by robertk on 4/4/2015.
  */
 public class IbConnection {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(IbConnection.class);

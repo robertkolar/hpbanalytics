@@ -1,11 +1,11 @@
-package com.highpowerbear.hpbanalytics.model;
+package com.highpowerbear.hpbanalytics.common;
 
 import com.highpowerbear.hpbanalytics.enums.OptionType;
 
 import java.util.Date;
 
 /**
- * Created by robertk on 9.10.2015.
+ * Created by robertk on 10/9/2015.
  */
 public class OptionParseResult {
     private String underlying;

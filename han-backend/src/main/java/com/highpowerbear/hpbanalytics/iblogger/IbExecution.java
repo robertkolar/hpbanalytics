@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.model;
+package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -7,9 +7,10 @@ import com.highpowerbear.hpbanalytics.enums.SecType;
 import java.util.Calendar;
 
 /**
- * Created by robertk on 4/6/15.
+ * Created by robertk on 4/6/2015.
  */
 public class IbExecution {
+
     private String origin; // IB:ibAccountId
     private String referenceId; // permId
     private Action action;

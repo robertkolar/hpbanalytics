@@ -1,7 +1,6 @@
 package com.highpowerbear.hpbanalytics.common;
 
 import com.highpowerbear.hpbanalytics.enums.OptionType;
-import com.highpowerbear.hpbanalytics.model.OptionParseResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

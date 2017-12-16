@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.common;
 
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-import com.highpowerbear.hpbanalytics.model.IbExecution;
+import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
