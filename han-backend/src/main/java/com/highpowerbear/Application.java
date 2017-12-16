@@ -1,6 +1,6 @@
 package com.highpowerbear;
 
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import org.apache.activemq.command.ActiveMQQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +33,6 @@ public class Application {
 
     @Bean
     public Queue queue() {
-        return new ActiveMQQueue(HanDefinitions.IBLOGGER_TO_REPORT_QUEUE);
+        return new ActiveMQQueue(HanSettings.IBLOGGER_TO_REPORT_QUEUE);
     }
 }

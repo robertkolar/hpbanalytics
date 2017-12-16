@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao;
 
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
@@ -175,7 +175,7 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<Trade> getTradesByUnderlying(Report report, String underlying) {
-        if (HanDefinitions.ALL_UNDERLYINGS.equals(underlying)) {
+        if (HanSettings.ALL_UNDERLYINGS.equals(underlying)) {
             underlying = null;
         }
         TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report = :report" +  (underlying != null ? " AND t.underlying = :underlying" : "") + " ORDER BY t.openDate ASC", Trade.class);

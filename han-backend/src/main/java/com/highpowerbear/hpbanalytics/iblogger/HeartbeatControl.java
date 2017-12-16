@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -56,7 +56,7 @@ public class HeartbeatControl {
     }
 
     public void initHeartbeat(IbOrder ibOrder) {
-        openOrderHeartbeatMap.get(ibOrder.getIbAccount()).put(ibOrder, HanDefinitions.MAX_ORDER_HEARTBEAT_FAILS);
+        openOrderHeartbeatMap.get(ibOrder.getIbAccount()).put(ibOrder, HanSettings.MAX_ORDER_HEARTBEAT_FAILS);
     }
 
     public void removeHeartbeat(IbOrder ibOrder) {

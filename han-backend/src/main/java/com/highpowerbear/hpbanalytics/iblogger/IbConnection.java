@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.IbConnectionType;
 import com.ib.client.EClientSocket;
@@ -46,7 +46,7 @@ public class IbConnection {
         if (!isConnected()) {
             log.info("Connecting " + print());
             eClientSocket.eConnect(host, port, clientId);
-            HanUtil.waitMilliseconds(HanDefinitions.ONE_SECOND_MILLIS);
+            HanUtil.waitMilliseconds(HanSettings.ONE_SECOND_MILLIS);
             if (isConnected()) {
                 log.info("Sucessfully connected " + print());
             }
@@ -61,7 +61,7 @@ public class IbConnection {
         if (isConnected()) {
             log.info("Disconnecting " + print());
             eClientSocket.eDisconnect();
-            HanUtil.waitMilliseconds(HanDefinitions.ONE_SECOND_MILLIS);
+            HanUtil.waitMilliseconds(HanSettings.ONE_SECOND_MILLIS);
             if (!isConnected()) {
                 log.info("Successfully disconnected " + print());
                 this.accounts = null;

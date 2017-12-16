@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.Action;
@@ -27,15 +27,15 @@ public class OutputProcessor {
     private Queue queue;
 
     public void sendToReport(String executionXml) {
-        log.info("BEGIN send message to MQ=" + HanDefinitions.IBLOGGER_TO_REPORT_QUEUE + ", xml=" + executionXml);
+        log.info("BEGIN send message to MQ=" + HanSettings.IBLOGGER_TO_REPORT_QUEUE + ", xml=" + executionXml);
         jmsTemplate.convertAndSend(queue, executionXml);
-        log.info("END send message to MQ=" + HanDefinitions.IBLOGGER_TO_REPORT_QUEUE);
+        log.info("END send message to MQ=" + HanSettings.IBLOGGER_TO_REPORT_QUEUE);
     }
 
     public void processExecution(IbOrder ibOrder) {
         if (ibOrder.getIbAccount().isAnalytics()) {
             IbExecution ie = new IbExecution();
-            ie.setOrigin(HanDefinitions.CONVERSION_ORIGIN_PREFIX_IB + ibOrder.getIbAccountId());
+            ie.setOrigin(HanSettings.CONVERSION_ORIGIN_PREFIX_IB + ibOrder.getIbAccountId());
             ie.setReferenceId(String.valueOf(ibOrder.getPermId()));
             ie.setAction(Action.valueOf(ibOrder.getAction()));
             ie.setQuantity(ibOrder.getQuantity());

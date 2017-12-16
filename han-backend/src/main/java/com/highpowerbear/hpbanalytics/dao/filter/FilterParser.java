@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
@@ -31,25 +31,25 @@ public class FilterParser {
             JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
             JsonArray array = jsonReader.readArray();
             for (int i = 0; i < array.size(); i++) {
-                String property = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.PROPERTY.toString()).getString();
+                String property = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.PROPERTY.toString()).getString();
 
-                if (HanDefinitions.IbOrderFilterField.SYMBOL.getVarName().equals(property)) {
+                if (FilterEnums.IbOrderFilterField.SYMBOL.getVarName().equals(property)) {
                     filter.getSymbolFilterMap().put(parseOperatorString(array, i), parseString(array, i));
 
-                } else if (HanDefinitions.IbOrderFilterField.SEC_TYPE.getVarName().equals(property)) {
-                    HanDefinitions.FilterOperatorEnum operator = parseOperatorEnum(array, i);
+                } else if (FilterEnums.IbOrderFilterField.SEC_TYPE.getVarName().equals(property)) {
+                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
                     filter.getSecTypeFilterMap().put(operator, new HashSet<>());
                     for (String v : parseValues(array, i)) {
                         filter.getSecTypeFilterMap().get(operator).add(v.toUpperCase());
                     }
 
-                } else if (HanDefinitions.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
+                } else if (FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getSubmitDateFilterMap().put(parseOperatorCalendar(array, i), cal);
 
-                } else if (HanDefinitions.IbOrderFilterField.STATUS.getVarName().equals(property)) {
-                    HanDefinitions.FilterOperatorEnum operator = parseOperatorEnum(array, i);
+                } else if (FilterEnums.IbOrderFilterField.STATUS.getVarName().equals(property)) {
+                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
                     filter.getStatusFilterMap().put(operator, new HashSet<>());
                     for (String v : parseValues(array, i)) {
                         filter.getStatusFilterMap().get(operator).add(OrderStatus.valueOf(v.toUpperCase()));
@@ -67,19 +67,19 @@ public class FilterParser {
             JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
             JsonArray array = jsonReader.readArray();
             for (int i = 0; i < array.size(); i++) {
-                String property = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.PROPERTY.toString()).getString();
+                String property = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.PROPERTY.toString()).getString();
 
-                if (HanDefinitions.ExecutionFilterField.SYMBOL.getVarName().equals(property)) {
+                if (FilterEnums.ExecutionFilterField.SYMBOL.getVarName().equals(property)) {
                     filter.getSymbolFilterMap().put(parseOperatorString(array, i), parseString(array, i));
 
-                } else if (HanDefinitions.ExecutionFilterField.SEC_TYPE.getVarName().equals(property)) {
-                    HanDefinitions.FilterOperatorEnum operator = parseOperatorEnum(array, i);
+                } else if (FilterEnums.ExecutionFilterField.SEC_TYPE.getVarName().equals(property)) {
+                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
                     filter.getSecTypeFilterMap().put(operator, new HashSet<>());
                     for (String v : parseValues(array, i)) {
                         filter.getSecTypeFilterMap().get(operator).add(SecType.valueOf(v.toUpperCase()));
                     }
 
-                } else if (HanDefinitions.ExecutionFilterField.FILL_DATE.getVarName().equals(property)) {
+                } else if (FilterEnums.ExecutionFilterField.FILL_DATE.getVarName().equals(property)) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getFillDateFilterMap().put(parseOperatorCalendar(array, i), cal);
@@ -96,25 +96,25 @@ public class FilterParser {
             JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
             JsonArray array = jsonReader.readArray();
             for (int i = 0; i < array.size(); i++) {
-                String property = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.PROPERTY.toString()).getString();
+                String property = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.PROPERTY.toString()).getString();
 
-                if (HanDefinitions.TradeFilterField.SYMBOL.getVarName().equals(property)) {
+                if (FilterEnums.TradeFilterField.SYMBOL.getVarName().equals(property)) {
                     filter.getSymbolFilterMap().put(parseOperatorString(array, i), parseString(array, i));
 
-                } else if (HanDefinitions.TradeFilterField.SEC_TYPE.getVarName().equals(property)) {
-                    HanDefinitions.FilterOperatorEnum operator = parseOperatorEnum(array, i);
+                } else if (FilterEnums.TradeFilterField.SEC_TYPE.getVarName().equals(property)) {
+                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
                     filter.getSecTypeFilterMap().put(operator, new HashSet<>());
                     for (String v : parseValues(array, i)) {
                         filter.getSecTypeFilterMap().get(operator).add(SecType.valueOf(v.toUpperCase()));
                     }
 
-                } else if (HanDefinitions.TradeFilterField.OPEN_DATE.getVarName().equals(property)) {
+                } else if (FilterEnums.TradeFilterField.OPEN_DATE.getVarName().equals(property)) {
                     Calendar cal = Calendar.getInstance();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getOpenDateFilterMap().put(parseOperatorCalendar(array, i), cal);
 
-                }  else if (HanDefinitions.TradeFilterField.STATUS.getVarName().equals(property)) {
-                    HanDefinitions.FilterOperatorEnum operator = parseOperatorEnum(array, i);
+                }  else if (FilterEnums.TradeFilterField.STATUS.getVarName().equals(property)) {
+                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
                     filter.getStatusFilterMap().put(operator, new HashSet<>());
                     for (String v : parseValues(array, i)) {
                         filter.getStatusFilterMap().get(operator).add(TradeStatus.valueOf(v.toUpperCase()));
@@ -127,15 +127,15 @@ public class FilterParser {
     }
 
     private String parseString(JsonArray array, int i) {
-        return array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.VALUE.toString()).getString();
+        return array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.VALUE.toString()).getString();
     }
 
     private Long parseLong(JsonArray array, int i) {
-        return array.getJsonObject(i).getJsonNumber(HanDefinitions.FilterKey.VALUE.toString()).longValue();
+        return array.getJsonObject(i).getJsonNumber(FilterEnums.FilterKey.VALUE.toString()).longValue();
     }
 
     private Set<String> parseValues(JsonArray array, int i) {
-        JsonArray a = array.getJsonObject(i).getJsonArray(HanDefinitions.FilterKey.VALUE.toString());
+        JsonArray a = array.getJsonObject(i).getJsonArray(FilterEnums.FilterKey.VALUE.toString());
         Set<String> values = new HashSet<>();
         for (int j = 0; j < a.size(); j++) {
             values.add(a.getString(j));
@@ -143,46 +143,46 @@ public class FilterParser {
         return values;
     }
 
-    private HanDefinitions.FilterOperatorString parseOperatorString(JsonArray array, int i) {
-        JsonString json = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.OPERATOR.toString());
-        HanDefinitions.FilterOperatorString operator;
+    private FilterEnums.FilterOperatorString parseOperatorString(JsonArray array, int i) {
+        JsonString json = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.OPERATOR.toString());
+        FilterEnums.FilterOperatorString operator;
         try {
-            operator = (json != null ? HanDefinitions.FilterOperatorString.valueOf(json.getString().toUpperCase()) : HanDefinitions.FilterOperatorString.LIKE);
+            operator = (json != null ? FilterEnums.FilterOperatorString.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorString.LIKE);
         } catch (Exception e) {
-            operator = HanDefinitions.FilterOperatorString.LIKE;
+            operator = FilterEnums.FilterOperatorString.LIKE;
         }
         return operator;
     }
 
-    private HanDefinitions.FilterOperatorNumber parseOperatorNumber(JsonArray array, int i) {
-        JsonString json = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.OPERATOR.toString());
-        HanDefinitions.FilterOperatorNumber operator;
+    private FilterEnums.FilterOperatorNumber parseOperatorNumber(JsonArray array, int i) {
+        JsonString json = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.OPERATOR.toString());
+        FilterEnums.FilterOperatorNumber operator;
         try {
-            operator = (json != null ? HanDefinitions.FilterOperatorNumber.valueOf(json.getString().toUpperCase()) : HanDefinitions.FilterOperatorNumber.EQ);
+            operator = (json != null ? FilterEnums.FilterOperatorNumber.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorNumber.EQ);
         } catch (Exception e) {
-            operator = HanDefinitions.FilterOperatorNumber.EQ;
+            operator = FilterEnums.FilterOperatorNumber.EQ;
         }
         return operator;
     }
 
-    private HanDefinitions.FilterOperatorCalendar parseOperatorCalendar(JsonArray array, int i) {
-        JsonString json = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.OPERATOR.toString());
-        HanDefinitions.FilterOperatorCalendar operator;
+    private FilterEnums.FilterOperatorCalendar parseOperatorCalendar(JsonArray array, int i) {
+        JsonString json = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.OPERATOR.toString());
+        FilterEnums.FilterOperatorCalendar operator;
         try {
-            operator = (json != null ? HanDefinitions.FilterOperatorCalendar.valueOf(json.getString().toUpperCase()) : HanDefinitions.FilterOperatorCalendar.EQ);
+            operator = (json != null ? FilterEnums.FilterOperatorCalendar.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorCalendar.EQ);
         } catch (Exception e) {
-            operator = HanDefinitions.FilterOperatorCalendar.EQ;
+            operator = FilterEnums.FilterOperatorCalendar.EQ;
         }
         return operator;
     }
 
-    private HanDefinitions.FilterOperatorEnum parseOperatorEnum(JsonArray array, int i) {
-        JsonString json = array.getJsonObject(i).getJsonString(HanDefinitions.FilterKey.OPERATOR.toString());
-        HanDefinitions.FilterOperatorEnum operator;
+    private FilterEnums.FilterOperatorEnum parseOperatorEnum(JsonArray array, int i) {
+        JsonString json = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.OPERATOR.toString());
+        FilterEnums.FilterOperatorEnum operator;
         try {
-            operator = (json != null ? HanDefinitions.FilterOperatorEnum.valueOf(json.getString().toUpperCase()) : HanDefinitions.FilterOperatorEnum.IN);
+            operator = (json != null ? FilterEnums.FilterOperatorEnum.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorEnum.IN);
         } catch (Exception e) {
-            operator = HanDefinitions.FilterOperatorEnum.IN;
+            operator = FilterEnums.FilterOperatorEnum.IN;
         }
         return operator;
     }

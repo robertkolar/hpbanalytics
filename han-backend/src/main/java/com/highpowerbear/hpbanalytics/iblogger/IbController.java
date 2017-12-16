@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
-import com.highpowerbear.hpbanalytics.common.HanDefinitions;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.enums.IbConnectionType;
@@ -38,7 +38,7 @@ public class IbController {
     private void init() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
             EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount));
-            IbConnection ibConnection = new IbConnection(IbConnectionType.IBLOGGER, ibAccount.getHost(), ibAccount.getPort(), HanDefinitions.IB_CONNECT_CLIENT_ID, eClientSocket);
+            IbConnection ibConnection = new IbConnection(IbConnectionType.IBLOGGER, ibAccount.getHost(), ibAccount.getPort(), HanSettings.IB_CONNECT_CLIENT_ID, eClientSocket);
             ibConnectionMap.put(ibAccount, ibConnection);
         });
     }
