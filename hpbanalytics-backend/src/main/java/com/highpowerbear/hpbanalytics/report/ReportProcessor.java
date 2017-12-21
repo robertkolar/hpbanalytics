@@ -55,14 +55,14 @@ public class ReportProcessor {
         List<Trade> trades = analyze(executions);
         reportDao.createTrades(trades);
         statisticsCalculator.clearCache(report);
-        websocketController.broadcastReportMessage("report analyzed");
+        websocketController.sendReportMessage("report analyzed");
         log.info("END report processing for " + report.getReportName());
     }
 
     public void deleteReport(Report report) {
         reportDao.deleteReport(report);
         statisticsCalculator.clearCache(report);
-        websocketController.broadcastReportMessage("report deleted");
+        websocketController.sendReportMessage("report deleted");
     }
     
     public void deleteExecution(Execution execution) {
@@ -90,7 +90,7 @@ public class ReportProcessor {
             reportDao.createTrades(newTrades);
         }
         statisticsCalculator.clearCache(execution.getReport());
-        websocketController.broadcastReportMessage("execution deleted");
+        websocketController.sendReportMessage("execution deleted");
     }
     
     public Long newExecution(Execution execution) {
@@ -129,7 +129,7 @@ public class ReportProcessor {
         log.info("Creating " + trades.size() + " trades");
         reportDao.createTrades(trades);
         statisticsCalculator.clearCache(execution.getReport());
-        websocketController.broadcastReportMessage("new execution processed");
+        websocketController.sendReportMessage("new execution processed");
 
         return execution.getId();
     }

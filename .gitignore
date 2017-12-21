@@ -4,6 +4,6 @@
 /.idea
 /*.iml
 /*/*.iml
-**/src/main/webapp/app/.sencha/
+**/src/main/app/.sencha/
 /**/build
 /**/ext

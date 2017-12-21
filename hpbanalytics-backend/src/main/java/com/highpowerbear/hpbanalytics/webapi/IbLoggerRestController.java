@@ -35,8 +35,11 @@ public class IbLoggerRestController {
     @Autowired HeartbeatControl heartbeatControl;
 
     @RequestMapping("/ibaccounts")
-    public List<IbAccount> getIbAccount() {
-        return ibLoggerDao.getIbAccounts();
+    public RestList<IbAccount> getIbAccount() {
+        List<IbAccount> ibAccounts = ibLoggerDao.getIbAccounts();
+        ibAccounts.forEach(ibAccount -> ibAccount.setIbConnection(ibController.getIbConnection(ibAccount)));
+
+        return new RestList<>(ibAccounts, (long) ibAccounts.size());
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/ibaccounts")
@@ -51,7 +54,7 @@ public class IbLoggerRestController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/ibaccounts/{accountId}/connect/{connect}")
-    public IbAccount connecIbAccount(
+    public IbAccount connectIbAccount(
             @PathVariable("accountId") String accountId,
             @PathVariable("connect") boolean connect) {
 
@@ -71,7 +74,7 @@ public class IbLoggerRestController {
     @RequestMapping("/ibaccounts/{accountId}/iborders")
     public ResponseEntity<?> getFilteredIbOrders(
             @PathVariable("accountId") String accountId,
-            @RequestParam("filter") String jsonFilter,
+            @RequestParam(required = false, value = "filter") String jsonFilter,
             @RequestParam("start") Integer start,
             @RequestParam("limit") Integer limit) {
 

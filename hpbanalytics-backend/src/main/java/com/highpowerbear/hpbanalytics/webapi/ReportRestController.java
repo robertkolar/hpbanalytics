@@ -103,7 +103,7 @@ public class ReportRestController {
     @RequestMapping("/reports/{id}/executions")
     public ResponseEntity<?> getFilteredExecutions(
             @PathVariable("id") Integer id,
-            @RequestParam("filter") String jsonFilter,
+            @RequestParam(required = false, value = "filter") String jsonFilter,
             @RequestParam("start") Integer start,
             @RequestParam("limit") Integer limit) {
 
@@ -157,7 +157,7 @@ public class ReportRestController {
     @RequestMapping("/reports/{id}/trades")
     public ResponseEntity<?> getFilteredTrades(
             @PathVariable("id") Integer id,
-            @RequestParam("filter") String jsonFilter,
+            @RequestParam(required = false, value = "filter") String jsonFilter,
             @RequestParam("start") Integer start,
             @RequestParam("limit") Integer limit) {
 
@@ -239,7 +239,7 @@ public class ReportRestController {
     public ResponseEntity<?> getStatistics(
             @PathVariable("id") Integer id,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam("underlying") String underlying,
+            @RequestParam(required = false, value = "underlying") String underlying,
             @RequestParam("start") Integer start,
             @RequestParam("limit") Integer limit) {
 
@@ -264,7 +264,7 @@ public class ReportRestController {
     public ResponseEntity<?> getCharts(
             @PathVariable("id") Integer id,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam("underlying") String underlying) {
+            @RequestParam(required = false, value = "underlying") String underlying) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -279,7 +279,7 @@ public class ReportRestController {
     public ResponseEntity<?> recalculateStatistics(
             @PathVariable("id") Integer id,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam("underlying") String underlying) {
+            @RequestParam(required = false, value = "underlying") String underlying) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {

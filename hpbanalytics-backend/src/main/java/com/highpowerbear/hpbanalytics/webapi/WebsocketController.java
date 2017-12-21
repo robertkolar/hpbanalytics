@@ -1,51 +1,26 @@
 package com.highpowerbear.hpbanalytics.webapi;
 
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Component;
-
-import javax.websocket.Session;
-import java.util.HashSet;
-import java.util.Set;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.stereotype.Controller;
 
 /**
  * Created by robertk on 9/17/2015.
  */
-@Component
+@Controller
 public class WebsocketController {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(WebsocketController.class);
 
-    private Set<Session> ibloggerSessions = new HashSet<>();
-    private Set<Session> reportSessions = new HashSet<>();
+    @Autowired private SimpMessagingTemplate simpMessagingTemplate;
 
-    public Set<Session> getIbloggerSessions() {
-        return ibloggerSessions;
+    public void sendIbLoggerMessage(String message) {
+        log.info("sendIbLoggerMessage " + message);
+        simpMessagingTemplate.convertAndSend("/topic/iblogger", message);
     }
 
-    public Set<Session> getReportSessions() {
-        return reportSessions;
-    }
-
-    public void sendIbLoggerMessage(Session s, String message) {
-        try {
-            s.getBasicRemote().sendText(message);
-        } catch (Throwable ioe) {
-            log.error("Error sending websocket message " + message, ioe);
-        }
-    }
-
-    public void broadcastIbLoggerMessage(String message) {
-        ibloggerSessions.stream().filter(Session::isOpen).forEach(s -> sendIbLoggerMessage(s, message));
-    }
-
-    public void sendReportMessage(Session s, String message) {
-        try {
-            s.getBasicRemote().sendText(message);
-        } catch (Throwable ioe) {
-            log.error("Error sending websocket message " + message, ioe);
-        }
-    }
-
-    public void broadcastReportMessage(String message) {
-        reportSessions.stream().filter(Session::isOpen).forEach(s -> sendReportMessage(s, message));
+    public void sendReportMessage(String message) {
+        log.info("sendReportMessage " + message);
+        simpMessagingTemplate.convertAndSend("/topic/report", message);
     }
 }

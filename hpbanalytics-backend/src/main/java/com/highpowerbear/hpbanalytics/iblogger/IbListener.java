@@ -70,7 +70,7 @@ public class IbListener extends GenericIbListener {
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
         }
-        websocketController.broadcastIbLoggerMessage("order status changed");
+        websocketController.sendIbLoggerMessage("order status changed");
     }
 
     @Override
