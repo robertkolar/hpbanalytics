@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.web;
+package com.highpowerbear.hpbanalytics.webapi;
 
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

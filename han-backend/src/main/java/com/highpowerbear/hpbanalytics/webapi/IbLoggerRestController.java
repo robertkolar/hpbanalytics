@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.web;
+package com.highpowerbear.hpbanalytics.webapi;
 
 import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;

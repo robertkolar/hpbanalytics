@@ -13,7 +13,7 @@ import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.web.WebsocketController;
+import com.highpowerbear.hpbanalytics.webapi.WebsocketController;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
