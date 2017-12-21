@@ -22,8 +22,6 @@ public class IbAccount implements Serializable {
     private Integer port;
     private boolean listen;
     private boolean allowUpd;
-    private boolean ibtoc2;
-    private boolean analytics;
     private boolean stk;
     private boolean fut;
     private boolean opt;
@@ -123,22 +121,6 @@ public class IbAccount implements Serializable {
 
     public void setAllowUpd(boolean allowUpd) {
         this.allowUpd = allowUpd;
-    }
-
-    public boolean isIbtoc2() {
-        return ibtoc2;
-    }
-
-    public void setIbtoc2(boolean ibtoc2) {
-        this.ibtoc2 = ibtoc2;
-    }
-
-    public boolean isAnalytics() {
-        return analytics;
-    }
-
-    public void setAnalytics(boolean analytics) {
-        this.analytics = analytics;
     }
 
     public boolean isStk() {

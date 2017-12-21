@@ -9,7 +9,6 @@ import com.highpowerbear.hpbanalytics.enums.OrderType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.ib.client.Contract;
 import com.ib.client.Order;
-import com.ib.client.OrderState;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -23,10 +22,9 @@ public class OpenOrderHandler {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
 
     @Autowired private IbLoggerDao ibLoggerDao;
-    @Autowired private OutputProcessor outputProcessor;
     @Autowired private HeartbeatControl heartbeatControl;
 
-    public void handle(IbAccount ibAccount, int orderId, Contract contract, Order order, OrderState orderState) {
+    public void handleOpenOrder(IbAccount ibAccount, int orderId, Contract contract, Order order) {
         if (!checkListenIb(ibAccount)) {
             log.info("IB listening disabled, order will be ignored");
             return;

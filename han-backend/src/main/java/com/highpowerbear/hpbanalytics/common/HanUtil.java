@@ -1,14 +1,7 @@
 package com.highpowerbear.hpbanalytics.common;
 
-import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -27,16 +20,6 @@ public class HanUtil {
 
     public static String removeSpace(String source) {
         return source.replaceAll("\\b\\s+\\b", "");
-    }
-
-    public static String toXml(IbExecution ibExecution) throws Exception {
-        JAXBContext jaxbContext = JAXBContext.newInstance(IbExecution.class);
-        Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
-        jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
-        StringWriter stringWriter = new StringWriter();
-        jaxbMarshaller.marshal(ibExecution, stringWriter);
-
-        return stringWriter.toString();
     }
 
     public static Calendar toBeginOfPeriod(Calendar cal, StatisticsInterval interval) {
@@ -69,14 +52,6 @@ public class HanUtil {
         long seconds = minutesRemainder / (1000);
 
         return days + " Days " + hours + ":" + minutes + ":" + seconds;
-    }
-
-    public static Execution toExecution(String xml) throws Exception {
-        JAXBContext jaxbContext = JAXBContext.newInstance(Execution.class);
-        Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-        StringReader stringReader = new StringReader(xml);
-
-        return (Execution) jaxbUnmarshaller.unmarshal(stringReader);
     }
 
     public static double round(double number, int decimalPlaces) {

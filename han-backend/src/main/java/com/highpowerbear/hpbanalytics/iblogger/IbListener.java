@@ -23,7 +23,7 @@ public class IbListener extends GenericIbListener {
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private OpenOrderHandler openOrderHandler;
-    @Autowired private OutputProcessor outputProcessor;
+    @Autowired private ExecutionSender executionSender;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private WebsocketController websocketController;
@@ -38,7 +38,7 @@ public class IbListener extends GenericIbListener {
     @Override
     public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
         super.openOrder(orderId, contract, order, orderState);
-        openOrderHandler.handle(ibAccount, orderId, contract, order, orderState);
+        openOrderHandler.handleOpenOrder(ibAccount, orderId, contract, order);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class IbListener extends GenericIbListener {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
-            outputProcessor.processExecution(ibOrder);
+            executionSender.sendExecution(ibOrder);
 
         } else if (IbOrderStatus.CANCELLED.getValue().equalsIgnoreCase(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
