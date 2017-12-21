@@ -1,19 +1,21 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.Calendar;
 
@@ -29,12 +31,14 @@ public class IbOrderEvent implements Serializable {
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "eventdate")
     private Calendar eventDate;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double price;
-    @XmlTransient
+    @JsonIgnore
     @ManyToOne
+    @JoinColumn(name = "iborder_id")
     private IbOrder ibOrder;
 
     @JsonProperty

@@ -1,4 +1,4 @@
-package com.highpowerbear;
+package com.highpowerbear.hpbanalytics;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

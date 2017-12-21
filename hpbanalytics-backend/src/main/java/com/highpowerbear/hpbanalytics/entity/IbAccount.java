@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.entity;
 
 import com.highpowerbear.hpbanalytics.iblogger.IbConnection;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -17,17 +18,21 @@ public class IbAccount implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @Column(name = "accountid")
     private String accountId;
     private String host;
     private Integer port;
     private boolean listen;
+    @Column(name = "allowupd")
     private boolean allowUpd;
     private boolean stk;
     private boolean fut;
     private boolean opt;
     private boolean fx;
     private boolean cfd;
+    @Column(name = "permittedclients")
     private String permittedClients; // csv, null means all
+    @Column(name = "permittedaccounts")
     private String permittedAccounts; // csv, null means all - applicable to FA subaccounts
     @Transient
     private IbConnection ibConnection;

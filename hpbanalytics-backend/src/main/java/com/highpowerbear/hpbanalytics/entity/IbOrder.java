@@ -1,8 +1,11 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
+import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -10,6 +13,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
@@ -17,8 +21,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlTransient;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -35,27 +37,39 @@ public class IbOrder implements Serializable {
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Long id;
+    @Column(name = "permid")
     private Integer permId;
+    @Column(name = "orderid")
     private Integer orderId;
+    @Column(name = "clientid")
     private Integer clientId;
-    @XmlTransient
+    @JsonIgnore
     @ManyToOne
+    @JoinColumn(name = "ibaccount_accountid")
     private IbAccount ibAccount;
     private String action;
     private Integer quantity;
     private String underlying;
     private String currency;
     private String symbol;
+    @Column(name = "sectype")
     private String secType;
+    @Column(name = "ordertype")
     private String orderType;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "submitdate")
     private Calendar submitDate;
+    @Column(name = "orderprice")
     private Double orderPrice;
     private String tif;
+    @Column(name = "parentid")
     private Integer parentId;
+    @Column(name = "ocagroup")
     private String ocaGroup;
     @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "statusdate")
     private Calendar statusDate;
+    @Column(name = "fillprice")
     private Double fillPrice;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -65,7 +79,7 @@ public class IbOrder implements Serializable {
     @Transient
     private Integer heartbeatCount;
 
-    @XmlElement
+    @JsonProperty
     public String getIbAccountId() {
         return ibAccount.getAccountId();
     }
