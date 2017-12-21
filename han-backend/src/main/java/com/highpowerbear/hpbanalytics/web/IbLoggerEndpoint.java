@@ -19,8 +19,7 @@ import javax.websocket.server.ServerEndpoint;
 public class IbLoggerEndpoint {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(IbLoggerEndpoint.class);
 
-    @Autowired
-    private WebsocketController websocketController;
+    @Autowired private WebsocketController websocketController;
 
     @OnOpen
     public void addSesssion(Session session) {

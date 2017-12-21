@@ -21,8 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class HeartbeatControl {
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
+    @Autowired private IbLoggerDao ibLoggerDao;
 
     private Map<IbAccount, Map<IbOrder, Integer>> openOrderHeartbeatMap = new HashMap<>(); // ibAccount --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
 

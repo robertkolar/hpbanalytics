@@ -21,18 +21,12 @@ import org.springframework.stereotype.Component;
 @Scope("prototype")
 public class IbListener extends GenericIbListener {
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
-    @Autowired
-    private OpenOrderHandler openOrderHandler;
-    @Autowired
-    private OutputProcessor outputProcessor;
-    @Autowired
-    private IbController ibController;
-    @Autowired
-    private HeartbeatControl heartbeatControl;
-    @Autowired
-    private WebsocketController websocketController;
+    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OpenOrderHandler openOrderHandler;
+    @Autowired private OutputProcessor outputProcessor;
+    @Autowired private IbController ibController;
+    @Autowired private HeartbeatControl heartbeatControl;
+    @Autowired private WebsocketController websocketController;
 
     private IbAccount ibAccount;
 

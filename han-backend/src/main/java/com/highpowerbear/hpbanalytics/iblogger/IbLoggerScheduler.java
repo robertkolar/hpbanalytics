@@ -11,12 +11,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class IbLoggerScheduler {
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
-    @Autowired
-    private IbController ibController;
-    @Autowired
-    private HeartbeatControl heartbeatControl;
+    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private IbController ibController;
+    @Autowired private HeartbeatControl heartbeatControl;
 
     @Scheduled(fixedRate = 5000)
     private void reconnect() {

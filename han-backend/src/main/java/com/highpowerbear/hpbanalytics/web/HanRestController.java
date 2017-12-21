@@ -18,8 +18,7 @@ public class HanRestController {
 
     private static final Logger log = LoggerFactory.getLogger(HanRestController.class);
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
+    @Autowired private IbLoggerDao ibLoggerDao;
 
     @RequestMapping("/accounts")
     public List<IbAccount> getIbAccount() {

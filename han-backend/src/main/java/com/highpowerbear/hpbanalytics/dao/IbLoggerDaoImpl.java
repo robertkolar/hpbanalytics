@@ -30,8 +30,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired
-    private QueryBuilder queryBuilder;
+    @Autowired private QueryBuilder queryBuilder;
 
     private final String B = "BEGIN " + this.getClass().getSimpleName() + ".";
     private final String E = "END " + this.getClass().getSimpleName() + ".";

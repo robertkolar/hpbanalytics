@@ -23,10 +23,8 @@ import java.util.Map;
 public class IbController {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(IbController.class);
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
-    @Autowired
-    private Provider<IbListener> ibListeners;
+    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private Provider<IbListener> ibListeners;
 
     private Map<IbAccount, IbConnection> ibConnectionMap = new HashMap<>(); // ibAccount --> ibConnection
 

@@ -20,11 +20,8 @@ import javax.jms.Queue;
 public class OutputProcessor {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(OutputProcessor.class);
 
-    @Autowired
-    private JmsTemplate jmsTemplate;
-
-    @Autowired
-    private Queue queue;
+    @Autowired private JmsTemplate jmsTemplate;
+    @Autowired private Queue queue;
 
     public void sendToReport(String executionXml) {
         log.info("BEGIN send message to MQ=" + HanSettings.IBLOGGER_TO_REPORT_QUEUE + ", xml=" + executionXml);

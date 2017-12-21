@@ -22,12 +22,9 @@ public class OpenOrderHandler {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
 
-    @Autowired
-    private IbLoggerDao ibLoggerDao;
-    @Autowired
-    private OutputProcessor outputProcessor;
-    @Autowired
-    private HeartbeatControl heartbeatControl;
+    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OutputProcessor outputProcessor;
+    @Autowired private HeartbeatControl heartbeatControl;
 
     public void handle(IbAccount ibAccount, int orderId, Contract contract, Order order, OrderState orderState) {
         if (!checkListenIb(ibAccount)) {

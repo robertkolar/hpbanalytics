@@ -29,8 +29,7 @@ public class ReportDaoImpl implements ReportDao {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired
-    private QueryBuilder queryBuilder;
+    @Autowired private QueryBuilder queryBuilder;
 
     @Override
     public Report getReportByOriginAndSecType(String origin, SecType secType) {

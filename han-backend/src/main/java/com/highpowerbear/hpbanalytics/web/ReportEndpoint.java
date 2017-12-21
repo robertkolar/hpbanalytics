@@ -20,8 +20,7 @@ import javax.websocket.server.ServerEndpoint;
 public class ReportEndpoint {
     private static final Logger log = LoggerFactory.getLogger(ReportEndpoint.class);
 
-    @Autowired
-    private WebsocketController websocketController;
+    @Autowired private WebsocketController websocketController;
 
     @OnOpen
     public void addSesssion(Session session) {
