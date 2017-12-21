@@ -23,12 +23,6 @@ public class OutputProcessor {
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private Queue queue;
 
-    public void sendToReport(String executionXml) {
-        log.info("BEGIN send message to MQ=" + HanSettings.IBLOGGER_TO_REPORT_QUEUE + ", xml=" + executionXml);
-        jmsTemplate.convertAndSend(queue, executionXml);
-        log.info("END send message to MQ=" + HanSettings.IBLOGGER_TO_REPORT_QUEUE);
-    }
-
     public void processExecution(IbOrder ibOrder) {
         if (ibOrder.getIbAccount().isAnalytics()) {
             IbExecution ie = new IbExecution();
@@ -43,7 +37,7 @@ public class OutputProcessor {
             ie.setFillDate(ibOrder.getStatusDate());
             ie.setFillPrice(ibOrder.getFillPrice());
             try {
-                sendToReport(HanUtil.toXml(ie));
+                jmsTemplate.convertAndSend(queue, HanUtil.toXml(ie));
             } catch (Exception e) {
                 log.error("Error", e);
             }

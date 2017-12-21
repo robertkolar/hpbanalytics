@@ -40,8 +40,10 @@ public class HeartbeatControl {
     public void updateHeartbeats(IbAccount ibAccount) {
         Map<IbOrder, Integer> hm = openOrderHeartbeatMap.get(ibAccount);
         Set<IbOrder> keyset = new HashSet<>(hm.keySet());
+
         for (IbOrder ibOrder : keyset) {
             Integer failedHeartbeatsLeft = hm.get(ibOrder);
+
             if (failedHeartbeatsLeft <= 0) {
                 if (!OrderStatus.UNKNOWN.equals(ibOrder.getStatus())) {
                     ibOrder.addEvent(OrderStatus.UNKNOWN, null);

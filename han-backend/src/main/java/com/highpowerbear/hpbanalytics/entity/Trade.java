@@ -91,38 +91,41 @@ public class Trade implements Serializable {
 
     public void calculate() {
         MathContext mc = new MathContext(7);
-        this.report = splitExecutions.iterator().next().execution.getReport();
-        this.type = (splitExecutions.iterator().next().getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT);
-        this.symbol = (this.splitExecutions == null || this.splitExecutions.isEmpty() ? null : this.splitExecutions.iterator().next().execution.getSymbol());
-        this.underlying = (this.splitExecutions == null || this.splitExecutions.isEmpty() ? null : this.splitExecutions.iterator().next().execution.getUnderlying());
-        this.currency = (this.splitExecutions == null || this.splitExecutions.isEmpty() ? null : this.splitExecutions.iterator().next().execution.getCurrency());
-        this.secType = (this.splitExecutions == null || this.splitExecutions.isEmpty() ? null : this.splitExecutions.iterator().next().execution.getSecType());
-        this.openPosition = (this.splitExecutions == null || this.splitExecutions.isEmpty() ? null : this.splitExecutions.get(this.splitExecutions.size() - 1).getCurrentPosition());
+        report = splitExecutions.iterator().next().execution.getReport();
+        type = (splitExecutions.iterator().next().getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT);
+        symbol = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getSymbol());
+        underlying = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getUnderlying());
+        currency = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getCurrency());
+        secType = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getSecType());
+        openPosition = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.get(splitExecutions.size() - 1).getCurrentPosition());
         BigDecimal cumulativeOpenPrice = new BigDecimal(0.0);
         BigDecimal cumulativeClosePrice = new BigDecimal(0.0);
-        this.cumulativeQuantity = 0;
+        cumulativeQuantity = 0;
+
         for (SplitExecution se : splitExecutions) {
-            if ((this.type == TradeType.LONG && se.execution.getAction() == Action.BUY) || (this.type == TradeType.SHORT && se.execution.getAction() == Action.SELL)) {
-                this.cumulativeQuantity += se.getSplitQuantity();
+            if ((type == TradeType.LONG && se.execution.getAction() == Action.BUY) || (type == TradeType.SHORT && se.execution.getAction() == Action.SELL)) {
+                cumulativeQuantity += se.getSplitQuantity();
                 cumulativeOpenPrice = cumulativeOpenPrice.add(new BigDecimal(se.getSplitQuantity()).multiply(se.execution.getFillPrice(), mc));
             }
-            if (this.status == TradeStatus.CLOSED) {
-                if ((this.type == TradeType.LONG && se.execution.getAction() == Action.SELL) || (this.type == TradeType.SHORT && se.execution.getAction() == Action.BUY)) {
+            if (status == TradeStatus.CLOSED) {
+                if ((type == TradeType.LONG && se.execution.getAction() == Action.SELL) || (type == TradeType.SHORT && se.execution.getAction() == Action.BUY)) {
                     cumulativeClosePrice = cumulativeClosePrice.add(new BigDecimal(se.getSplitQuantity()).multiply(se.execution.getFillPrice(), mc));
                 }
             }
         }
-        this.avgOpenPrice = cumulativeOpenPrice.divide(new BigDecimal(this.cumulativeQuantity), mc);
-        this.openDate = this.getSplitExecutions().get(0).getExecution().getFillDate();
-        if (this.status == TradeStatus.CLOSED) {
-            this.avgClosePrice = cumulativeClosePrice.divide(new BigDecimal(this.cumulativeQuantity), mc);
-            this.closeDate = this.getSplitExecutions().get(this.getSplitExecutions().size() - 1).getExecution().getFillDate();
-            this.profitLoss = (TradeType.LONG.equals(this.type) ? cumulativeClosePrice.subtract(cumulativeOpenPrice, mc) : cumulativeOpenPrice.subtract(cumulativeClosePrice, mc));
+
+        avgOpenPrice = cumulativeOpenPrice.divide(new BigDecimal(cumulativeQuantity), mc);
+        openDate = getSplitExecutions().get(0).getExecution().getFillDate();
+
+        if (status == TradeStatus.CLOSED) {
+            avgClosePrice = cumulativeClosePrice.divide(new BigDecimal(cumulativeQuantity), mc);
+            closeDate = getSplitExecutions().get(getSplitExecutions().size() - 1).getExecution().getFillDate();
+            profitLoss = (TradeType.LONG.equals(type) ? cumulativeClosePrice.subtract(cumulativeOpenPrice, mc) : cumulativeOpenPrice.subtract(cumulativeClosePrice, mc));
             if (SecType.OPT.equals(getSecType())) {
-                this.profitLoss = this.profitLoss.multiply((OptionUtil.isMini(symbol) ? new BigDecimal(10) : new BigDecimal(100)), mc);
+                profitLoss = profitLoss.multiply((OptionUtil.isMini(symbol) ? new BigDecimal(10) : new BigDecimal(100)), mc);
             }
             if (SecType.FUT.equals(getSecType())) {
-                this.profitLoss = this.profitLoss.multiply(new BigDecimal(FuturePlMultiplier.getMultiplierByUnderlying(underlying)), mc);
+                profitLoss = profitLoss.multiply(new BigDecimal(FuturePlMultiplier.getMultiplierByUnderlying(underlying)), mc);
             }
         }
     }
@@ -280,7 +283,7 @@ public class Trade implements Serializable {
     }
 
     public SplitExecution getLastSplitExecution() {
-        return this.getSplitExecutions().get(this.getSplitExecutions().size() - 1);
+        return getSplitExecutions().get(getSplitExecutions().size() - 1);
     }
     
     public Boolean getOpen() {

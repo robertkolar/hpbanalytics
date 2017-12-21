@@ -42,6 +42,7 @@ public class HanUtil {
     public static Calendar toBeginOfPeriod(Calendar cal, StatisticsInterval interval) {
         Calendar beginPeriodDate = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
         beginPeriodDate.setTimeInMillis(cal.getTimeInMillis());
+
         if (StatisticsInterval.YEAR.equals(interval)) {
             beginPeriodDate.set(Calendar.MONTH, 0);
             beginPeriodDate.set(Calendar.DAY_OF_MONTH, 1);
@@ -49,6 +50,7 @@ public class HanUtil {
         } else if (StatisticsInterval.MONTH.equals(interval)) {
             beginPeriodDate.set(Calendar.DAY_OF_MONTH, 1);
         }
+
         beginPeriodDate.set(Calendar.HOUR_OF_DAY, 0);
         beginPeriodDate.set(Calendar.MINUTE, 0);
         beginPeriodDate.set(Calendar.SECOND, 0);

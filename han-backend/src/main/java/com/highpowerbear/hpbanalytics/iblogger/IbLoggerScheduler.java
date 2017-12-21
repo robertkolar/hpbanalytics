@@ -19,6 +19,7 @@ public class IbLoggerScheduler {
     private void reconnect() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
             IbConnection c = ibController.getIbConnection(ibAccount);
+
             if (!c.isConnected() && c.isMarkConnected()) {
                 c.connect();
             }
@@ -29,6 +30,7 @@ public class IbLoggerScheduler {
     private void requestOpenOrders() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
             IbConnection c = ibController.getIbConnection(ibAccount);
+
             if (c.isConnected()) {
                 heartbeatControl.updateHeartbeats(ibAccount);
                 ibController.requestOpenOrders(ibAccount);

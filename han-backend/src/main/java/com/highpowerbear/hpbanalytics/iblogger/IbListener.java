@@ -50,17 +50,21 @@ public class IbListener extends GenericIbListener {
                 IbOrderStatus.FILLED.getValue().equalsIgnoreCase(status))) {
             return;
         }
+
         IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(ibAccount, permId);
         if (ibOrder == null) {
             return;
         }
+
         if ((IbOrderStatus.SUBMITTED.getValue().equalsIgnoreCase(status) || IbOrderStatus.PRESUBMITTED.getValue().equalsIgnoreCase(status)) && OrderStatus.SUBMITTED.equals(ibOrder.getStatus())) {
             heartbeatControl.initHeartbeat(ibOrder);
+
         } else if (IbOrderStatus.FILLED.getValue().equalsIgnoreCase(status) && remaining == 0 && !OrderStatus.FILLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
             outputProcessor.processExecution(ibOrder);
+
         } else if (IbOrderStatus.CANCELLED.getValue().equalsIgnoreCase(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
             ibLoggerDao.updateIbOrder(ibOrder);

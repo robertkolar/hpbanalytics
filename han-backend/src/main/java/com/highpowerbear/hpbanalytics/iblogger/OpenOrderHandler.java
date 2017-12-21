@@ -102,6 +102,7 @@ public class OpenOrderHandler {
             return;
         }
         boolean update = true;
+
         // if order already exists, check if the lmt/stp price has been updated
         if (OrderType.LMT.name().equalsIgnoreCase(order.m_orderType) && ibOrderDb.getOrderPrice() != order.m_lmtPrice) {
             ibOrderDb.setOrderPrice(order.m_lmtPrice);
@@ -110,6 +111,7 @@ public class OpenOrderHandler {
         } else {
             update = false;
         }
+
         if (update) {
             ibOrderDb.addEvent(OrderStatus.UPDATED, ibOrderDb.getOrderPrice());
             ibLoggerDao.updateIbOrder(ibOrderDb);
@@ -129,11 +131,13 @@ public class OpenOrderHandler {
         ibOrder.setSymbol(symbol);
         ibOrder.setSecType(contract.m_secType);
         ibOrder.setOrderType(order.m_orderType);
+
         if (OrderType.LMT.name().equalsIgnoreCase(order.m_orderType)) {
             ibOrder.setOrderPrice(order.m_lmtPrice);
         } else if (OrderType.STP.name().equalsIgnoreCase(order.m_orderType)) {
             ibOrder.setOrderPrice(order.m_auxPrice);
         }
+
         ibOrder.setTif(order.m_tif);
         ibOrder.setParentId(order.m_parentId);
         ibOrder.setOcaGroup(order.m_ocaGroup);
