@@ -12,7 +12,6 @@ import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -23,6 +22,7 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -38,12 +38,13 @@ import java.util.List;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "trade", schema = "report", catalog = "hpbanalytics")
+@Table(name = "trade", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Trade implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trade_generator")
     private Long id;
     @Enumerated(EnumType.STRING)
     private TradeType type;
@@ -52,25 +53,17 @@ public class Trade implements Serializable {
     @Enumerated(EnumType.STRING)
     private Currency currency;
     @Enumerated(EnumType.STRING)
-    @Column(name = "sectype")
     private SecType secType;
-    @Column(name = "cumulativequantity")
     private Integer cumulativeQuantity;
     @Enumerated(EnumType.STRING)
     private TradeStatus status;
-    @Column(name = "openposition")
     private Integer openPosition;
-    @Column(name = "avgopenprice")
     private BigDecimal avgOpenPrice;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "opendate")
     private Calendar openDate;
-    @Column(name = "avgcloseprice")
     private BigDecimal avgClosePrice;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "closedate")
     private Calendar closeDate;
-    @Column(name = "profitloss")
     private BigDecimal profitLoss;
     @ManyToOne
     @JsonIgnore

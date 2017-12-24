@@ -5,7 +5,6 @@ import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -13,10 +12,10 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -30,46 +29,35 @@ import java.util.List;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "iborder", schema = "iblogger", catalog = "hpbanalytics")
+@Table(name = "ib_order", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class IbOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name="ib_order_generator", sequenceName = "ib_order_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_generator")
     private Long id;
-    @Column(name = "permid")
     private Integer permId;
-    @Column(name = "orderid")
     private Integer orderId;
-    @Column(name = "clientid")
     private Integer clientId;
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "ibaccount_accountid")
     private IbAccount ibAccount;
     private String action;
     private Integer quantity;
     private String underlying;
     private String currency;
     private String symbol;
-    @Column(name = "sectype")
     private String secType;
-    @Column(name = "ordertype")
     private String orderType;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "submitdate")
     private Calendar submitDate;
-    @Column(name = "orderprice")
     private Double orderPrice;
     private String tif;
-    @Column(name = "parentid")
     private Integer parentId;
-    @Column(name = "ocagroup")
     private String ocaGroup;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "statusdate")
     private Calendar statusDate;
-    @Column(name = "fillprice")
     private Double fillPrice;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

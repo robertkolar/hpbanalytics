@@ -12,6 +12,8 @@ import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
+
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -56,6 +58,7 @@ public class ReportDaoImpl implements ReportDao {
         return em.find(Report.class, id);
     }
 
+    @Transactional
     @Override
     public Report updateReport(Report report) {
         return em.merge(report);
@@ -132,6 +135,7 @@ public class ReportDaoImpl implements ReportDao {
         return em.find(Execution.class, id);
     }
 
+    @Transactional
     @Override
     public void createExecution(Execution execution) {
         em.persist(execution);

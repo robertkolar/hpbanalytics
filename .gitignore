@@ -1,9 +1,7 @@
-/target
-/*/target
-/*.log
+**/target
 /.idea
-/*.iml
-/*/*.iml
+**/*.iml
 **/src/main/app/.sencha/
-/**/build
-/**/ext
+**/build
+**/ext
+**/*.log

@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -46,6 +47,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
         return q.getResultList();
     }
 
+    @Transactional
     @Override
     public IbAccount updateIbAccount(IbAccount ibAccount) {
         return em.merge(ibAccount);

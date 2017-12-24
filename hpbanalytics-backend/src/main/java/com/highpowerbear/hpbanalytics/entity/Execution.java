@@ -7,7 +7,6 @@ import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
@@ -15,6 +14,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -28,22 +28,21 @@ import java.util.Calendar;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "execution", schema = "report", catalog = "hpbanalytics")
+@Table(name = "execution", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Execution implements Serializable, Comparable<Execution> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "receiveddate")
     private Calendar receivedDate;
     @ManyToOne
     @JsonIgnore
     private Report report;
     private String comment;
     private String origin; // in case of IB origin --> IB:ibAccountId, in case of manual addition --> manual
-    @Column(name = "referenceid")
     private String referenceId; // in case of IB origin --> permId
     @Enumerated(EnumType.STRING)
     private Action action;
@@ -53,12 +52,9 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Enumerated(EnumType.STRING)
     private Currency currency;
     @Enumerated(EnumType.STRING)
-    @Column(name = "sectype")
     private SecType secType;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "filldate")
     private Calendar fillDate;
-    @Column(name = "fillprice")
     private BigDecimal fillPrice;
 
     public Execution() {

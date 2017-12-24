@@ -25,7 +25,7 @@ public class ExchangeRateRetriever {
 
     @Autowired private ReportDao reportDao;
 
-    private final RestTemplate restTemplate = new RestTemplate();;
+    private final RestTemplate restTemplate = new RestTemplate();
     private DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     public void retrieve() {
@@ -39,12 +39,10 @@ public class ExchangeRateRetriever {
 
             exchangeRate.setDate(date);
             exchangeRate.setEurUsd(retrievePair(date, "EUR", "USD"));
-            exchangeRate.setGbpUsd(retrievePair(date, "GBP", "USD"));
-            exchangeRate.setAudUsd(retrievePair(date, "AUD", "USD"));
-            exchangeRate.setNzdUsd(retrievePair(date, "NZD", "USD"));
-            exchangeRate.setUsdChf(retrievePair(date, "USD", "CHF"));
-            exchangeRate.setUsdJpy(retrievePair(date, "USD", "JPY"));
-            exchangeRate.setUsdCad(retrievePair(date, "USD", "CAD"));
+            exchangeRate.setEurGbp(retrievePair(date, "EUR", "GBP"));
+            exchangeRate.setEurChf(retrievePair(date, "EUR", "CHF"));
+            exchangeRate.setEurAud(retrievePair(date, "EUR", "AUD"));
+            exchangeRate.setEurJpy(retrievePair(date, "EUR", "JPY"));
 
             reportDao.createOrUpdateExchangeRate(exchangeRate);
         }

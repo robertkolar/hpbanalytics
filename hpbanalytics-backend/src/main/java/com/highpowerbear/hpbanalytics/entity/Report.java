@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.entity;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -12,14 +11,13 @@ import java.util.Calendar;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "report", schema = "report", catalog = "hpbanalytics")
+@Table(name = "report", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Report implements Serializable {
     private static final long serialVersionUID = 1L;
     
     @Id
     private Integer id;
     private String origin; // in case of IB origin --> IB:ibAccountId
-    @Column(name = "reportname")
     private String reportName;
     private boolean stk;
     private boolean fut;

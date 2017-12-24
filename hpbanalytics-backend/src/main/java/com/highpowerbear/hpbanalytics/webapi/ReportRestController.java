@@ -123,7 +123,8 @@ public class ReportRestController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/reports/{id}/executions")
     public ResponseEntity<?> createExecution(
-            @PathVariable("id") Integer reportId, Execution execution) {
+            @PathVariable("id") Integer reportId,
+            @RequestBody Execution execution) {
 
         Report report = reportDao.findReport(reportId);
         if (report == null) {

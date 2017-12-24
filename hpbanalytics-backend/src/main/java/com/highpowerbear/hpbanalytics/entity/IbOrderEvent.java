@@ -4,15 +4,14 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -23,22 +22,21 @@ import java.util.Calendar;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "iborderevent", schema = "iblogger", catalog = "hpbanalytics")
+@Table(name = "ib_order_event", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class IbOrderEvent implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name="ib_order_event_generator", sequenceName = "ib_order_event_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_event_generator")
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "eventdate")
     private Calendar eventDate;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
     private Double price;
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "iborder_id")
     private IbOrder ibOrder;
 
     @JsonProperty

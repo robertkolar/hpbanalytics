@@ -3,12 +3,12 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -21,19 +21,17 @@ import java.util.Calendar;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "splitexecution", schema = "report", catalog = "hpbanalytics")
+@Table(name = "split_execution", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class SplitExecution implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
+    @SequenceGenerator(name="split_execution_generator", sequenceName = "split_execution_seq")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "split_execution_generator")
     private Long id;
-    @Column(name = "splitquantity")
     private Integer splitQuantity;
-    @Column(name = "currentposition")
     private Integer currentPosition;
     @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "filldate")
     private Calendar fillDate;
     @ManyToOne
     @JsonIgnore
