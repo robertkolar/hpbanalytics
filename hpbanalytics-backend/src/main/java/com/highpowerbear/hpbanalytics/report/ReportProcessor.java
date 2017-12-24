@@ -13,10 +13,10 @@ import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.webapi.WebsocketController;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,9 +38,9 @@ public class ReportProcessor {
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(ReportProcessor.class);
 
     @Autowired private ReportDao reportDao;
-    @Autowired private WebsocketController websocketController;
     @Autowired private StatisticsCalculator statisticsCalculator;
-    
+
+    @Transactional
     public void analyzeAll(Report report) {
         log.info("START report processing for " + report.getReportName());
 
@@ -55,16 +55,17 @@ public class ReportProcessor {
         List<Trade> trades = analyze(executions);
         reportDao.createTrades(trades);
         statisticsCalculator.clearCache(report);
-        websocketController.sendReportMessage("report analyzed");
+
         log.info("END report processing for " + report.getReportName());
     }
 
+    @Transactional
     public void deleteReport(Report report) {
         reportDao.deleteReport(report);
         statisticsCalculator.clearCache(report);
-        websocketController.sendReportMessage("report deleted");
     }
-    
+
+    @Transactional
     public void deleteExecution(Execution execution) {
         StringBuilder sb = new StringBuilder();
         sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
@@ -90,10 +91,10 @@ public class ReportProcessor {
             reportDao.createTrades(newTrades);
         }
         statisticsCalculator.clearCache(execution.getReport());
-        websocketController.sendReportMessage("execution deleted");
     }
-    
-    public Long newExecution(Execution execution) {
+
+    @Transactional
+    public void newExecution(Execution execution) {
         List<Trade> tl = reportDao.getTradesAffectedByExecution(execution);
         StringBuilder sb = new StringBuilder();
         sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
@@ -129,12 +130,9 @@ public class ReportProcessor {
         log.info("Creating " + trades.size() + " trades");
         reportDao.createTrades(trades);
         statisticsCalculator.clearCache(execution.getReport());
-        websocketController.sendReportMessage("new execution processed");
-
-        return execution.getId();
     }
 
-    public Execution closeTrade(Trade trade, Calendar closeDate, BigDecimal closePrice) {
+    public void closeTrade(Trade trade, Calendar closeDate, BigDecimal closePrice) {
         Execution e = new Execution();
 
         e.setReceivedDate(Calendar.getInstance());
@@ -152,17 +150,15 @@ public class ReportProcessor {
         e.setFillPrice(closePrice);
 
         newExecution(e);
-
-        return e;
     }
 
-    public Execution expireTrade(Trade trade) {
+    public void expireTrade(Trade trade) {
         OptionParseResult opr;
         try {
             opr = OptionUtil.parse(trade.getSymbol());
         } catch (Exception e) {
             log.error("Error", e);
-            return null;
+            return;
         }
 
         Execution e = new Execution();
@@ -184,20 +180,17 @@ public class ReportProcessor {
         e.setFillPrice(new BigDecimal(0.0));
 
         newExecution(e);
-
-        return e;
     }
 
-    public List<Execution> assignTrade(Trade trade) {
+    public void assignTrade(Trade trade) {
         OptionParseResult opr;
         try {
             opr = OptionUtil.parse(trade.getSymbol());
         } catch (Exception exception) {
             log.error("Error", exception);
-            return null;
+            return;
         }
 
-        List<Execution> list = new ArrayList<>();
         Execution e = new Execution();
 
         e.setReceivedDate(Calendar.getInstance());
@@ -240,11 +233,6 @@ public class ReportProcessor {
         ce.setFillPrice(new BigDecimal(opr.getStrikePrice()));
 
         newExecution(ce);
-
-        list.add(e);
-        list.add(ce);
-
-        return list;
     }
 
     private List<Trade> analyze(List<Execution> executions) {

@@ -12,6 +12,7 @@ import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -26,6 +27,7 @@ import java.util.List;
  * Created by robertk on 12/16/2017.
  */
 @Repository
+@Transactional(propagation = Propagation.SUPPORTS)
 public class ReportDaoImpl implements ReportDao {
 
     @PersistenceContext
@@ -188,9 +190,7 @@ public class ReportDaoImpl implements ReportDao {
         if (underlying != null) {
             q.setParameter("underlying", underlying);
         }
-        List<Trade> list = q.getResultList();
-        list.forEach(Trade::getSplitExecutions);
-        return list;
+        return q.getResultList();
     }
 
     @Override
@@ -200,9 +200,7 @@ public class ReportDaoImpl implements ReportDao {
         q.setParameter("report", e.getReport());
         q.setParameter("eDate", e.getFillDate());
         q.setParameter("eSymbol", e.getSymbol());
-        List<Trade> tl = q.getResultList();
-        tl.forEach(Trade::getSplitExecutions);
-        return tl;
+        return q.getResultList();
     }
 
     @Transactional
@@ -245,9 +243,7 @@ public class ReportDaoImpl implements ReportDao {
         Query q = queryBuilder.buildFilteredTradesQuery(em, report, filter, false);
         q.setFirstResult(start);
         q.setMaxResults(limit);
-        List<Trade> list = q.getResultList();
-        list.forEach(Trade::getSplitExecutions);
-        return list;
+        return (List<Trade>) q.getResultList();
     }
 
     @Override
@@ -263,9 +259,7 @@ public class ReportDaoImpl implements ReportDao {
         q.setParameter("beginDate", beginDate);
         q.setParameter("endDate", endDate);
         q.setParameter("tradeType", tradeType);
-        List<Trade> list = q.getResultList();
-        list.forEach(Trade::getSplitExecutions);
-        return list;
+        return q.getResultList();
     }
 
     @Override

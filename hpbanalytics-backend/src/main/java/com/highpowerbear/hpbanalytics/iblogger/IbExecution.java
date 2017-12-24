@@ -4,12 +4,14 @@ import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 
+import java.io.Serializable;
 import java.util.Calendar;
 
 /**
  * Created by robertk on 4/6/2015.
  */
-public class IbExecution {
+public class IbExecution implements Serializable {
+    private static final long serialVersionUID = -5761622659478582498L;
 
     private String origin; // IB:ibAccountId
     private String referenceId; // permId

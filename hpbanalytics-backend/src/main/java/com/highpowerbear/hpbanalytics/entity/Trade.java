@@ -43,7 +43,7 @@ public class Trade implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics")
+    @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trade_generator")
     private Long id;
     @Enumerated(EnumType.STRING)
@@ -68,7 +68,7 @@ public class Trade implements Serializable {
     @ManyToOne
     @JsonIgnore
     private Report report;
-    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("fillDate ASC")
     private List<SplitExecution> splitExecutions;
 

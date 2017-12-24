@@ -46,6 +46,7 @@ public class ReportRestController {
     @Autowired private ReportProcessor reportProcessor;
     @Autowired private FilterParser filterParser;
     @Autowired private IfiCsvGenerator ifiCsvGenerator;
+    @Autowired private WebsocketController websocketController;
 
     @RequestMapping("/reports")
     public ResponseEntity<?> getReports() {
@@ -84,6 +85,8 @@ public class ReportRestController {
         }
 
         reportProcessor.analyzeAll(report);
+        websocketController.sendReportMessage("report analyzed");
+
         return ResponseEntity.ok().build();
     }
 
@@ -97,6 +100,8 @@ public class ReportRestController {
         }
 
         reportProcessor.deleteReport(report);
+        websocketController.sendReportMessage("report deleted");
+
         return ResponseEntity.ok().build();
     }
 
@@ -136,10 +141,11 @@ public class ReportRestController {
         // fix fill date timezone, JAXB JSON converter sets it to UTC
         execution.getFillDate().setTimeZone(TimeZone.getTimeZone(HanSettings.TIMEZONE));
         execution.setReceivedDate(Calendar.getInstance());
-        Long executionId = reportProcessor.newExecution(execution);
-        execution.setId(executionId);
 
-        return (executionId != null ? ResponseEntity.ok(execution) : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build());
+        reportProcessor.newExecution(execution);
+        websocketController.sendReportMessage("new execution processed");
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}/executions/{executionid}")
@@ -152,6 +158,8 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         reportProcessor.deleteExecution(execution);
+        websocketController.sendReportMessage("execution deleted");
+
         return ResponseEntity.ok().build();
     }
 
@@ -197,7 +205,10 @@ public class ReportRestController {
         // fix fill date timezone, JAXB JSON converter sets it to UTC
         closeTradeDto.getCloseDate().setTimeZone(TimeZone.getTimeZone(HanSettings.TIMEZONE));
 
-        return ResponseEntity.ok(reportProcessor.closeTrade(trade, closeTradeDto.getCloseDate(), closeTradeDto.getClosePrice()));
+        reportProcessor.closeTrade(trade, closeTradeDto.getCloseDate(), closeTradeDto.getClosePrice());
+        websocketController.sendReportMessage("trade closed");
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/expire")
@@ -215,7 +226,10 @@ public class ReportRestController {
         if (!SecType.OPT.equals(trade.getSecType()) || !TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(reportProcessor.expireTrade(trade));
+        reportProcessor.expireTrade(trade);
+        websocketController.sendReportMessage("trade expired");
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/assign")
@@ -233,7 +247,10 @@ public class ReportRestController {
         if (!SecType.OPT.equals(trade.getSecType()) || !TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(reportProcessor.assignTrade(trade));
+        reportProcessor.assignTrade(trade);
+        websocketController.sendReportMessage("trade assigned");
+
+        return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/statistics/{interval}")

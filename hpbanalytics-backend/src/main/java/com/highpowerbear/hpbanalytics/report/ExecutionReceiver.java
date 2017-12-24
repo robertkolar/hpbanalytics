@@ -4,6 +4,7 @@ import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
+import com.highpowerbear.hpbanalytics.webapi.WebsocketController;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
@@ -20,6 +21,7 @@ public class ExecutionReceiver {
 
     @Autowired private ReportDao reportDao;
     @Autowired private ReportProcessor reportProcessor;
+    @Autowired private WebsocketController websocketController;
 
     @JmsListener(destination = "ibLoggerToReport", containerFactory = "jmsFactory")
     public void receiveExecution(IbExecution ibExecution) {
@@ -38,5 +40,6 @@ public class ExecutionReceiver {
         execution.setReport(report);
 
         reportProcessor.newExecution(execution);
+        websocketController.sendReportMessage("new execution processed");
     }
 }

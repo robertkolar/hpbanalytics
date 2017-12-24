@@ -33,7 +33,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics")
+    @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)

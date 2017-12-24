@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -24,6 +25,7 @@ import java.util.Set;
  * Created by robertk on 11/18/2017.
  */
 @Repository
+@Transactional(propagation = Propagation.SUPPORTS)
 public class IbLoggerDaoImpl implements IbLoggerDao {
 
     private static final Logger log = LoggerFactory.getLogger(IbLoggerDaoImpl.class);

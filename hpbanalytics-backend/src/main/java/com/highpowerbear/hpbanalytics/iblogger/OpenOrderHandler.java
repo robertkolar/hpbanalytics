@@ -11,12 +11,12 @@ import com.ib.client.Contract;
 import com.ib.client.Order;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 /**
  * Created by robertk on 4/6/2015.
  */
-@Component
+@Service
 public class OpenOrderHandler {
 
     private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
