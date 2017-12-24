@@ -26,7 +26,7 @@ public class SplitExecution implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="split_execution_generator", sequenceName = "split_execution_seq")
+    @SequenceGenerator(name="split_execution_generator", sequenceName = "split_execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "split_execution_generator")
     private Long id;
     private Integer splitQuantity;

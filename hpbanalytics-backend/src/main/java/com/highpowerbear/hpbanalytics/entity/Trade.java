@@ -43,7 +43,7 @@ public class Trade implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq")
+    @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trade_generator")
     private Long id;
     @Enumerated(EnumType.STRING)

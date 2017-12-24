@@ -79,6 +79,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
         return q.getResultList();
     }
 
+    @Transactional
     @Override
     public void newIbOrder(IbOrder ibOrder) {
         log.info(B + "newIbOrder, dbId=" + ibOrder.getId() + ", account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
@@ -86,6 +87,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
         log.info(E + "newIbOrder, dbId=" + ibOrder.getId() + ", account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
     }
 
+    @Transactional
     @Override
     public void updateIbOrder(IbOrder ibOrder) {
         log.info(B + "updateIbOrder, account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());

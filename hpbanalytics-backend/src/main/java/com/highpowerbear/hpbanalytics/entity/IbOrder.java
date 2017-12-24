@@ -34,7 +34,7 @@ public class IbOrder implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
-    @SequenceGenerator(name="ib_order_generator", sequenceName = "ib_order_seq")
+    @SequenceGenerator(name="ib_order_generator", sequenceName = "ib_order_seq", schema = "hpbanalytics", catalog = "hpbanalytics")
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_generator")
     private Long id;
     private Integer permId;

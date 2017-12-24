@@ -64,6 +64,7 @@ public class ReportDaoImpl implements ReportDao {
         return em.merge(report);
     }
 
+    @Transactional
     @Override
     public void deleteReport(Report report) {
         Report reportDb = em.find(Report.class, report.getId());
@@ -141,6 +142,7 @@ public class ReportDaoImpl implements ReportDao {
         em.persist(execution);
     }
 
+    @Transactional
     @Override
     public void deleteExecution(Execution execution) {
         Execution executionDb = em.find(Execution.class, execution.getId());
@@ -203,11 +205,13 @@ public class ReportDaoImpl implements ReportDao {
         return tl;
     }
 
+    @Transactional
     @Override
     public void createTrades(List<Trade> trades) {
         trades.forEach(em::persist);
     }
 
+    @Transactional
     @Override
     public void deleteAllTrades(Report report) {
         for (Trade trade : this.getTradesByUnderlying(report, null)) {
@@ -217,6 +221,7 @@ public class ReportDaoImpl implements ReportDao {
         }
     }
 
+    @Transactional
     @Override
     public void deleteTrades(List<Trade> trades) {
         if (trades == null) {
@@ -290,6 +295,7 @@ public class ReportDaoImpl implements ReportDao {
         return em.find(ExchangeRate.class, date);
     }
 
+    @Transactional
     @Override
     public void createOrUpdateExchangeRate(ExchangeRate exchangeRate) {
         em.merge(exchangeRate);
