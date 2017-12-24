@@ -1,5 +1,5 @@
 /**
- * Created by robertk on 4/11/15.
+ * Created by robertk on 4/11/2015.
  */
 Ext.define('HanGui.model.iblogger.IbOrder', {
     extend: 'HanGui.model.iblogger.Base',

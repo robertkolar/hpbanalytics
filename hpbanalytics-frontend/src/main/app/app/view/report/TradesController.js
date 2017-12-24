@@ -1,5 +1,5 @@
 /**
- * Created by robertk on 15.10.2015.
+ * Created by robertk on 10/15/2015.
  */
 Ext.define('HanGui.view.report.TradesController', {
     extend: 'Ext.app.ViewController',

@@ -1,8 +1,5 @@
 /**
- * Created by robertk on 9/6/15.
- */
-/**
- * Created by robertk on 9/6/15.
+ * Created by robertk on 9/6/2015.
  */
 Ext.define('HanGui.view.report.window.TradeCloseWindow', {
     extend: 'Ext.window.Window',

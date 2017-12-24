@@ -1,5 +1,5 @@
 /**
- * Created by robertk on 4/17/15.
+ * Created by robertk on 4/17/2015.
  */
 Ext.define('HanGui.model.iblogger.Base', {
     extend: 'Ext.data.Model',
