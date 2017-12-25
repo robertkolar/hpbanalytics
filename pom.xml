@@ -9,8 +9,9 @@
     <packaging>pom</packaging>
     <version>3.5</version>
     <modules>
-        <module>hpbanalytics-backend</module>
-        <module>hpbanalytics-frontend</module>
+        <module>application</module>
+        <module>core</module>
+        <module>frontend</module>
     </modules>
 
     <parent>
