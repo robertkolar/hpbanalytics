@@ -16,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.HashSet;
 import java.util.List;
@@ -58,7 +57,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
 
     @Override
     public List<IbOrder> getFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter, Integer start, Integer limit) {
-        Query q = queryBuilder.buildFilteredIbOrdersQuery(em, ibAccount, filter, false);
+        TypedQuery<IbOrder> q = queryBuilder.buildFilteredIbOrdersQuery(em, ibAccount, filter);
 
         q.setFirstResult(start != null ? start : 0);
         q.setMaxResults(limit != null ? limit : CoreSettings.JPA_MAX_RESULTS);
@@ -68,19 +67,20 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
 
     @Override
     public Long getNumFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter) {
-        Query q = queryBuilder.buildFilteredIbOrdersQuery(em, ibAccount, filter, true);
-        //Query q = em.createQuery("SELECT COUNT(io) FROM IbOrder io WHERE io.ibAccount = :ibAccount");
-        return (Long) q.getSingleResult();
+        TypedQuery<Long> q = queryBuilder.buildFilteredIbOrdersCountQuery(em, ibAccount, filter);
+        return q.getSingleResult();
     }
 
     @Override
     public List<IbOrder> getOpenIbOrders(IbAccount ibAccount) {
         TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount = :ibAccount AND io.status IN :statuses", IbOrder.class);
+
         q.setParameter("ibAccount", ibAccount);
         Set<OrderStatus> statuses = new HashSet<>();
         statuses.add(OrderStatus.SUBMITTED);
         statuses.add(OrderStatus.UPDATED);
         q.setParameter("statuses", statuses);
+
         return q.getResultList();
     }
 
@@ -103,10 +103,12 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     @Override
     public IbOrder getIbOrderByPermId(IbAccount ibAccount, Integer permId) {
         TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount = :ibAccount AND io.permId = :permId", IbOrder.class);
+
         q.setParameter("ibAccount", ibAccount);
         q.setParameter("permId", permId);
         List<IbOrder> ibOrders = q.getResultList();
-        return (!ibOrders.isEmpty() ? ibOrders.get(0) : null);
+
+        return !ibOrders.isEmpty() ? ibOrders.get(0) : null;
     }
 
     public List<ExchangeRate> getAllExchangeRates() {

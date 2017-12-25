@@ -153,7 +153,7 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<Execution> getFilteredExecutions(Report report, ExecutionFilter filter, Integer start, Integer limit) {
-        Query q = queryBuilder.buildFilteredExecutionsQuery(em , report, filter, false);
+        TypedQuery<Execution> q = queryBuilder.buildFilteredExecutionsQuery(em , report, filter);
 
         q.setFirstResult(start != null ? start : 0);
         q.setMaxResults(limit != null ? limit : CoreSettings.JPA_MAX_RESULTS);
@@ -163,8 +163,8 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public Long getNumFilteredExecutions(Report report, ExecutionFilter filter) {
-        Query q = queryBuilder.buildFilteredExecutionsQuery(em , report, filter, true);
-        return (Long) q.getSingleResult();
+        TypedQuery<Long> q = queryBuilder.buildFilteredExecutionsCountQuery(em , report, filter);
+        return q.getSingleResult();
     }
 
     @Override
@@ -242,18 +242,18 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<Trade> getFilteredTrades(Report report, TradeFilter filter, Integer start, Integer limit) {
-        Query q = queryBuilder.buildFilteredTradesQuery(em, report, filter, false);
+        TypedQuery<Trade> q = queryBuilder.buildFilteredTradesQuery(em, report, filter);
 
         q.setFirstResult(start != null ? start : 0);
         q.setMaxResults(limit != null ? limit : CoreSettings.JPA_MAX_RESULTS);
 
-        return (List<Trade>) q.getResultList();
+        return q.getResultList();
     }
 
     @Override
     public Long getNumFilteredTrades(Report report, TradeFilter filter) {
-        Query q = queryBuilder.buildFilteredTradesQuery(em, report, filter, true);
-        return (Long) q.getSingleResult();
+        TypedQuery<Long> q = queryBuilder.buildFilteredTradesCountQuery(em, report, filter);
+        return q.getSingleResult();
     }
 
     @Override

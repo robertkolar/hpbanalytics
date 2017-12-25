@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -21,8 +20,6 @@ import java.util.Set;
  */
 @Component
 public class FilterParser {
-
-    private ObjectMapper mapper = new ObjectMapper();
 
     public IbOrderFilter parseIbOrderFilter(String jsonFilter) {
         IbOrderFilter filter = new IbOrderFilter();

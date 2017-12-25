@@ -12,7 +12,7 @@ import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
-import javax.persistence.Query;
+import javax.persistence.TypedQuery;
 import java.util.Calendar;
 
 /**
@@ -21,7 +21,17 @@ import java.util.Calendar;
 @Component
 public class QueryBuilder {
 
-    public Query buildFilteredIbOrdersQuery(EntityManager em, IbAccount ibAccount, IbOrderFilter filter, boolean isCount) {
+    public TypedQuery<IbOrder> buildFilteredIbOrdersQuery(EntityManager em, IbAccount ibAccount, IbOrderFilter filter) {
+        return buildFilteredIbOrdersQuery(em, ibAccount, filter, IbOrder.class);
+    }
+
+    public TypedQuery<Long> buildFilteredIbOrdersCountQuery(EntityManager em, IbAccount ibAccount, IbOrderFilter filter) {
+        return buildFilteredIbOrdersQuery(em, ibAccount, filter, Long.class);
+    }
+
+    private <T> TypedQuery<T> buildFilteredIbOrdersQuery(EntityManager em, IbAccount ibAccount, IbOrderFilter filter, Class<T> clazz) {
+        boolean isCount = clazz.isAssignableFrom(Long.class);
+
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ").append(isCount ? "COUNT(io)" : "io").append(" FROM IbOrder io WHERE io.ibAccount = :ibAccount");
 
@@ -44,7 +54,7 @@ public class QueryBuilder {
         }
 
         sb.append(isCount ? "" : " ORDER BY io.submitDate DESC");
-        Query q = (isCount ? em.createQuery(sb.toString()) : em.createQuery(sb.toString(), IbOrder.class));
+        TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
         q.setParameter("ibAccount", ibAccount);
 
@@ -76,7 +86,17 @@ public class QueryBuilder {
         return q;
     }
 
-    public Query buildFilteredExecutionsQuery(EntityManager em, Report report, ExecutionFilter filter, boolean isCount) {
+    public TypedQuery<Execution> buildFilteredExecutionsQuery(EntityManager em, Report report, ExecutionFilter filter) {
+        return buildFilteredExecutionsQuery(em, report, filter, Execution.class);
+    }
+
+    public TypedQuery<Long> buildFilteredExecutionsCountQuery(EntityManager em, Report report, ExecutionFilter filter) {
+        return buildFilteredExecutionsQuery(em, report, filter, Long.class);
+    }
+
+    private <T> TypedQuery<T> buildFilteredExecutionsQuery(EntityManager em, Report report, ExecutionFilter filter, Class<T> clazz) {
+        boolean isCount = clazz.isAssignableFrom(Long.class);
+
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ").append(isCount ? "COUNT(e)" : "e").append(" FROM Execution e WHERE e.report = :report");
 
@@ -96,7 +116,7 @@ public class QueryBuilder {
         }
 
         sb.append(isCount ? "" : " ORDER BY e.fillDate DESC");
-        Query q = (isCount ? em.createQuery(sb.toString()) : em.createQuery(sb.toString(), Execution.class));
+        TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
         q.setParameter("report", report);
 
@@ -125,7 +145,17 @@ public class QueryBuilder {
         return q;
     }
 
-    public Query buildFilteredTradesQuery(EntityManager em, Report report, TradeFilter filter, boolean isCount) {
+    public TypedQuery<Trade> buildFilteredTradesQuery(EntityManager em, Report report, TradeFilter filter) {
+        return buildFilteredTradesQuery(em, report, filter, Trade.class);
+    }
+
+    public TypedQuery<Long> buildFilteredTradesCountQuery(EntityManager em, Report report, TradeFilter filter) {
+        return buildFilteredTradesQuery(em, report, filter, Long.class);
+    }
+
+    private <T> TypedQuery<T> buildFilteredTradesQuery(EntityManager em, Report report, TradeFilter filter, Class<T> clazz) {
+        boolean isCount = clazz.isAssignableFrom(Long.class);
+
         StringBuilder sb = new StringBuilder();
         sb.append("SELECT ").append(isCount ? "COUNT(t)" : "t").append(" FROM Trade t WHERE t.report = :report");
 
@@ -148,7 +178,7 @@ public class QueryBuilder {
         }
 
         sb.append(isCount ? "" : " ORDER BY t.openDate DESC");
-        Query q = (isCount ? em.createQuery(sb.toString()) : em.createQuery(sb.toString(), Trade.class));
+        TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
         q.setParameter("report", report);
 
