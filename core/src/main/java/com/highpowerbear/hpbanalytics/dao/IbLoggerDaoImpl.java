@@ -2,10 +2,8 @@ package com.highpowerbear.hpbanalytics.dao;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,17 +107,5 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
         List<IbOrder> ibOrders = q.getResultList();
 
         return !ibOrders.isEmpty() ? ibOrders.get(0) : null;
-    }
-
-    public List<ExchangeRate> getAllExchangeRates() {
-        TypedQuery<ExchangeRate> q = em.createQuery("SELECT er FROM ExchangeRate er", ExchangeRate.class);
-
-        return q.getResultList();
-    }
-
-    public List<Trade> getAllTrades() {
-        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t", Trade.class);
-
-        return q.getResultList();
     }
 }

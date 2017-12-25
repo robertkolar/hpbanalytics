@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.highpowerbear.hpbanalytics.enums.Currency;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -20,6 +22,22 @@ public class ExchangeRate implements Serializable {
     private Double eurChf;
     private Double eurAud;
     private Double eurJpy;
+
+    public Double getRate(Currency base, Currency transaction) {
+        switch (base) {
+            case EUR:
+                switch (transaction) {
+                    case EUR: return 1d;
+                    case USD: return eurUsd;
+                    case GBP: return eurGbp;
+                    case CHF: return eurChf;
+                    case AUD: return eurAud;
+                    case JPY: return eurJpy;
+                    default: return null;
+                }
+            default: return null;
+        }
+    }
 
     @Override
     public boolean equals(Object o) {
