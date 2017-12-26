@@ -37,7 +37,7 @@ public class IbOrder implements Serializable {
     @SequenceGenerator(name="ib_order_generator", sequenceName = "ib_order_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_generator")
     private Long id;
-    private Integer permId;
+    private Long permId;
     private Integer orderId;
     private Integer clientId;
     @JsonIgnore
@@ -116,11 +116,11 @@ public class IbOrder implements Serializable {
         this.id = id;
     }
 
-    public Integer getPermId() {
+    public Long getPermId() {
         return permId;
     }
 
-    public void setPermId(Integer permId) {
+    public void setPermId(Long permId) {
         this.permId = permId;
     }
 

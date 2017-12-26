@@ -3,20 +3,24 @@ package com.highpowerbear.hpbanalytics.iblogger;
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;
 import com.ib.client.ContractDetails;
+import com.ib.client.DeltaNeutralContract;
 import com.ib.client.EWrapper;
 import com.ib.client.EWrapperMsgGenerator;
 import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
-import com.ib.client.UnderComp;
+import com.ib.client.SoftDollarTier;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Set;
 
 /**
  *
  * Created by robertk on 4/6/2015.
  */
 public class GenericIbListener implements EWrapper {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(GenericIbListener.class);
+    private static final Logger log = LoggerFactory.getLogger(GenericIbListener.class);
 
     @Override
     public void bondContractDetails(int reqId, ContractDetails contractDetails) {
@@ -79,7 +83,7 @@ public class GenericIbListener implements EWrapper {
     }
 
     @Override
-    public void orderStatus(int orderId, String status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+    public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
         log.info(EWrapperMsgGenerator.orderStatus(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld));
     }
 
@@ -169,8 +173,8 @@ public class GenericIbListener implements EWrapper {
     }
 
     @Override
-    public void updatePortfolio(Contract contract, int position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, String accountName) {
-        log.info(EWrapperMsgGenerator.updatePortfolio(contract, position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName));
+    public void updatePortfolio(Contract contract, double position, double marketPrice, double marketValue, double averageCost, double unrealizedPNL, double realizedPNL, String accountName) {
+        log.info(EWrapperMsgGenerator.updatePortfolio(contract, (int) position, marketPrice, marketValue, averageCost, unrealizedPNL, realizedPNL, accountName));
     }
 
     @Override
@@ -194,7 +198,7 @@ public class GenericIbListener implements EWrapper {
     }
 
     @Override
-    public void deltaNeutralValidation(int reqId, UnderComp underComp) {
+    public void deltaNeutralValidation(int reqId, DeltaNeutralContract underComp) {
         log.info(EWrapperMsgGenerator.deltaNeutralValidation(reqId, underComp));
     }
 
@@ -214,7 +218,7 @@ public class GenericIbListener implements EWrapper {
     }
 
     @Override
-    public void position(String account, Contract contract, int pos, double avgCost) {
+    public void position(String account, Contract contract, double pos, double avgCost) {
         log.info(EWrapperMsgGenerator.position(account, contract, pos, avgCost));
     }
 
@@ -247,5 +251,46 @@ public class GenericIbListener implements EWrapper {
 
     @Override
     public void displayGroupUpdated(int reqId, String contractInfo) {
+    }
+
+    // API 9.72
+    @Override
+    public void verifyAndAuthCompleted(boolean b, String s) {
+    }
+
+    @Override
+    public void positionMulti(int i, String s, String s1, Contract contract, double v, double v1) {
+    }
+
+    @Override
+    public void positionMultiEnd(int i) {
+    }
+
+    @Override
+    public void verifyAndAuthMessageAPI(String s, String s1) {
+    }
+
+    @Override
+    public void connectAck() {
+    }
+
+    @Override
+    public void accountUpdateMulti(int i, String s, String s1, String s2, String s3, String s4) {
+    }
+
+    @Override
+    public void accountUpdateMultiEnd(int i) {
+    }
+
+    @Override
+    public void securityDefinitionOptionalParameter(int i, String s, int i1, String s1, String s2, Set<String> set, Set<Double> set1) {
+    }
+
+    @Override
+    public void securityDefinitionOptionalParameterEnd(int i) {
+    }
+
+    @Override
+    public void softDollarTiers(int i, SoftDollarTier[] softDollarTiers) {
     }
 }

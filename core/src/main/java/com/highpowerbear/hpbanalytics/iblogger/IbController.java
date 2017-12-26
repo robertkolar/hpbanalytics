@@ -4,6 +4,9 @@ import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.ib.client.EClientSocket;
+import com.ib.client.EJavaSignal;
+import com.ib.client.EReaderSignal;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +23,7 @@ import java.util.Map;
  */
 @Component
 public class IbController {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(IbController.class);
+    private static final Logger log = LoggerFactory.getLogger(IbController.class);
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private Provider<IbListener> ibListeners;
@@ -34,8 +37,10 @@ public class IbController {
     @PostConstruct
     private void init() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
-            EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount));
-            IbConnection ibConnection = new IbConnection(ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket);
+            EReaderSignal eReaderSignal = new EJavaSignal();
+            EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount), eReaderSignal);
+
+            IbConnection ibConnection = new IbConnection(ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket, eReaderSignal);
             ibConnectionMap.put(ibAccount, ibConnection);
         });
     }

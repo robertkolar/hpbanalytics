@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.ib.client.EClientSocket;
+import com.ib.client.EReader;
+import com.ib.client.EReaderSignal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,19 +22,22 @@ public class IbConnection {
     private boolean markConnected = false;
     @JsonIgnore
     private EClientSocket eClientSocket; // null means not connected yet or manually disconnected
+    @JsonIgnore
+    private EReaderSignal eReaderSignal;
 
     public IbConnection() {
     }
 
-    public IbConnection(String host, Integer port, Integer clientId, EClientSocket eClientSocket) {
+    public IbConnection(String host, Integer port, Integer clientId, EClientSocket eClientSocket, EReaderSignal eReaderSignal) {
         this.host = host;
         this.port = port;
         this.clientId = clientId;
         this.eClientSocket = eClientSocket;
+        this.eReaderSignal = eReaderSignal;
     }
 
     private String print() {
-        return "mkt data, host=" + host + ", port=" + port + ", clientId=" + clientId;
+        return "host=" + host + ", port=" + port + ", clientId=" + clientId;
     }
 
     public void connect() {
@@ -40,12 +45,29 @@ public class IbConnection {
             return;
         }
         this.markConnected = true;
+
         if (!isConnected()) {
             log.info("Connecting " + print());
             eClientSocket.eConnect(host, port, clientId);
             CoreUtil.waitMilliseconds(1000);
+
             if (isConnected()) {
-                log.info("Sucessfully connected " + print());
+                log.info("Successfully connected " + print());
+
+                final EReader eReader = new EReader(eClientSocket, eReaderSignal);
+
+                eReader.start();
+                // an additional thread is created in this program design to empty the messaging queue
+                new Thread(() -> {
+                    while (eClientSocket.isConnected()) {
+                        eReaderSignal.waitForSignal();
+                        try {
+                            eReader.processMsgs();
+                        } catch (Exception e) {
+                            log.error("Error", e);
+                        }
+                    }
+                }).start();
             }
         }
     }

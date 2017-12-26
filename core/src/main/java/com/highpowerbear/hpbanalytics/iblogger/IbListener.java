@@ -42,7 +42,7 @@ public class IbListener extends GenericIbListener {
     }
 
     @Override
-    public void orderStatus(int orderId, String status, int filled, int remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
+    public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
         super.orderStatus(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
         if (!(  IbOrderStatus.SUBMITTED.getValue().equalsIgnoreCase(status) ||
                 IbOrderStatus.PRESUBMITTED.getValue().equalsIgnoreCase(status) ||
@@ -51,7 +51,7 @@ public class IbListener extends GenericIbListener {
             return;
         }
 
-        IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(ibAccount, permId);
+        IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(ibAccount, (long) permId);
         if (ibOrder == null) {
             return;
         }

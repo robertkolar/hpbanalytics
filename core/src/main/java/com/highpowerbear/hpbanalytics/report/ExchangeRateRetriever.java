@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.report;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import java.util.Calendar;
  */
 @Service
 public class ExchangeRateRetriever {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ExchangeRateRetriever.class);
+    private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetriever.class);
 
     @Autowired private ReportDao reportDao;
 

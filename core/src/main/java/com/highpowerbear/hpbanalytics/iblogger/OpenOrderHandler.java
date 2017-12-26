@@ -9,6 +9,7 @@ import com.highpowerbear.hpbanalytics.enums.OrderType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.ib.client.Contract;
 import com.ib.client.Order;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class OpenOrderHandler {
 
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
+    private static final Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private HeartbeatControl heartbeatControl;
@@ -29,35 +30,35 @@ public class OpenOrderHandler {
             log.info("IB listening disabled, order will be ignored");
             return;
         }
-        if (!(ibAccount.mayProcessAccount(order.m_account))) {
-            log.info("Account filter active, account=" + order.m_account + ", permitted=" + ibAccount.getPermittedAccounts() + ", order will be ignored");
+        if (!(ibAccount.mayProcessAccount(order.account()))) {
+            log.info("Account filter active, account=" + order.account() + ", permitted=" + ibAccount.getPermittedAccounts() + ", order will be ignored");
             return;
         }
-        if (!(ibAccount.mayProcessClient(order.m_clientId))) {
-            log.info("Account filter active, clientId=" + order.m_clientId + ", permitted=" + ibAccount.getPermittedClients() + ", order will be ignored");
+        if (!(ibAccount.mayProcessClient(order.clientId()))) {
+            log.info("Account filter active, clientId=" + order.clientId() + ", permitted=" + ibAccount.getPermittedClients() + ", order will be ignored");
             return;
         }
-        if (!checkOrderType(order.m_orderType)) {
-            log.info("Unsupported order type=" + order.m_orderType + ", order will be ignored");
+        if (!checkOrderType(order.getOrderType())) {
+            log.info("Unsupported order type=" + order.getOrderType() + ", order will be ignored");
             return;
         }
-        if (!checkSecType(contract.m_secType)) {
-            log.info("Unsupported security type=" + contract.m_secType + ", order will be ignored");
+        if (!checkSecType(contract.getSecType())) {
+            log.info("Unsupported security type=" + contract.getSecType() + ", order will be ignored");
             return;
         }
-        if (!checkInstrumentFilter(ibAccount, contract.m_secType)) {
-            log.info("Processing disabled, security type=" + contract.m_secType + ", order will be ignored");
+        if (!checkInstrumentFilter(ibAccount, contract.getSecType())) {
+            log.info("Processing disabled, security type=" + contract.getSecType() + ", order will be ignored");
             return;
         }
 
-        String underlying = contract.m_symbol;
-        String symbol = contract.m_localSymbol;
+        String underlying = contract.symbol();
+        String symbol = contract.localSymbol();
 
         if (symbol.split(" ").length > 1) {
             symbol = CoreUtil.removeSpace(symbol);
         }
 
-        IbOrder ibOrderDb = ibLoggerDao.getIbOrderByPermId(ibAccount, order.m_permId);
+        IbOrder ibOrderDb = ibLoggerDao.getIbOrderByPermId(ibAccount, order.permId());
         if (ibOrderDb != null) {
             updateExistingOrder(ibOrderDb, order);
         } else {
@@ -93,7 +94,7 @@ public class OpenOrderHandler {
 
     private void updateExistingOrder(IbOrder ibOrderDb, Order order) {
         if (ibOrderDb.getOrderId() == 0) {
-            ibOrderDb.setOrderId(order.m_orderId);
+            ibOrderDb.setOrderId(order.orderId());
             ibLoggerDao.updateIbOrder(ibOrderDb);
         }
         if (!OrderStatus.SUBMITTED.equals(ibOrderDb.getStatus()) && !OrderStatus.UPDATED.equals(ibOrderDb.getStatus())) {
@@ -102,10 +103,10 @@ public class OpenOrderHandler {
         boolean update = true;
 
         // if order already exists, check if the lmt/stp price has been updated
-        if (OrderType.LMT.name().equalsIgnoreCase(order.m_orderType) && ibOrderDb.getOrderPrice() != order.m_lmtPrice) {
-            ibOrderDb.setOrderPrice(order.m_lmtPrice);
-        } else if (OrderType.STP.name().equalsIgnoreCase(order.m_orderType) && ibOrderDb.getOrderPrice() != order.m_auxPrice) {
-            ibOrderDb.setOrderPrice(order.m_auxPrice);
+        if (OrderType.LMT.name().equalsIgnoreCase(order.getOrderType()) && ibOrderDb.getOrderPrice() != order.lmtPrice()) {
+            ibOrderDb.setOrderPrice(order.lmtPrice());
+        } else if (OrderType.STP.name().equalsIgnoreCase(order.getOrderType()) && ibOrderDb.getOrderPrice() != order.auxPrice()) {
+            ibOrderDb.setOrderPrice(order.auxPrice());
         } else {
             update = false;
         }
@@ -118,27 +119,27 @@ public class OpenOrderHandler {
 
     private void createNewOrder(IbAccount ibAccount, int orderId, Contract contract, Order order, String underlying, String symbol) {
         IbOrder ibOrder = new IbOrder();
-        ibOrder.setPermId(order.m_permId);
+        ibOrder.setPermId(order.permId());
         ibOrder.setOrderId(orderId);
-        ibOrder.setClientId(order.m_clientId);
+        ibOrder.setClientId(order.clientId());
         ibOrder.setIbAccount(ibAccount);
-        ibOrder.setAction(order.m_action);
-        ibOrder.setQuantity(order.m_totalQuantity);
+        ibOrder.setAction(order.getAction());
+        ibOrder.setQuantity((int) order.totalQuantity());
         ibOrder.setUnderlying(underlying);
-        ibOrder.setCurrency(contract.m_currency);
+        ibOrder.setCurrency(contract.currency());
         ibOrder.setSymbol(symbol);
-        ibOrder.setSecType(contract.m_secType);
-        ibOrder.setOrderType(order.m_orderType);
+        ibOrder.setSecType(contract.getSecType());
+        ibOrder.setOrderType(order.getOrderType());
 
-        if (OrderType.LMT.name().equalsIgnoreCase(order.m_orderType)) {
-            ibOrder.setOrderPrice(order.m_lmtPrice);
-        } else if (OrderType.STP.name().equalsIgnoreCase(order.m_orderType)) {
-            ibOrder.setOrderPrice(order.m_auxPrice);
+        if (OrderType.LMT.name().equalsIgnoreCase(order.getOrderType())) {
+            ibOrder.setOrderPrice(order.lmtPrice());
+        } else if (OrderType.STP.name().equalsIgnoreCase(order.getOrderType())) {
+            ibOrder.setOrderPrice(order.auxPrice());
         }
 
-        ibOrder.setTif(order.m_tif);
-        ibOrder.setParentId(order.m_parentId);
-        ibOrder.setOcaGroup(order.m_ocaGroup);
+        ibOrder.setTif(order.getTif());
+        ibOrder.setParentId(order.parentId());
+        ibOrder.setOcaGroup(order.ocaGroup());
         ibOrder.addEvent(OrderStatus.SUBMITTED, ibOrder.getOrderPrice());
         ibLoggerDao.newIbOrder(ibOrder);
         heartbeatControl.initHeartbeat(ibOrder);

@@ -5,6 +5,7 @@ import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.annotation.JmsListener;
@@ -17,7 +18,7 @@ import java.util.Calendar;
  */
 @Component
 public class ExecutionReceiver {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ExecutionReceiver.class);
+    private static final Logger log = LoggerFactory.getLogger(ExecutionReceiver.class);
 
     @Autowired private ReportDao reportDao;
     @Autowired private ReportProcessor reportProcessor;

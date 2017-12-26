@@ -19,5 +19,5 @@ public interface IbLoggerDao {
     List<IbOrder> getOpenIbOrders(IbAccount ibAccount);
     void newIbOrder(IbOrder ibOrder);
     void updateIbOrder(IbOrder ibOrder);
-    IbOrder getIbOrderByPermId(IbAccount ibAccount, Integer permId);
+    IbOrder getIbOrderByPermId(IbAccount ibAccount, Long permId);
 }

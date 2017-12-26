@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.common;
 
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 public class WsMessageSender {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(WsMessageSender.class);
+    private static final Logger log = LoggerFactory.getLogger(WsMessageSender.class);
 
     @Autowired private SimpMessagingTemplate simpMessagingTemplate;
 

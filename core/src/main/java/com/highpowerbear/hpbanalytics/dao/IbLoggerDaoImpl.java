@@ -99,7 +99,7 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     }
 
     @Override
-    public IbOrder getIbOrderByPermId(IbAccount ibAccount, Integer permId) {
+    public IbOrder getIbOrderByPermId(IbAccount ibAccount, Long permId) {
         TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount = :ibAccount AND io.permId = :permId", IbOrder.class);
 
         q.setParameter("ibAccount", ibAccount);
