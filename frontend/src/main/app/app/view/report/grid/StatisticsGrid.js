@@ -48,16 +48,16 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
     }, {
         xtype: 'numbercolumn',
         format: '0.00',
-        text: 'Max W',
+        text: 'Big W',
         width: 100,
-        dataIndex: 'maxWinner',
+        dataIndex: 'bigWinner',
         align: 'right'
     }, {
         xtype: 'numbercolumn',
         format: '0.00',
-        text: 'Max L',
+        text: 'Big L',
         width: 100,
-        dataIndex: 'maxLoser',
+        dataIndex: 'bigLoser',
         align: 'right'
     }, {
         xtype: 'numbercolumn',
@@ -143,8 +143,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
         }, {
             xtype: 'button',
             margin: '0 0 0 10',
-            text: 'Recalculate',
-            handler: 'onRecalculateStatistics',
+            text: 'Calculate',
+            handler: 'onCalculateStatistics',
             listeners: {
                 beforerender: function(c, eOpts) {
                     c.setGlyph(HanGui.common.Glyphs.getGlyph('gear'));

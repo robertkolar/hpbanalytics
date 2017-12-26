@@ -7,9 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -19,26 +17,6 @@ import java.util.TimeZone;
  */
 public class OptionUtil {
     private static final Logger log = LoggerFactory.getLogger(OptionUtil.class);
-
-    private static final List<String> miniOptionRoots = new ArrayList<>();
-    static {
-        miniOptionRoots.add("AMZN7");
-        miniOptionRoots.add("AAPL7");
-        miniOptionRoots.add("GOOG7");
-        miniOptionRoots.add("GLD7");
-        miniOptionRoots.add("SPY7");
-    }
-    
-    public static boolean isMini(String optionSymbol) {
-        boolean isMini = false;
-        for (String miniOptionRoot : miniOptionRoots) {
-            if (optionSymbol.startsWith(miniOptionRoot)) {
-                isMini = true;
-                break;
-            }
-        }
-        return isMini;
-    }
     
     public static OptionParseResult parse(String optionSymbol) throws Exception {
         OptionParseResult result = new OptionParseResult();
@@ -46,7 +24,7 @@ public class OptionUtil {
             throw new Exception(optionSymbol + " has not correct length");
         }
         int l = optionSymbol.length();
-        result.setUnderlying(optionSymbol.substring(0, (isMini(optionSymbol) ? l-16 : l-15)).trim().toUpperCase());
+        result.setUnderlying(optionSymbol.substring(0, l-15).trim().toUpperCase());
 
         String yy = optionSymbol.substring(l-15, l-13);
         String MM = optionSymbol.substring(l-13, l-11);

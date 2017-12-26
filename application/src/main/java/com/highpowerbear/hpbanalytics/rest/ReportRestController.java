@@ -288,7 +288,7 @@ public class ReportRestController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")
-    public ResponseEntity<?> recalculateStatistics(
+    public ResponseEntity<?> calculateStatistics(
             @PathVariable("id") Integer id,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "underlying") String underlying) {

@@ -53,5 +53,6 @@ public interface ReportDao {
     Long getNumOpenUnderlyings(Report report);
 
     ExchangeRate getExchangeRate(String date);
+    List<ExchangeRate> getAllExchangeRates();
     void createOrUpdateExchangeRate(ExchangeRate exchangeRate);
 }

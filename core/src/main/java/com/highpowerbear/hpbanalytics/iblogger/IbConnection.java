@@ -2,19 +2,17 @@ package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.enums.IbConnectionType;
 import com.ib.client.EClientSocket;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Created by robertk on 4/4/2015.
  */
 public class IbConnection {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(IbConnection.class);
+    private static final Logger log = LoggerFactory.getLogger(IbConnection.class);
 
-    private IbConnectionType type;
     private String host;
     private Integer port;
     private Integer clientId;
@@ -26,8 +24,7 @@ public class IbConnection {
     public IbConnection() {
     }
 
-    public IbConnection(IbConnectionType type, String host, Integer port, Integer clientId, EClientSocket eClientSocket) {
-        this.type = type;
+    public IbConnection(String host, Integer port, Integer clientId, EClientSocket eClientSocket) {
         this.host = host;
         this.port = port;
         this.clientId = clientId;
@@ -79,10 +76,6 @@ public class IbConnection {
 
     public String getAccounts() {
         return accounts;
-    }
-
-    public IbConnectionType getType() {
-        return type;
     }
 
     public String getHost() {

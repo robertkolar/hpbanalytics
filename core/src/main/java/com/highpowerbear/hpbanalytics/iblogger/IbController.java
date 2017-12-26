@@ -3,7 +3,6 @@ package com.highpowerbear.hpbanalytics.iblogger;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
-import com.highpowerbear.hpbanalytics.enums.IbConnectionType;
 import com.ib.client.EClientSocket;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class IbController {
     private void init() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
             EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount));
-            IbConnection ibConnection = new IbConnection(IbConnectionType.IBLOGGER, ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket);
+            IbConnection ibConnection = new IbConnection(ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket);
             ibConnectionMap.put(ibAccount, ibConnection);
         });
     }

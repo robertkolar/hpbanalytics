@@ -12,6 +12,7 @@ import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,10 +35,10 @@ import java.util.stream.Collectors;
  */
 @Service
 public class ReportProcessor {
-    private static final org.slf4j.Logger log = LoggerFactory.getLogger(ReportProcessor.class);
+    private static final Logger log = LoggerFactory.getLogger(ReportProcessor.class);
 
     @Autowired private ReportDao reportDao;
-    @Autowired private StatisticsCalculator statisticsCalculator;
+    @Autowired private TradeCalculator tradeCalculator;
 
     @Transactional
     public void analyzeAll(Report report) {
@@ -53,7 +54,6 @@ public class ReportProcessor {
 
         List<Trade> trades = analyze(executions);
         reportDao.createTrades(trades);
-        statisticsCalculator.clearCache(report);
 
         log.info("END report processing for " + report.getReportName());
     }
@@ -61,7 +61,6 @@ public class ReportProcessor {
     @Transactional
     public void deleteReport(Report report) {
         reportDao.deleteReport(report);
-        statisticsCalculator.clearCache(report);
     }
 
     @Transactional
@@ -89,7 +88,6 @@ public class ReportProcessor {
         if (!newTrades.isEmpty()) {
             reportDao.createTrades(newTrades);
         }
-        statisticsCalculator.clearCache(execution.getReport());
     }
 
     @Transactional
@@ -128,7 +126,6 @@ public class ReportProcessor {
 
         log.info("Creating " + trades.size() + " trades");
         reportDao.createTrades(trades);
-        statisticsCalculator.clearCache(execution.getReport());
     }
 
     public void closeTrade(Trade trade, Calendar closeDate, BigDecimal closePrice) {
@@ -217,7 +214,7 @@ public class ReportProcessor {
         ce.setOrigin("INTERNAL");
         ce.setReferenceId("N/A");
         ce.setAction(OptionType.PUT.equals(opr.getOptType()) ? Action.BUY : Action.SELL);
-        ce.setQuantity((OptionUtil.isMini(e.getSymbol()) ? 10 : 100) * e.getQuantity());
+        ce.setQuantity(e.getQuantity() * 100);
         ce.setSymbol(e.getUnderlying());
         ce.setUnderlying(e.getUnderlying());
         ce.setCurrency(e.getCurrency());
@@ -348,7 +345,7 @@ public class ReportProcessor {
                 }
             }
             trade.setSplitExecutions(new ArrayList<>(singleTradeSet));
-            trade.calculate();
+            tradeCalculator.calculateFields(trade);
             trades.add(trade);
             singleSymbolSet.removeAll(singleTradeSet);
         }

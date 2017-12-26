@@ -79,7 +79,7 @@ Ext.define('HanGui.view.iblogger.grid.OrdersGrid', {
         dataIndex: 'secType',
         filter: {
             type: 'list',
-            options: ['STK', 'OPT', 'FUT', 'CASH']
+            options: ['STK', 'OPT', 'FUT', 'CASH', 'CFD']
         }
     }, {
         text: 'Ord',

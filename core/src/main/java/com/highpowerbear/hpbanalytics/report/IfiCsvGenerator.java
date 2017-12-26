@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.OptionUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Report;
@@ -9,10 +9,8 @@ import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.FuturePlMultiplier;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,21 +35,18 @@ public class IfiCsvGenerator {
     private static final Logger log = LoggerFactory.getLogger(IfiCsvGenerator.class);
 
     @Autowired private ReportDao reportDao;
+    @Autowired private TradeCalculator tradeCalculator;
 
-    private final Integer optionMultiplier = 100;
     private final String NL = "\n";
     private final String DL = ",";
     private final String acquireType = "A - nakup";
 
-    private Map<SecType, String> secTypeMap = new HashMap<>();
-    private Map<TradeType, String> tradeTypeMap = new HashMap<>();
+    private final Map<SecType, String> secTypeMap = new HashMap<>();
+    private final Map<TradeType, String> tradeTypeMap = new HashMap<>();
 
-    private DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-    private DateFormat dfLog = new SimpleDateFormat("MM/dd/yyyy");
-    private DateFormat dfRate = new SimpleDateFormat("yyyy-MM-dd");
-    private NumberFormat nf = NumberFormat.getInstance(Locale.US);
-
-    private final Currency baseCurrency = Currency.EUR;
+    private final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    private final DateFormat dfLog = new SimpleDateFormat("MM/dd/yyyy");
+    private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
     @PostConstruct
     private void init() {
@@ -175,72 +170,20 @@ public class IfiCsvGenerator {
         sb.append(NL);
     }
 
-    private Double calculatePlEur(Trade trade) {
-        if (!TradeStatus.CLOSED.equals(trade.getStatus())) {
-            return null;
-        }
-
-        Double cumulativeOpenPrice = 0d;
-        Double cumulativeClosePrice = 0d;
-        boolean firstStepOk = true;
-
-        // first step
-        for (SplitExecution se : trade.getSplitExecutions()) {
-            ExchangeRate exchangeRate = reportDao.getExchangeRate(dfRate.format(se.getFillDate().getTime()));
-            if (exchangeRate == null) {
-                firstStepOk = false;
-                break;
-            }
-            double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate.getRate(baseCurrency, trade.getCurrency());
-
-            if ((TradeType.LONG. equals(trade.getType()) && Action.BUY. equals(se.getExecution().getAction())) ||
-                (TradeType.SHORT.equals(trade.getType()) && Action.SELL.equals(se.getExecution().getAction()))) {
-
-                cumulativeOpenPrice += se.getSplitQuantity() * fillPrice;
-            }
-
-            if (TradeStatus.CLOSED.equals(trade.getStatus())) {
-                if ((TradeType.LONG. equals(trade.getType()) && Action.SELL.equals(se.getExecution().getAction())) ||
-                    (TradeType.SHORT.equals(trade.getType()) && Action.BUY. equals(se.getExecution().getAction()))) {
-
-                    cumulativeClosePrice += se.getSplitQuantity() * fillPrice;
-                }
-            }
-        }
-        if (!firstStepOk) {
-            return null;
-        }
-        // second step
-        Double profitLoss = (TradeType.LONG.equals(trade.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
-        if (SecType.OPT.equals(trade.getSecType())) {
-            profitLoss *= OptionUtil.isMini(trade.getSymbol()) ? 10d : 100d;
-        }
-        if (SecType.FUT.equals(trade.getSecType())) {
-            profitLoss *= FuturePlMultiplier.getMultiplierByUnderlying(trade.getUnderlying());
-        }
-
-        return profitLoss;
-    }
-
     private void writeTradeShortSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(dfRate.format(se.getFillDate().getTime()));
-        if (exchangeRate == null) {
-            return;
-        }
+        ExchangeRate exchangeRate = reportDao.getExchangeRate(CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(se.getFillDate().getTime()));
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
 
-        if (SecType.OPT.equals(se.getExecution().getSecType())) {
-            fillPrice = fillPrice * optionMultiplier;
-        }
+        double fillPrice = se.getExecution().getFillPrice().doubleValue();
+        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
 
         Currency currency = se.getExecution().getCurrency();
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate.getRate(baseCurrency, currency))).append(DL);
+        sb.append(nf.format(fillPrice / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency))).append(DL);
         sb.append("");
 
         for (int k = 0; k < 5; k++) {
@@ -250,10 +193,8 @@ public class IfiCsvGenerator {
     }
 
     private Double writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(dfRate.format(se.getFillDate().getTime()));
-        if (exchangeRate == null) {
-            return null;
-        }
+        ExchangeRate exchangeRate = reportDao.getExchangeRate(CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(se.getFillDate().getTime()));
+
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
             sb.append(DL).append("");
@@ -263,21 +204,19 @@ public class IfiCsvGenerator {
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
 
-        if (SecType.OPT.equals(se.getExecution().getSecType())) {
-            fillPrice = fillPrice * optionMultiplier;
-        }
+        double fillPrice = se.getExecution().getFillPrice().doubleValue();
+        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
 
         Currency currency = se.getExecution().getCurrency();
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate.getRate(baseCurrency, currency))).append(DL);
+        sb.append(nf.format(fillPrice / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency))).append(DL);
         sb.append(se.getCurrentPosition());
         Double profitLoss = null;
 
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = calculatePlEur(se.getTrade());
+            profitLoss = tradeCalculator.calculatePlPortfolioBase(se.getTrade());
             sb.append(DL);
             sb.append(profitLoss != null ? nf.format(profitLoss) : "");
         }
@@ -287,24 +226,20 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeLongSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(dfRate.format(se.getFillDate().getTime()));
-        if (exchangeRate == null) {
-            return;
-        }
+        ExchangeRate exchangeRate = reportDao.getExchangeRate(CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(se.getFillDate().getTime()));
+
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
 
-        if (SecType.OPT.equals(se.getExecution().getSecType())) {
-            fillPrice = fillPrice * optionMultiplier;
-        }
+        double fillPrice = se.getExecution().getFillPrice().doubleValue();
+        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
 
         Currency currency = se.getExecution().getCurrency();
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate.getRate(baseCurrency, currency))).append(DL);
+        sb.append(nf.format(fillPrice / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency))).append(DL);
         sb.append("");
 
         for (int k = 0; k < 4; k++) {
@@ -314,10 +249,8 @@ public class IfiCsvGenerator {
     }
 
     private Double writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(dfRate.format(se.getFillDate().getTime()));
-        if (exchangeRate == null) {
-            return null;
-        }
+        ExchangeRate exchangeRate = reportDao.getExchangeRate(CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(se.getFillDate().getTime()));
+
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
             sb.append(DL).append("");
@@ -325,21 +258,19 @@ public class IfiCsvGenerator {
         sb.append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
 
-        if (SecType.OPT.equals(se.getExecution().getSecType())) {
-            fillPrice = fillPrice * optionMultiplier;
-        }
+        double fillPrice = se.getExecution().getFillPrice().doubleValue();
+        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
 
         Currency currency = se.getExecution().getCurrency();
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate.getRate(baseCurrency, currency))).append(DL);
+        sb.append(nf.format(fillPrice / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency))).append(DL);
         sb.append(se.getCurrentPosition());
         Double profitLoss = null;
 
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = calculatePlEur(se.getTrade());
+            profitLoss = tradeCalculator.calculatePlPortfolioBase(se.getTrade());
             sb.append(DL);
             sb.append(profitLoss != null ? nf.format(profitLoss) : "");
         }

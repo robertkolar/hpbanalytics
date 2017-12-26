@@ -196,11 +196,9 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<Trade> getTradesByUnderlying(Report report, String underlying) {
-        if ("ALLUNDLS".equals(underlying)) {
-            underlying = null;
-        }
         TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report = :report" +  (underlying != null ? " AND t.underlying = :underlying" : "") + " ORDER BY t.openDate ASC", Trade.class);
         q.setParameter("report", report);
+
         if (underlying != null) {
             q.setParameter("underlying", underlying);
         }
@@ -310,6 +308,12 @@ public class ReportDaoImpl implements ReportDao {
     @Override
     public ExchangeRate getExchangeRate(String date) {
         return em.find(ExchangeRate.class, date);
+    }
+
+    @Override
+    public List<ExchangeRate> getAllExchangeRates() {
+        TypedQuery<ExchangeRate> q = em.createQuery("SELECT er FROM ExchangeRate er", ExchangeRate.class);
+        return q.getResultList();
     }
 
     @Transactional

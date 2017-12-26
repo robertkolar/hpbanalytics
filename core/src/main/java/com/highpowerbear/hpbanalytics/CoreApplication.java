@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.jms.annotation.EnableJms;
 import org.springframework.jms.config.DefaultJmsListenerContainerFactory;
 import org.springframework.jms.config.JmsListenerContainerFactory;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import javax.jms.ConnectionFactory;
@@ -16,6 +17,7 @@ import javax.jms.ConnectionFactory;
 @SpringBootApplication
 @EnableJms
 @EnableScheduling
+@EnableAsync
 public class CoreApplication {
 
     @Bean

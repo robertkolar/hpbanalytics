@@ -14,8 +14,8 @@ public class Statistics {
     private Integer numClosed;
     private Integer numWinners;
     private Integer numLosers;
-    private Double maxWinner;
-    private Double maxLoser;
+    private Double bigWinner;
+    private Double bigLoser;
     private Double winnersProfit;
     private Double losersLoss;
     private Double profitLoss;
@@ -73,20 +73,20 @@ public class Statistics {
         this.numLosers = numLosers;
     }
 
-    public Double getMaxWinner() {
-        return maxWinner;
+    public Double getBigWinner() {
+        return bigWinner;
     }
 
-    public void setMaxWinner(Double maxWinner) {
-        this.maxWinner = maxWinner;
+    public void setBigWinner(Double bigWinner) {
+        this.bigWinner = bigWinner;
     }
 
-    public Double getMaxLoser() {
-        return maxLoser;
+    public Double getBigLoser() {
+        return bigLoser;
     }
 
-    public void setMaxLoser(Double maxLoser) {
-        this.maxLoser = maxLoser;
+    public void setBigLoser(Double bigLoser) {
+        this.bigLoser = bigLoser;
     }
 
     public Double getWinnersProfit() {

@@ -12,8 +12,6 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonReader;
 import java.io.StringReader;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -26,7 +24,6 @@ public class ExchangeRateRetriever {
     @Autowired private ReportDao reportDao;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
     public void retrieve() {
         log.info("BEGIN ExchangeRateRetriever.retrive");
@@ -35,7 +32,7 @@ public class ExchangeRateRetriever {
             ExchangeRate exchangeRate = new ExchangeRate();
             Calendar cal = Calendar.getInstance();
             cal.add(Calendar.DAY_OF_MONTH, i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
-            String date = df.format(cal.getTime());
+            String date = CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(cal.getTime());
 
             exchangeRate.setDate(date);
             exchangeRate.setEurUsd(retrievePair(date, "EUR", "USD"));

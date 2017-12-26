@@ -3,10 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.OptionUtil;
-import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.FuturePlMultiplier;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
@@ -28,7 +25,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.math.MathContext;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -80,47 +76,6 @@ public class Trade implements Serializable {
     @JsonProperty
     public String getDuration() {
         return (closeDate != null ? CoreUtil.toDurationString(closeDate.getTimeInMillis() - openDate.getTimeInMillis()) : "");
-    }
-
-    public void calculate() {
-        MathContext mc = new MathContext(7);
-        report = splitExecutions.iterator().next().execution.getReport();
-        type = (splitExecutions.iterator().next().getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT);
-        symbol = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getSymbol());
-        underlying = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getUnderlying());
-        currency = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getCurrency());
-        secType = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.iterator().next().execution.getSecType());
-        openPosition = (splitExecutions == null || splitExecutions.isEmpty() ? null : splitExecutions.get(splitExecutions.size() - 1).getCurrentPosition());
-        BigDecimal cumulativeOpenPrice = new BigDecimal(0.0);
-        BigDecimal cumulativeClosePrice = new BigDecimal(0.0);
-        cumulativeQuantity = 0;
-
-        for (SplitExecution se : splitExecutions) {
-            if ((type == TradeType.LONG && se.execution.getAction() == Action.BUY) || (type == TradeType.SHORT && se.execution.getAction() == Action.SELL)) {
-                cumulativeQuantity += se.getSplitQuantity();
-                cumulativeOpenPrice = cumulativeOpenPrice.add(new BigDecimal(se.getSplitQuantity()).multiply(se.execution.getFillPrice(), mc));
-            }
-            if (status == TradeStatus.CLOSED) {
-                if ((type == TradeType.LONG && se.execution.getAction() == Action.SELL) || (type == TradeType.SHORT && se.execution.getAction() == Action.BUY)) {
-                    cumulativeClosePrice = cumulativeClosePrice.add(new BigDecimal(se.getSplitQuantity()).multiply(se.execution.getFillPrice(), mc));
-                }
-            }
-        }
-
-        avgOpenPrice = cumulativeOpenPrice.divide(new BigDecimal(cumulativeQuantity), mc);
-        openDate = getSplitExecutions().get(0).getExecution().getFillDate();
-
-        if (status == TradeStatus.CLOSED) {
-            avgClosePrice = cumulativeClosePrice.divide(new BigDecimal(cumulativeQuantity), mc);
-            closeDate = getSplitExecutions().get(getSplitExecutions().size() - 1).getExecution().getFillDate();
-            profitLoss = (TradeType.LONG.equals(type) ? cumulativeClosePrice.subtract(cumulativeOpenPrice, mc) : cumulativeOpenPrice.subtract(cumulativeClosePrice, mc));
-            if (SecType.OPT.equals(getSecType())) {
-                profitLoss = profitLoss.multiply((OptionUtil.isMini(symbol) ? new BigDecimal(10) : new BigDecimal(100)), mc);
-            }
-            if (SecType.FUT.equals(getSecType())) {
-                profitLoss = profitLoss.multiply(new BigDecimal(FuturePlMultiplier.getMultiplierByUnderlying(underlying)), mc);
-            }
-        }
     }
 
     public String print() {
@@ -296,9 +251,9 @@ public class Trade implements Serializable {
                 ", status=" + status +
                 ", openPosition=" + openPosition +
                 ", avgOpenPrice=" + avgOpenPrice +
-                ", openDate=" + openDate +
+                ", openDate=" + openDate.getTime() +
                 ", avgClosePrice=" + avgClosePrice +
-                ", closeDate=" + closeDate +
+                ", closeDate=" + closeDate.getTime() +
                 ", profitLoss=" + profitLoss +
                 '}';
     }
