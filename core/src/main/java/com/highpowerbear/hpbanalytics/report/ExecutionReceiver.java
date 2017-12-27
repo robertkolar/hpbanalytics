@@ -4,7 +4,7 @@ import com.highpowerbear.hpbanalytics.common.WsMessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
-import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
+import com.highpowerbear.hpbanalytics.iblogger.dto.IbExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.common.WsMessageSender;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.enums.IbOrderStatus;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.ib.client.Contract;
 import com.ib.client.Order;
@@ -23,7 +22,7 @@ public class IbListener extends GenericIbListener {
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private OpenOrderHandler openOrderHandler;
-    @Autowired private ExecutionSender executionSender;
+    @Autowired private MessageSender messageSender;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private WsMessageSender wsMessageSender;
@@ -44,10 +43,11 @@ public class IbListener extends GenericIbListener {
     @Override
     public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld) {
         super.orderStatus(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld);
-        if (!(  IbOrderStatus.SUBMITTED.getValue().equalsIgnoreCase(status) ||
-                IbOrderStatus.PRESUBMITTED.getValue().equalsIgnoreCase(status) ||
-                IbOrderStatus.CANCELLED.getValue().equalsIgnoreCase(status) ||
-                IbOrderStatus.FILLED.getValue().equalsIgnoreCase(status))) {
+
+        if (!(  OrderStatus.SUBMITTED.getIbStatus().equals(status) ||
+                OrderStatus.PRESUBMITTED.getIbStatus().equals(status) ||
+                OrderStatus.CANCELLED.getIbStatus().equals(status) ||
+                OrderStatus.FILLED.getIbStatus().equals(status))) {
             return;
         }
 
@@ -56,16 +56,16 @@ public class IbListener extends GenericIbListener {
             return;
         }
 
-        if ((IbOrderStatus.SUBMITTED.getValue().equalsIgnoreCase(status) || IbOrderStatus.PRESUBMITTED.getValue().equalsIgnoreCase(status)) && OrderStatus.SUBMITTED.equals(ibOrder.getStatus())) {
+        if ((OrderStatus.SUBMITTED.getIbStatus().equals(status) || OrderStatus.PRESUBMITTED.getIbStatus().equals(status)) && OrderStatus.SUBMITTED.equals(ibOrder.getStatus())) {
             heartbeatControl.initHeartbeat(ibOrder);
 
-        } else if (IbOrderStatus.FILLED.getValue().equalsIgnoreCase(status) && remaining == 0 && !OrderStatus.FILLED.equals(ibOrder.getStatus())) {
+        } else if (OrderStatus.FILLED.getIbStatus().equals(status) && remaining == 0 && !OrderStatus.FILLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
-            executionSender.sendExecution(ibOrder);
+            messageSender.sendExecution(ibOrder);
 
-        } else if (IbOrderStatus.CANCELLED.getValue().equalsIgnoreCase(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
+        } else if (OrderStatus.CANCELLED.getIbStatus().equals(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
@@ -77,5 +77,15 @@ public class IbListener extends GenericIbListener {
     public void managedAccounts(String accountsList) {
         super.managedAccounts(accountsList);
         ibController.getIbConnection(ibAccount).setAccounts(accountsList);
+    }
+
+    @Override
+    public void position(String account, Contract contract, double pos, double avgCost) {
+        super.position(account, contract, pos, avgCost);
+    }
+
+    @Override
+    public void positionEnd() {
+        super.positionEnd();
     }
 }

@@ -27,11 +27,11 @@ Ext.define('HanGui.view.main.Main', {
     },
     items: [{
         xtype: 'han-iblogger',
-        title: 'IB Orders',
+        title: 'IB Logger',
         reference: 'ibLoggerPanel'
     }, {
         xtype: 'han-report',
-        title: 'Reports',
+        title: 'Report',
         reference: 'reportPanel'
     }]
 });

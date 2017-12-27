@@ -4,6 +4,7 @@ import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.highpowerbear.hpbanalytics.iblogger.dto.IbExecution;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component;
  * Created by robertk on 3/29/2015.
  */
 @Component
-public class ExecutionSender {
+public class MessageSender {
 
     @Autowired private JmsTemplate jmsTemplate;
 

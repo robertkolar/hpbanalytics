@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.iblogger.IbExecution;
+import com.highpowerbear.hpbanalytics.iblogger.dto.IbExecution;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;

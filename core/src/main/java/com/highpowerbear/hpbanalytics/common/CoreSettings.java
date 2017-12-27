@@ -17,4 +17,6 @@ public class CoreSettings {
     public static final Integer EXCHANGE_RATE_DAYS_BACK = 5;
     public static final DateFormat EXCHANGE_RATE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     public static final Currency PORTFOLIO_BASE = Currency.EUR;
+    public static final String EMAIL_FROM = "hpb@highpowerbear.com";
+    public static final String EMAIL_TO = "info@highpowerbear.com";
 }
