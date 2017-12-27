@@ -62,4 +62,16 @@ public class CoreUtil {
     public static double round2(double number) {
         return round(number, 2);
     }
+
+    public static String formatExchangeRateDate(final Calendar calendar) {
+        return CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(calendar.getTime());
+    }
+
+    public static Calendar previousDay(final Calendar calendar) {
+        Calendar previousDay = Calendar.getInstance();
+        previousDay.setTimeInMillis(calendar.getTimeInMillis());
+        previousDay.set(Calendar.DAY_OF_MONTH, -1);
+
+        return previousDay;
+    }
 }

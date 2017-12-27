@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
@@ -15,7 +16,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -91,7 +91,18 @@ public class TradeCalculator {
 
         // first step
         for (SplitExecution se : trade.getSplitExecutions()) {
-            ExchangeRate exchangeRate = getExchangeRate(se.getFillDate());
+            String date = CoreUtil.formatExchangeRateDate(se.getFillDate());
+            ExchangeRate exchangeRate = exchangeRateMap.get(date);
+
+            if (exchangeRate == null) {
+                exchangeRate = reportDao.getExchangeRate(date);
+                if (exchangeRate != null) {
+                    exchangeRateMap.put(date, exchangeRate);
+                } else {
+                    String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(se.getFillDate()));
+                    exchangeRate = exchangeRateMap.get(previousDate);
+                }
+            }
 
             double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, trade.getCurrency());
 
@@ -122,20 +133,5 @@ public class TradeCalculator {
             case FUT: return FuturePlMultiplier.getMultiplierByUnderlying(t.getUnderlying());
             default: return 1;
         }
-    }
-
-    private ExchangeRate getExchangeRate(Calendar calendar) {
-        if (exchangeRateMap.isEmpty()) {
-            List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
-            exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
-        }
-
-        String date = CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(calendar.getTime());
-
-        if (exchangeRateMap.get(date) == null) {
-            ExchangeRate exchangeRate = reportDao.getExchangeRate(date);
-            exchangeRateMap.put(date, exchangeRate);
-        }
-        return exchangeRateMap.get(date);
     }
 }

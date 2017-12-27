@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import org.slf4j.Logger;
@@ -31,9 +32,9 @@ public class ExchangeRateRetriever {
 
         for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
-            Calendar cal = Calendar.getInstance();
-            cal.add(Calendar.DAY_OF_MONTH, i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
-            String date = CoreSettings.EXCHANGE_RATE_DATE_FORMAT.format(cal.getTime());
+            Calendar calendar = Calendar.getInstance();
+            calendar.add(Calendar.DAY_OF_MONTH, i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
+            String date = CoreUtil.formatExchangeRateDate(calendar);
 
             exchangeRate.setDate(date);
             exchangeRate.setEurUsd(retrievePair(date, "EUR", "USD"));

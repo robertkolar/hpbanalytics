@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
-import com.highpowerbear.hpbanalytics.common.CommonService;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -15,8 +14,6 @@ public class IbLoggerScheduler {
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
-
-    @Autowired CommonService commonService;
 
     @Scheduled(fixedRate = 5000)
     private void reconnect() {
@@ -39,8 +36,5 @@ public class IbLoggerScheduler {
                 ibController.requestOpenOrders(ibAccount);
             }
         });
-
-        // test
-        commonService.sendEmail("Test message", "Test message text");
     }
 }
