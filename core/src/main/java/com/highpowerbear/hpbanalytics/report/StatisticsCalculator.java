@@ -111,7 +111,7 @@ public class StatisticsCalculator {
             double profitLoss;
 
             for (Trade t : tradesClosedForPeriod) {
-                double pl = tradeCalculator.calculatePlPortfolioBase(t);
+                double pl = tradeCalculator.calculatePLPortfolioBase(t);
 
                 if (pl >= 0) {
                     numWinners++;

@@ -8,7 +8,8 @@ import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
-import com.highpowerbear.hpbanalytics.enums.FuturePlMultiplier;
+import com.highpowerbear.hpbanalytics.enums.ContractMultiplier;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,62 +78,92 @@ public class TradeCalculator {
         }
     }
 
-    public Double calculatePlPortfolioBase(Trade trade) {
-        if (!TradeStatus.CLOSED.equals(trade.getStatus())) {
-            return null;
-        }
+    public Double calculatePLPortfolioBase(Trade t) {
 
-        if (exchangeRateMap.isEmpty()) {
-            List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
-            exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
+        switch (CoreSettings.STATISTICS_PL_METHOD) {
+            case PORTFOLIO_BASE_OPEN_CLOSE: return calculatePLPortfolioBaseOpenClose(t);
+            case PORTFOLIO_BASE_CLOSE_ONLY: return calculatePLPortfolioBaseCloseOnly(t);
+            case PORTFOLIO_BASE_CURRENT: return calculatePLPortfolioBaseCurrent(t);
+
+            default: return null;
         }
+    }
+
+    public Double calculatePLPortfolioBaseOpenClose(Trade t) {
+        validateClosed(t);
 
         Double cumulativeOpenPrice = 0d;
         Double cumulativeClosePrice = 0d;
 
-        // first step
-        for (SplitExecution se : trade.getSplitExecutions()) {
-            String date = CoreUtil.formatExchangeRateDate(se.getFillDate());
-            ExchangeRate exchangeRate = exchangeRateMap.get(date);
+        for (SplitExecution se : t.getSplitExecutions()) {
+            Execution e = se.getExecution();
 
-            if (exchangeRate == null) {
-                exchangeRate = reportDao.getExchangeRate(date);
-                if (exchangeRate != null) {
-                    exchangeRateMap.put(date, exchangeRate);
-                } else {
-                    String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(se.getFillDate()));
-                    exchangeRate = exchangeRateMap.get(previousDate);
-                }
-            }
+            double exchangeRate = getExchangeRate(se.getFillDate(), e.getCurrency());
+            double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate;
 
-            double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, trade.getCurrency());
-
-            if ((TradeType.LONG. equals(trade.getType()) && Action.BUY. equals(se.getExecution().getAction())) ||
-                    (TradeType.SHORT.equals(trade.getType()) && Action.SELL.equals(se.getExecution().getAction()))) {
-
+            if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
                 cumulativeOpenPrice += se.getSplitQuantity() * fillPrice;
-            }
 
-            if (TradeStatus.CLOSED.equals(trade.getStatus())) {
-                if ((TradeType.LONG. equals(trade.getType()) && Action.SELL.equals(se.getExecution().getAction())) ||
-                        (TradeType.SHORT.equals(trade.getType()) && Action.BUY. equals(se.getExecution().getAction()))) {
-
-                    cumulativeClosePrice += se.getSplitQuantity() * fillPrice;
-                }
+            } else if ((t.getType() == TradeType.LONG && e.getAction() == Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Action.BUY)) {
+                cumulativeClosePrice += se.getSplitQuantity() * fillPrice;
             }
         }
-        // second step
-        Double profitLoss = (TradeType.LONG.equals(trade.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
-        profitLoss *= getMultiplier(trade);
+
+        Double profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
+        profitLoss *= getMultiplier(t);
 
         return profitLoss;
+    }
+
+    private Double calculatePLPortfolioBaseCloseOnly(Trade t) {
+        return calculatePLPortfolioBaseSimple(t, false);
+    }
+
+    private Double calculatePLPortfolioBaseCurrent(Trade t) {
+        return calculatePLPortfolioBaseSimple(t, true);
+    }
+
+    private Double calculatePLPortfolioBaseSimple(Trade t, boolean current) {
+        validateClosed(t);
+        Calendar plCalculationDate = current ? Calendar.getInstance() : t.getCloseDate();
+        double exchangeRate = getExchangeRate(plCalculationDate, t.getCurrency());
+
+        return t.getProfitLoss().doubleValue() / exchangeRate;
     }
 
     public int getMultiplier(Trade t) {
         switch (t.getSecType()) {
             case OPT: return 100;
-            case FUT: return FuturePlMultiplier.getMultiplierByUnderlying(t.getUnderlying());
+            case FUT: return ContractMultiplier.getByUnderlying(t.getUnderlying());
             default: return 1;
+        }
+    }
+
+    private Double getExchangeRate(Calendar calendar, Currency currency) {
+        if (exchangeRateMap.isEmpty()) {
+            List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
+            exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
+        }
+
+        String date = CoreUtil.formatExchangeRateDate(calendar);
+        ExchangeRate exchangeRate = exchangeRateMap.get(date);
+
+        if (exchangeRate == null) {
+            exchangeRate = reportDao.getExchangeRate(date);
+            if (exchangeRate != null) {
+                exchangeRateMap.put(date, exchangeRate);
+            } else {
+                String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(calendar));
+                exchangeRate = exchangeRateMap.get(previousDate);
+            }
+        }
+
+        return exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency);
+    }
+
+    private void validateClosed(Trade t) {
+        if (!TradeStatus.CLOSED.equals(t.getStatus())) {
+            throw new IllegalArgumentException("cannot calculate pl, trade not closed");
         }
     }
 }

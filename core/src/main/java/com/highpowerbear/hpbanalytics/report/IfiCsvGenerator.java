@@ -171,10 +171,7 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeShortSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        Double exchangeRate = getExchangeRate(se);
-        if (exchangeRate == null) {
-            return;
-        }
+        double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
@@ -187,19 +184,15 @@ public class IfiCsvGenerator {
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
         sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
-        sb.append("");
 
         for (int k = 0; k < 5; k++) {
-            sb.append(DL).append("");
+            sb.append(DL);
         }
         sb.append(NL);
     }
 
     private Double writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        Double exchangeRate = getExchangeRate(se);
-        if (exchangeRate == null) {
-            return null;
-        }
+        double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
@@ -218,13 +211,12 @@ public class IfiCsvGenerator {
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
         sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
-        sb.append(se.getCurrentPosition());
-        Double profitLoss = null;
+        sb.append(se.getCurrentPosition()).append(DL);
 
+        Double profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculator.calculatePlPortfolioBase(se.getTrade());
-            sb.append(DL);
-            sb.append(profitLoss != null ? nf.format(profitLoss) : "");
+            profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            sb.append(nf.format(profitLoss));
         }
 
         sb.append(NL);
@@ -232,10 +224,7 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeLongSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        Double exchangeRate = getExchangeRate(se);
-        if (exchangeRate == null) {
-            return;
-        }
+        double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);
@@ -249,19 +238,15 @@ public class IfiCsvGenerator {
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
         sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
-        sb.append("");
 
         for (int k = 0; k < 4; k++) {
-            sb.append(DL).append("");
+            sb.append(DL);
         }
         sb.append(NL);
     }
 
     private Double writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        Double exchangeRate = getExchangeRate(se);
-        if (exchangeRate == null) {
-            return null;
-        }
+        double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
@@ -278,23 +263,28 @@ public class IfiCsvGenerator {
 
         sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
         sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
-        sb.append(se.getCurrentPosition());
-        Double profitLoss = null;
+        sb.append(se.getCurrentPosition()).append(DL);
 
+        Double profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculator.calculatePlPortfolioBase(se.getTrade());
-            sb.append(DL);
-            sb.append(profitLoss != null ? nf.format(profitLoss) : "");
+            profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            sb.append(nf.format(profitLoss));
         }
         sb.append(NL);
 
         return profitLoss;
     }
 
-    private Double getExchangeRate(SplitExecution se) {
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(CoreUtil.formatExchangeRateDate(se.getFillDate()));
+    private double getExchangeRate(SplitExecution se) {
+        String date = CoreUtil.formatExchangeRateDate(se.getFillDate());
+        ExchangeRate exchangeRate = reportDao.getExchangeRate(date);
+
+        if (exchangeRate == null) {
+            String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(se.getFillDate()));
+            exchangeRate = reportDao.getExchangeRate(previousDate);
+        }
         Currency currency = se.getExecution().getCurrency();
 
-        return exchangeRate != null ? exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency) : null;
+        return exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency);
     }
 }

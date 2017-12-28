@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.enums;
 /**
  * Created by robertk on 11/18/2017.
  */
-public enum FuturePlMultiplier {
+public enum ContractMultiplier {
     ES(50),
     NQ(20),
     YM(5),
@@ -12,11 +12,11 @@ public enum FuturePlMultiplier {
 
     private Integer multiplier;
 
-    FuturePlMultiplier(Integer multiplier) {
+    ContractMultiplier(Integer multiplier) {
         this.multiplier = multiplier;
     }
 
-    public static Integer getMultiplierByUnderlying(String underlying) {
+    public static Integer getByUnderlying(String underlying) {
         if (ES.name().equalsIgnoreCase(underlying)) return ES.multiplier;
         if (NQ.name().equalsIgnoreCase(underlying)) return NQ.multiplier;
         if (YM.name().equalsIgnoreCase(underlying)) return YM.multiplier;
