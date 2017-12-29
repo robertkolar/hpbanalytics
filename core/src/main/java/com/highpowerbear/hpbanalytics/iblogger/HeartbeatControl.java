@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
-import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,22 +22,22 @@ public class HeartbeatControl {
 
     @Autowired private IbLoggerDao ibLoggerDao;
 
-    private Map<IbAccount, Map<IbOrder, Integer>> openOrderHeartbeatMap = new HashMap<>(); // ibAccount --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
+    private Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new HashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
 
     @PostConstruct
     public void init() {
-        ibLoggerDao.getIbAccounts().forEach(ibAccount -> openOrderHeartbeatMap.put(ibAccount, new ConcurrentHashMap<>()));
+        ibLoggerDao.getIbAccounts().forEach(ibAccount -> openOrderHeartbeatMap.put(ibAccount.getAccountId(), new ConcurrentHashMap<>()));
         ibLoggerDao.getIbAccounts().stream()
-                .flatMap(ibAccount -> ibLoggerDao.getOpenIbOrders(ibAccount).stream())
+                .flatMap(ibAccount -> ibLoggerDao.getOpenIbOrders(ibAccount.getAccountId()).stream())
                 .forEach(this::initHeartbeat);
     }
 
-    public Map<IbAccount, Map<IbOrder, Integer>> getOpenOrderHeartbeatMap() {
+    public Map<String, Map<IbOrder, Integer>> getOpenOrderHeartbeatMap() {
         return openOrderHeartbeatMap;
     }
 
-    public void updateHeartbeats(IbAccount ibAccount) {
-        Map<IbOrder, Integer> hm = openOrderHeartbeatMap.get(ibAccount);
+    public void updateHeartbeats(String accountId) {
+        Map<IbOrder, Integer> hm = openOrderHeartbeatMap.get(accountId);
         Set<IbOrder> keyset = new HashSet<>(hm.keySet());
 
         for (IbOrder ibOrder : keyset) {
@@ -57,10 +56,10 @@ public class HeartbeatControl {
     }
 
     public void initHeartbeat(IbOrder ibOrder) {
-        openOrderHeartbeatMap.get(ibOrder.getIbAccount()).put(ibOrder, CoreSettings.MAX_ORDER_HEARTBEAT_FAILS);
+        openOrderHeartbeatMap.get(ibOrder.getIbAccount().getAccountId()).put(ibOrder, CoreSettings.MAX_ORDER_HEARTBEAT_FAILS);
     }
 
     public void removeHeartbeat(IbOrder ibOrder) {
-        openOrderHeartbeatMap.get(ibOrder.getIbAccount()).remove(ibOrder);
+        openOrderHeartbeatMap.get(ibOrder.getIbAccount().getAccountId()).remove(ibOrder);
     }
 }

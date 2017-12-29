@@ -4,10 +4,12 @@ import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
+import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.report.ReportInfo;
 
 import java.util.Calendar;
 import java.util.List;
@@ -17,40 +19,36 @@ import java.util.List;
  */
 public interface ReportDao {
 
+    IbOrder findIbOrder(long ibOrderId);
+
     Report getReportByOriginAndSecType(String origin, SecType secType);
-    Report findReport(Integer id);
+    Report findReport(int reportId);
     Report updateReport(Report report);
-    void deleteReport(Report report);
+    void deleteReport(int reportId);
     List<Report> getReports();
+    ReportInfo getReportInfo(int reportId);
 
-    Calendar getFirstExecutionDate(Report report);
-    Calendar getLastExecutionDate(Report report);
-    List<Execution> getExecutions(Report report);
-    Long getNumExecutions(Report report);
-    List<Execution> getExecutionsAfterExecution(Execution e);
-    List<Execution> getExecutionsAfterExecutionInclusive(Execution e);
-    boolean existsExecution(Execution e);
-    Execution findExecution(Long id);
+    List<Execution> getExecutions(int reportId);
+    List<Execution> getExecutionsAfterDate(int reportId, Calendar date, String symbol);
+    List<Execution> getExecutionsAfterDateInclusive(int reportId, Calendar date, String symbol);
+    boolean existsExecution(long executionId);
+    Execution findExecution(long executionId);
     void createExecution(Execution execution);
-    void deleteExecution(Execution execution);
-    List<Execution> getFilteredExecutions(Report report, ExecutionFilter filter, Integer start, Integer limit);
-    Long getNumFilteredExecutions(Report report, ExecutionFilter filter);
+    void deleteExecution(long executionId);
+    List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, Integer start, Integer limit);
+    long getNumFilteredExecutions(int reportId, ExecutionFilter filter);
 
-    Long getNumTrades(Report report);
-    Long getNumOpenTrades(Report report);
-    List<Trade> getTradesByUnderlying(Report report, String underlying);
-    List<Trade> getTradesAffectedByExecution(Execution e);
+    List<Trade> getTradesByUnderlying(int reportId, String underlying);
+    List<Trade> getTradesAffectedByExecution(int reportId, Calendar fillDate, String symbol);
     void createTrades(List<Trade> trades);
-    void deleteAllTrades(Report report);
+    void deleteAllTrades(int reportId);
     void deleteTrades(List<Trade> trades);
-    Trade findTrade(Long id);
-    List<Trade> getFilteredTrades(Report report, TradeFilter filter, Integer start, Integer limit);
-    Long getNumFilteredTrades(Report report, TradeFilter filter);
-    List<Trade> getTradesBetweenDates(Report report, Calendar beginDate, Calendar endDate, TradeType tradeType);
+    Trade findTrade(long tradeId);
+    List<Trade> getFilteredTrades(int reportId, TradeFilter filter, Integer start, Integer limit);
+    long getNumFilteredTrades(int reportId, TradeFilter filter);
+    List<Trade> getTradesBetweenDates(int reportId, Calendar beginDate, Calendar endDate, TradeType tradeType);
 
-    List<String> getUnderlyings(Report report);
-    Long getNumUnderlyings(Report report);
-    Long getNumOpenUnderlyings(Report report);
+    List<String> getUnderlyings(int reportId);
 
     ExchangeRate getExchangeRate(String date);
     List<ExchangeRate> getAllExchangeRates();

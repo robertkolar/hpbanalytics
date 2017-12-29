@@ -25,7 +25,9 @@ public class OpenOrderHandler {
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private HeartbeatControl heartbeatControl;
 
-    public void handleOpenOrder(IbAccount ibAccount, int orderId, Contract contract, Order order) {
+    public void handleOpenOrder(String accountId, int orderId, Contract contract, Order order) {
+        IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
+
         if (!checkListenIb(ibAccount)) {
             log.info("IB listening disabled, order will be ignored");
             return;
@@ -58,7 +60,7 @@ public class OpenOrderHandler {
             symbol = CoreUtil.removeSpace(symbol);
         }
 
-        IbOrder ibOrderDb = ibLoggerDao.getIbOrderByPermId(ibAccount, order.permId());
+        IbOrder ibOrderDb = ibLoggerDao.getIbOrderByPermId(accountId, order.permId());
         if (ibOrderDb != null) {
             updateExistingOrder(ibOrderDb, order);
         } else {

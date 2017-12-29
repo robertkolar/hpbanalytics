@@ -1,8 +1,7 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
-import com.highpowerbear.hpbanalytics.common.WsMessageSender;
+import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
-import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.ib.client.Contract;
@@ -11,6 +10,9 @@ import com.ib.client.OrderState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
 
 /**
  *
@@ -22,22 +24,21 @@ public class IbListener extends GenericIbListener {
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private OpenOrderHandler openOrderHandler;
-    @Autowired private MessageSender messageSender;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
-    @Autowired private WsMessageSender wsMessageSender;
+    @Autowired private MessageSender messageSender;
 
-    private IbAccount ibAccount;
+    private String accountId;
 
-    public IbListener configure(IbAccount ibAccount) {
-        this.ibAccount = ibAccount;
+    public IbListener configure(String accountId) {
+        this.accountId = accountId;
         return this;
     }
 
     @Override
     public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
         super.openOrder(orderId, contract, order, orderState);
-        openOrderHandler.handleOpenOrder(ibAccount, orderId, contract, order);
+        openOrderHandler.handleOpenOrder(accountId, orderId, contract, order);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class IbListener extends GenericIbListener {
             return;
         }
 
-        IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(ibAccount, (long) permId);
+        IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(accountId, (long) permId);
         if (ibOrder == null) {
             return;
         }
@@ -63,20 +64,20 @@ public class IbListener extends GenericIbListener {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
-            messageSender.sendExecution(ibOrder);
+            messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_REPORT, String.valueOf(ibOrder.getId()));
 
         } else if (OrderStatus.CANCELLED.getIbStatus().equals(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
             ibLoggerDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
         }
-        wsMessageSender.sendIbLoggerMessage("order status changed");
+        messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, "order status changed");
     }
 
     @Override
     public void managedAccounts(String accountsList) {
         super.managedAccounts(accountsList);
-        ibController.getIbConnection(ibAccount).setAccounts(accountsList);
+        ibController.getIbConnection(accountId).setAccounts(accountsList);
     }
 
     @Override

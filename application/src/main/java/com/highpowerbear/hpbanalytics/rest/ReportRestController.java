@@ -1,8 +1,8 @@
 package com.highpowerbear.hpbanalytics.rest;
 
+import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.common.OptionParseResult;
 import com.highpowerbear.hpbanalytics.common.OptionUtil;
-import com.highpowerbear.hpbanalytics.common.WsMessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -33,6 +33,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.TimeZone;
 
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
+
 /**
  * Created by robertk on 12/21/2017.
  */
@@ -45,21 +47,14 @@ public class ReportRestController {
     @Autowired private ReportProcessor reportProcessor;
     @Autowired private FilterParser filterParser;
     @Autowired private IfiCsvGenerator ifiCsvGenerator;
-    @Autowired private WsMessageSender wsMessageSender;
+    @Autowired private MessageSender messageSender;
 
     @RequestMapping("/reports")
     public ResponseEntity<?> getReports() {
         List<Report> reports = reportDao.getReports();
 
-        for (Report r : reports) {
-            r.setNumExecutions(reportDao.getNumExecutions(r));
-            r.setNumTrades(reportDao.getNumTrades(r));
-            r.setNumOpenTrades(reportDao.getNumOpenTrades(r));
-            r.setNumUnderlyings(reportDao.getNumUnderlyings(r));
-            r.setNumOpenUnderlyings(reportDao.getNumOpenUnderlyings(r));
-            r.setFirstExecutionDate(reportDao.getFirstExecutionDate(r));
-            r.setLastExecutionDate(reportDao.getLastExecutionDate(r));
-        }
+        reports.forEach(report -> report.setReportInfo(reportDao.getReportInfo(report.getId())));
+
         return ResponseEntity.ok(reports);
     }
 
@@ -83,8 +78,8 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        reportProcessor.analyzeAll(report);
-        wsMessageSender.sendReportMessage("report analyzed");
+        reportProcessor.analyzeAll(id);
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report analyzed");
 
         return ResponseEntity.ok().build();
     }
@@ -98,8 +93,8 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        reportProcessor.deleteReport(report);
-        wsMessageSender.sendReportMessage("report deleted");
+        reportProcessor.deleteReport(id);
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -117,8 +112,8 @@ public class ReportRestController {
         }
 
         ExecutionFilter filter = filterParser.parseExecutionFilter(jsonFilter);
-        List<Execution> executions = reportDao.getFilteredExecutions(report, filter, start, limit);
-        Long numExecutions = reportDao.getNumFilteredExecutions(report, filter);
+        List<Execution> executions = reportDao.getFilteredExecutions(id, filter, start, limit);
+        Long numExecutions = reportDao.getNumFilteredExecutions(id, filter);
 
         return ResponseEntity.ok(new RestList<>(executions, numExecutions));
     }
@@ -140,22 +135,22 @@ public class ReportRestController {
         execution.setReceivedDate(Calendar.getInstance());
 
         reportProcessor.newExecution(execution);
-        wsMessageSender.sendReportMessage("new execution processed");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}/executions/{executionid}")
     public ResponseEntity<?> deleteExecution(
-            @PathVariable("id") Integer reportId,
-            @PathVariable("executionid") Long executionId) {
+            @PathVariable("id") int reportId,
+            @PathVariable("executionid") long executionId) {
 
         Execution execution = reportDao.findExecution(executionId);
-        if (execution == null || !reportId.equals(execution.getReportId())) {
+        if (execution == null || reportId != execution.getReportId()) {
             return ResponseEntity.notFound().build();
         }
-        reportProcessor.deleteExecution(execution);
-        wsMessageSender.sendReportMessage("execution deleted");
+        reportProcessor.deleteExecution(executionId);
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "execution deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -173,8 +168,8 @@ public class ReportRestController {
         }
 
         TradeFilter filter = filterParser.parseTradeFilter(jsonFilter);
-        List<Trade> trades = reportDao.getFilteredTrades(report, filter, start, limit);
-        Long numTrades = reportDao.getNumFilteredTrades(report, filter);
+        List<Trade> trades = reportDao.getFilteredTrades(id, filter, start, limit);
+        Long numTrades = reportDao.getNumFilteredTrades(id, filter);
 
         return ResponseEntity.ok(new RestList<>(trades, numTrades));
     }
@@ -200,7 +195,7 @@ public class ReportRestController {
         closeTradeDto.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
         reportProcessor.closeTrade(trade, closeTradeDto.getCloseDate(), closeTradeDto.getClosePrice());
-        wsMessageSender.sendReportMessage("trade closed");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade closed");
 
         return ResponseEntity.ok().build();
     }
@@ -221,7 +216,7 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
         reportProcessor.expireTrade(trade);
-        wsMessageSender.sendReportMessage("trade expired");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade expired");
 
         return ResponseEntity.ok().build();
     }
@@ -242,7 +237,7 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
         reportProcessor.assignTrade(trade);
-        wsMessageSender.sendReportMessage("trade assigned");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade assigned");
 
         return ResponseEntity.ok().build();
     }
@@ -297,7 +292,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        statisticsCalculator.calculateStatistics(report, interval, underlying);
+        statisticsCalculator.calculateStatistics(id, interval, underlying);
 
         return ResponseEntity.ok().build();
     }
@@ -310,7 +305,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(reportDao.getUnderlyings(report));
+        return ResponseEntity.ok(reportDao.getUnderlyings(id));
     }
 
     @RequestMapping("/optionutil/parse")
@@ -336,6 +331,6 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(ifiCsvGenerator.generate(report, year, tradeType));
+        return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, tradeType));
     }
 }

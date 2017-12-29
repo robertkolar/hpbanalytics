@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
-import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
 import com.ib.client.EReaderSignal;
@@ -28,20 +27,20 @@ public class IbController {
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private Provider<IbListener> ibListeners;
 
-    private Map<IbAccount, IbConnection> ibConnectionMap = new HashMap<>(); // ibAccount --> ibConnection
+    private Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
 
-    public IbConnection getIbConnection(IbAccount ibAccount) {
-        return ibConnectionMap.get(ibAccount);
+    public IbConnection getIbConnection(String accountId) {
+        return ibConnectionMap.get(accountId);
     }
 
     @PostConstruct
     private void init() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
             EReaderSignal eReaderSignal = new EJavaSignal();
-            EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount), eReaderSignal);
+            EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount.getAccountId()), eReaderSignal);
 
             IbConnection ibConnection = new IbConnection(ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket, eReaderSignal);
-            ibConnectionMap.put(ibAccount, ibConnection);
+            ibConnectionMap.put(ibAccount.getAccountId(), ibConnection);
         });
     }
 
@@ -50,17 +49,18 @@ public class IbController {
         ibConnectionMap.keySet().forEach(this::disconnect);
     }
 
-    public void connect(IbAccount ibAccount) {
-        ibConnectionMap.get(ibAccount).connect();
+    public void connect(String accountId) {
+        ibConnectionMap.get(accountId).connect();
     }
 
-    public void disconnect(IbAccount ibAccount) {
-        ibConnectionMap.get(ibAccount).disconnect();
+    public void disconnect(String accountId) {
+        ibConnectionMap.get(accountId).disconnect();
     }
 
-    public void requestOpenOrders(IbAccount ibAccount) {
-        log.info("Requesting open orders for ibAccount " + ibAccount.print());
-        IbConnection c = ibConnectionMap.get(ibAccount);
+    public void requestOpenOrders(String accountId) {
+        log.info("Requesting open orders for ibAccount " + accountId);
+
+        IbConnection c = ibConnectionMap.get(accountId);
         c.getClientSocket().reqOpenOrders();
         c.getClientSocket().reqAllOpenOrders();
         c.getClientSocket().reqAutoOpenOrders(true);

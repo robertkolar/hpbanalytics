@@ -53,6 +53,7 @@ public class IfiCsvGenerator {
         secTypeMap.put(SecType.FUT, "01 - terminska pogodba");
         secTypeMap.put(SecType.CFD, "02 - pogodba na razliko");
         secTypeMap.put(SecType.OPT, "03 - opcija");
+
         tradeTypeMap.put(TradeType.LONG, "običajni");
         tradeTypeMap.put(TradeType.SHORT, "na kratko");
 
@@ -61,18 +62,19 @@ public class IfiCsvGenerator {
         nf.setGroupingUsed(false);
     }
 
-    public String generate(Report report, Integer year, TradeType tradeType) {
-        log.info("BEGIN IfiCsvGenerator.generate, report=" + report.getId() + ", year=" + year + ", tradeType=" + tradeType);
+    public String generate(int reportId, Integer year, TradeType tradeType) {
+        log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.YEAR, year);
         Calendar beginDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
         cal.set(Calendar.YEAR, year + 1);
         Calendar endDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
-        List<Trade> trades = reportDao.getTradesBetweenDates(report, beginDate, endDate, tradeType);
+        List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
 
-        log.info("Begin date=" + dfLog.format(beginDate.getTime()) + ", endDate=" + dfLog.format(endDate.getTime()) + ", trades=" + trades.size());
+        log.info("beginDate=" + dfLog.format(beginDate.getTime()) + ", endDate=" + dfLog.format(endDate.getTime()) + ", trades=" + trades.size());
         StringBuilder sb = new StringBuilder();
+
         if (TradeType.SHORT.equals(tradeType)) {
             writeCsvHeaderShort(sb);
         } else if (TradeType.LONG.equals(tradeType)) {
@@ -80,12 +82,13 @@ public class IfiCsvGenerator {
         }
         int i = 0;
         Double sumPlEur = 0D;
+
         for (Trade trade : trades) {
-            Double tradePlEur = 0D;
-            if (!(SecType.FUT.equals(trade.getSecType()) || SecType.OPT.equals(trade.getSecType()) || SecType.CFD.equals(trade.getSecType()))) {
+            if (!trade.getSecType().isDerivative()) {
                 continue;
             }
 
+            Double tradePlEur = 0D;
             i++;
             writeTrade(sb, trade, i);
             List<SplitExecution> splitExecutions = trade.getSplitExecutions();
@@ -94,13 +97,16 @@ public class IfiCsvGenerator {
                 j++;
                 if (TradeType.SHORT.equals(tradeType) && Action.SELL.equals(se.getExecution().getAction())) {
                     writeTradeShortSplitExecutionSell(sb, se, i, j);
+
                 } else if (TradeType.SHORT.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
                     Double plEur = writeTradeShortSplitExecutionBuy(sb, se, i, j);
+
                     if (plEur != null) {
                         tradePlEur = plEur;
                     }
                 } else if (TradeType.LONG.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
                     writeTradeLongSplitExecutionBuy(sb, se, i, j);
+
                 } else if (TradeType.LONG.equals(tradeType) && Action.SELL.equals(se.getExecution().getAction())) {
                     Double plEur = writeTradeLongSplitExecutionSell(sb, se, i, j);
                     if (plEur != null) {
@@ -118,7 +124,7 @@ public class IfiCsvGenerator {
         }
         sb.append(nf.format(sumPlEur));
 
-        log.info("END IfiCsvGenerator.generate, report=" + report.getId() + ", year=" + year + ", tradeType=" + tradeType);
+        log.info("END IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
         return sb.toString();
     }
 

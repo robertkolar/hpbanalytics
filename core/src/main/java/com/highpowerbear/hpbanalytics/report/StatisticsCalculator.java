@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.WsMessageSender;
+import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
@@ -20,6 +20,8 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
+
 /**
  * Created by robertk on 4/26/2015.
  */
@@ -28,7 +30,7 @@ public class StatisticsCalculator {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculator.class);
 
     @Autowired private ReportDao reportDao;
-    @Autowired private WsMessageSender wsMessageSender;
+    @Autowired private MessageSender messageSender;
     @Autowired private TradeCalculator tradeCalculator;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
@@ -53,17 +55,17 @@ public class StatisticsCalculator {
     }
 
     @Async
-    public void calculateStatistics(Report report, StatisticsInterval interval, String underlying) {
-        log.info("BEGIN statistics calculation for " + report.getReportName() + ", undl=" + underlying + ", interval=" + interval);
+    public void calculateStatistics(int reportId, StatisticsInterval interval, String underlying) {
+        log.info("BEGIN statistics calculation for report " + reportId + ", undl=" + underlying + ", interval=" + interval);
 
-        List<Trade> trades = reportDao.getTradesByUnderlying(report, normalizeUnderlying(underlying));
+        List<Trade> trades = reportDao.getTradesByUnderlying(reportId, normalizeUnderlying(underlying));
 
         List<Statistics> stats = doCalculate(trades, interval);
-        statisticsMap.put(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying), stats);
+        statisticsMap.put(reportId + "_" + interval.name() + "_" + underlyingKey(underlying), stats);
 
-        log.info("END statistics calculation for " + report.getReportName() + ", interval=" + interval);
+        log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
-        wsMessageSender.sendReportMessage("statistics calculated");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated");
     }
 
     private String underlyingKey(String underlying) {

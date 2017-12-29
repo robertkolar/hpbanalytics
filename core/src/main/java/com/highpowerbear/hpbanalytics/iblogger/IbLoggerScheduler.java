@@ -18,7 +18,7 @@ public class IbLoggerScheduler {
     @Scheduled(fixedRate = 5000)
     private void reconnect() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
-            IbConnection c = ibController.getIbConnection(ibAccount);
+            IbConnection c = ibController.getIbConnection(ibAccount.getAccountId());
 
             if (!c.isConnected() && c.isMarkConnected()) {
                 c.connect();
@@ -29,11 +29,12 @@ public class IbLoggerScheduler {
     @Scheduled(fixedRate = 300000)
     private void requestOpenOrders() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
-            IbConnection c = ibController.getIbConnection(ibAccount);
+            String accountId = ibAccount.getAccountId();
+            IbConnection c = ibController.getIbConnection(accountId);
 
             if (c.isConnected()) {
-                heartbeatControl.updateHeartbeats(ibAccount);
-                ibController.requestOpenOrders(ibAccount);
+                heartbeatControl.updateHeartbeats(accountId);
+                ibController.requestOpenOrders(accountId);
             }
         });
     }

@@ -35,7 +35,7 @@ public class IbLoggerRestController {
     @RequestMapping("/ibaccounts")
     public RestList<IbAccount> getIbAccount() {
         List<IbAccount> ibAccounts = ibLoggerDao.getIbAccounts();
-        ibAccounts.forEach(ibAccount -> ibAccount.setIbConnection(ibController.getIbConnection(ibAccount)));
+        ibAccounts.forEach(ibAccount -> ibAccount.setIbConnection(ibController.getIbConnection(ibAccount.getAccountId())));
 
         return new RestList<>(ibAccounts, (long) ibAccounts.size());
     }
@@ -58,9 +58,9 @@ public class IbLoggerRestController {
 
         IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
         if (connect) {
-            ibController.connect(ibAccount);
+            ibController.connect(accountId);
         } else {
-            ibController.disconnect(ibAccount);
+            ibController.disconnect(accountId);
         }
 
         try {
@@ -68,7 +68,7 @@ public class IbLoggerRestController {
         } catch (InterruptedException ie) {
             // Ignore
         }
-        ibAccount.setIbConnection(ibController.getIbConnection(ibAccount));
+        ibAccount.setIbConnection(ibController.getIbConnection(accountId));
 
         return ibAccount;
     }
@@ -88,13 +88,13 @@ public class IbLoggerRestController {
         }
 
         IbOrderFilter filter = filterParser.parseIbOrderFilter(jsonFilter);
+        Map<IbOrder, Integer> hm = heartbeatControl.getOpenOrderHeartbeatMap().get(accountId);
 
-        for (IbOrder ibOrder : ibLoggerDao.getFilteredIbOrders(ibAccount, filter, start, limit)) {
-            Map<IbOrder, Integer> hm = heartbeatControl.getOpenOrderHeartbeatMap().get(ibOrder.getIbAccount());
+        for (IbOrder ibOrder : ibLoggerDao.getFilteredIbOrders(accountId, filter, start, limit)) {
             ibOrder.setHeartbeatCount(hm.get(ibOrder));
             ibOrders.add(ibOrder);
         }
 
-        return ResponseEntity.ok(new RestList<>(ibOrders, ibLoggerDao.getNumFilteredIbOrders(ibAccount, filter)));
+        return ResponseEntity.ok(new RestList<>(ibOrders, ibLoggerDao.getNumFilteredIbOrders(accountId, filter)));
     }
 }

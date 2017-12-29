@@ -5,11 +5,13 @@ import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
+import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.report.ReportInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -17,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import java.util.Calendar;
 import java.util.List;
@@ -34,6 +35,11 @@ public class ReportDaoImpl implements ReportDao {
     private EntityManager em;
 
     @Autowired private QueryBuilder queryBuilder;
+
+    @Override
+    public IbOrder findIbOrder(long ibOrderId) {
+        return em.find(IbOrder.class, ibOrderId);
+    }
 
     @Override
     public Report getReportByOriginAndSecType(String origin, SecType secType) {
@@ -57,8 +63,8 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public Report findReport(Integer id) {
-        return em.find(Report.class, id);
+    public Report findReport(int reportId) {
+        return em.find(Report.class, reportId);
     }
 
     @Transactional
@@ -69,12 +75,12 @@ public class ReportDaoImpl implements ReportDao {
 
     @Transactional
     @Override
-    public void deleteReport(Report report) {
-        Report reportDb = em.find(Report.class, report.getId());
-        deleteAllTrades(report);
-        getExecutions(report).forEach(em::remove);
+    public void deleteReport(int reportId) {
+        Report report = em.find(Report.class, reportId);
+        deleteAllTrades(reportId);
+        getExecutions(reportId).forEach(em::remove);
 
-        em.remove(reportDb);
+        em.remove(report);
     }
 
     @Override
@@ -84,68 +90,87 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public Calendar getFirstExecutionDate(Report report) {
-        Query q = em.createQuery("SELECT MIN(e.fillDate) FROM Execution e WHERE e.report = :report");
-        q.setParameter("report", report);
+    public ReportInfo getReportInfo(int reportId) {
+        TypedQuery<Long> query = em.createQuery("SELECT COUNT(e) FROM Execution e WHERE e.report.id = :reportId", Long.class);
+        query.setParameter("reportId", reportId);
 
-        return (Calendar) q.getResultList().get(0);
+        long numExecutions = query.getSingleResult();
+
+        query = em.createQuery("SELECT COUNT(t) FROM Trade t WHERE t.report.id = :reportId", Long.class);
+        query.setParameter("reportId", reportId);
+
+        long numTrades = query.getSingleResult();
+
+        query = em.createQuery("SELECT COUNT(t) FROM Trade t WHERE t.report.id = :reportId AND t.status = :tradeStatus", Long.class);
+        query.setParameter("reportId", reportId);
+        query.setParameter("tradeStatus", TradeStatus.OPEN);
+
+        long numOpenTrades = query.getSingleResult();
+
+        query = em.createQuery("SELECT COUNT(DISTINCT e.underlying) FROM Execution e WHERE e.report.id = :reportId", Long.class);
+        query.setParameter("reportId", reportId);
+
+        long numUnderlyings = query.getSingleResult();
+
+        query = em.createQuery("SELECT COUNT(DISTINCT se.execution.underlying) FROM SplitExecution se WHERE se.execution.report.id = :reportId AND se.trade.status = :tradeStatus", Long.class);
+
+        query.setParameter("reportId", reportId);
+        query.setParameter("tradeStatus", TradeStatus.OPEN);
+
+        long numOpenUnderlyings = query.getSingleResult();
+
+        TypedQuery<Calendar> calQuery = em.createQuery("SELECT MIN(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", Calendar.class);
+        calQuery.setParameter("reportId", reportId);
+
+        Calendar firstExecutionDate = calQuery.getResultList().get(0);
+
+        calQuery = em.createQuery("SELECT MAX(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", Calendar.class);
+        calQuery.setParameter("reportId", reportId);
+
+        Calendar lastExecutionDate = calQuery.getResultList().get(0);
+
+        return new ReportInfo(numExecutions, numTrades, numOpenTrades, numUnderlyings, numOpenUnderlyings, firstExecutionDate, lastExecutionDate);
     }
 
     @Override
-    public Calendar getLastExecutionDate(Report report) {
-        Query q = em.createQuery("SELECT MAX(e.fillDate) FROM Execution e WHERE e.report = :report");
-        q.setParameter("report", report);
-
-        return (Calendar) q.getResultList().get(0);
-    }
-
-    @Override
-    public Long getNumExecutions(Report report) {
-        Query query = em.createQuery("SELECT COUNT(e) FROM Execution e WHERE e.report = :report");
-        query.setParameter("report", report);
-
-        return (Long) query.getSingleResult();
-    }
-
-    @Override
-    public List<Execution> getExecutions(Report report) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report = :report ORDER BY e.fillDate ASC", Execution.class);
-        q.setParameter("report", report);
+    public List<Execution> getExecutions(int reportId) {
+        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report.id = :reportId ORDER BY e.fillDate ASC", Execution.class);
+        q.setParameter("reportId", reportId);
 
         return q.getResultList();
     }
 
     @Override
-    public List<Execution> getExecutionsAfterExecution(Execution e) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report = :report AND e.fillDate > :eDate AND e.symbol = :eSymbol ORDER BY e.fillDate ASC", Execution.class);
+    public List<Execution> getExecutionsAfterDate(int reportId, Calendar date, String symbol) {
+        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report.id = :reportId AND e.fillDate > :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
 
-        q.setParameter("report", e.getReport());
-        q.setParameter("eDate", e.getFillDate());
-        q.setParameter("eSymbol", e.getSymbol());
-
-        return q.getResultList();
-    }
-
-    @Override
-    public List<Execution> getExecutionsAfterExecutionInclusive(Execution e) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report= :report AND e.fillDate >= :eDate AND e.symbol = :eSymbol ORDER BY e.fillDate ASC", Execution.class);
-
-        q.setParameter("report", e.getReport());
-        q.setParameter("eDate", e.getFillDate());
-        q.setParameter("eSymbol", e.getSymbol());
+        q.setParameter("reportId", reportId);
+        q.setParameter("date", date);
+        q.setParameter("symbol", symbol);
 
         return q.getResultList();
     }
 
     @Override
-    public boolean existsExecution(Execution e) {
-        Execution eDb = em.find(Execution.class, e.getId());
-        return (eDb != null);
+    public List<Execution> getExecutionsAfterDateInclusive(int reportId, Calendar date, String symbol) {
+        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report.id = :reportId AND e.fillDate >= :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
+
+        q.setParameter("reportId", reportId);
+        q.setParameter("date", date);
+        q.setParameter("symbol", symbol);
+
+        return q.getResultList();
     }
 
     @Override
-    public Execution findExecution(Long id) {
-        return em.find(Execution.class, id);
+    public boolean existsExecution(long executionId) {
+        Execution execution = em.find(Execution.class, executionId);
+        return (execution != null);
+    }
+
+    @Override
+    public Execution findExecution(long executionId) {
+        return em.find(Execution.class, executionId);
     }
 
     @Transactional
@@ -156,13 +181,14 @@ public class ReportDaoImpl implements ReportDao {
 
     @Transactional
     @Override
-    public void deleteExecution(Execution execution) {
-        Execution executionDb = em.find(Execution.class, execution.getId());
-        em.remove(executionDb);
+    public void deleteExecution(long executionId) {
+        Execution execution = em.find(Execution.class, executionId);
+        em.remove(execution);
     }
 
     @Override
-    public List<Execution> getFilteredExecutions(Report report, ExecutionFilter filter, Integer start, Integer limit) {
+    public List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, Integer start, Integer limit) {
+        Report report = findReport(reportId);
         TypedQuery<Execution> q = queryBuilder.buildFilteredExecutionsQuery(em , report, filter);
 
         q.setFirstResult(start != null ? start : 0);
@@ -172,32 +198,17 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public Long getNumFilteredExecutions(Report report, ExecutionFilter filter) {
+    public long getNumFilteredExecutions(int reportId, ExecutionFilter filter) {
+        Report report = findReport(reportId);
         TypedQuery<Long> q = queryBuilder.buildFilteredExecutionsCountQuery(em , report, filter);
+
         return q.getSingleResult();
     }
 
     @Override
-    public Long getNumTrades(Report report) {
-        Query query = em.createQuery("SELECT COUNT(t) FROM Trade t WHERE t.report = :report");
-        query.setParameter("report", report);
-
-        return (Long) query.getSingleResult();
-    }
-
-    @Override
-    public Long getNumOpenTrades(Report report) {
-        Query query = em.createQuery("SELECT COUNT(t) FROM Trade t WHERE t.report = :report AND t.status = :tradeStatus");
-        query.setParameter("report", report);
-        query.setParameter("tradeStatus", TradeStatus.OPEN);
-
-        return (Long) query.getSingleResult();
-    }
-
-    @Override
-    public List<Trade> getTradesByUnderlying(Report report, String underlying) {
-        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report = :report" +  (underlying != null ? " AND t.underlying = :underlying" : "") + " ORDER BY t.openDate ASC", Trade.class);
-        q.setParameter("report", report);
+    public List<Trade> getTradesByUnderlying(int reportId, String underlying) {
+        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId" +  (underlying != null ? " AND t.underlying = :underlying" : "") + " ORDER BY t.openDate ASC", Trade.class);
+        q.setParameter("reportId", reportId);
 
         if (underlying != null) {
             q.setParameter("underlying", underlying);
@@ -206,13 +217,13 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Trade> getTradesAffectedByExecution(Execution e) {
-        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report = :report AND (t.closeDate >= :eDate OR t.status = :tradeStatus) AND t.symbol = :eSymbol ORDER BY t.openDate ASC", Trade.class);
+    public List<Trade> getTradesAffectedByExecution(int reportId, Calendar fillDate, String symbol) {
+        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId AND (t.closeDate >= :fillDate OR t.status = :tradeStatus) AND t.symbol = :symbol ORDER BY t.openDate ASC", Trade.class);
 
         q.setParameter("tradeStatus", TradeStatus.OPEN);
-        q.setParameter("report", e.getReport());
-        q.setParameter("eDate", e.getFillDate());
-        q.setParameter("eSymbol", e.getSymbol());
+        q.setParameter("reportId", reportId);
+        q.setParameter("fillDate", fillDate);
+        q.setParameter("symbol", symbol);
 
         return q.getResultList();
     }
@@ -225,8 +236,8 @@ public class ReportDaoImpl implements ReportDao {
 
     @Transactional
     @Override
-    public void deleteAllTrades(Report report) {
-        for (Trade trade : this.getTradesByUnderlying(report, null)) {
+    public void deleteAllTrades(int reportId) {
+        for (Trade trade : this.getTradesByUnderlying(reportId, null)) {
             // it is managed, since trade is managed
             trade.getSplitExecutions().forEach(em::remove);
             em.remove(trade);
@@ -248,12 +259,13 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public Trade findTrade(Long id) {
-        return em.find(Trade.class, id);
+    public Trade findTrade(long tradeId) {
+        return em.find(Trade.class, tradeId);
     }
 
     @Override
-    public List<Trade> getFilteredTrades(Report report, TradeFilter filter, Integer start, Integer limit) {
+    public List<Trade> getFilteredTrades(int reportId, TradeFilter filter, Integer start, Integer limit) {
+        Report report = findReport(reportId);
         TypedQuery<Trade> q = queryBuilder.buildFilteredTradesQuery(em, report, filter);
 
         q.setFirstResult(start != null ? start : 0);
@@ -263,16 +275,18 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public Long getNumFilteredTrades(Report report, TradeFilter filter) {
+    public long getNumFilteredTrades(int reportId, TradeFilter filter) {
+        Report report = findReport(reportId);
         TypedQuery<Long> q = queryBuilder.buildFilteredTradesCountQuery(em, report, filter);
+
         return q.getSingleResult();
     }
 
     @Override
-    public List<Trade> getTradesBetweenDates(Report report, Calendar beginDate, Calendar endDate, TradeType tradeType) {
-        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report = :report AND t.closeDate >= :beginDate AND t.closeDate < :endDate AND t.type = :tradeType ORDER BY t.openDate ASC", Trade.class);
+    public List<Trade> getTradesBetweenDates(int reportId, Calendar beginDate, Calendar endDate, TradeType tradeType) {
+        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId AND t.closeDate >= :beginDate AND t.closeDate < :endDate AND t.type = :tradeType ORDER BY t.openDate ASC", Trade.class);
 
-        q.setParameter("report", report);
+        q.setParameter("reportId", reportId);
         q.setParameter("beginDate", beginDate);
         q.setParameter("endDate", endDate);
         q.setParameter("tradeType", tradeType);
@@ -281,28 +295,11 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<String> getUnderlyings(Report report) {
-        TypedQuery<String> query = em.createQuery("SELECT DISTINCT e.underlying FROM Execution e WHERE e.report = :report", String.class);
-        query.setParameter("report", report);
+    public List<String> getUnderlyings(int reportId) {
+        TypedQuery<String> query = em.createQuery("SELECT DISTINCT e.underlying FROM Execution e WHERE e.report.id = :reportId", String.class);
+        query.setParameter("reportId", reportId);
 
         return query.getResultList();
-    }
-
-    @Override
-    public Long getNumUnderlyings(Report report) {
-        Query query = em.createQuery("SELECT COUNT(DISTINCT e.underlying) FROM Execution e WHERE e.report = :report");
-        query.setParameter("report", report);
-        return (Long) query.getSingleResult();
-    }
-
-    @Override
-    public Long getNumOpenUnderlyings(Report report) {
-        Query query = em.createQuery("SELECT COUNT(DISTINCT se.execution.underlying) FROM SplitExecution se WHERE se.execution.report = :report AND se.trade.status = :tradeStatus");
-
-        query.setParameter("report", report);
-        query.setParameter("tradeStatus", TradeStatus.OPEN);
-
-        return (Long) query.getSingleResult();
     }
 
     @Override

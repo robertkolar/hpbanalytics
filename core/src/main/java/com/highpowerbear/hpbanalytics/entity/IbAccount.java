@@ -62,11 +62,6 @@ public class IbAccount implements Serializable {
         return mayProcess;
     }
 
-    public String print() {
-        return accountId + ", " + host + ":" + port;
-    }
-
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

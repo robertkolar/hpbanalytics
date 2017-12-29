@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.common.OptionParseResult;
 import com.highpowerbear.hpbanalytics.common.OptionUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
@@ -41,48 +40,46 @@ public class ReportProcessor {
     @Autowired private TradeCalculator tradeCalculator;
 
     @Transactional
-    public void analyzeAll(Report report) {
-        log.info("START report processing for " + report.getReportName());
+    public void analyzeAll(int reportId) {
+        log.info("START report processing for report " + reportId);
 
-        reportDao.deleteAllTrades(report);
-        List<Execution> executions = reportDao.getExecutions(report);
+        reportDao.deleteAllTrades(reportId);
+        List<Execution> executions = reportDao.getExecutions(reportId);
 
         if (executions.isEmpty()) {
-            log.info("END report processing for " + report.getReportName() + ", no executions, skipping");
+            log.info("END report processing for report " + reportId + ", no executions, skipping");
             return;
         }
 
         List<Trade> trades = analyze(executions);
         reportDao.createTrades(trades);
 
-        log.info("END report processing for " + report.getReportName());
+        log.info("END report processing for report " + reportId);
     }
 
     @Transactional
-    public void deleteReport(Report report) {
-        reportDao.deleteReport(report);
+    public void deleteReport(int reportId) {
+        reportDao.deleteReport(reportId);
     }
 
     @Transactional
-    public void deleteExecution(Execution execution) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
-        List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(execution);
+    public void deleteExecution(long executionId) {
+        Execution execution = reportDao.findExecution(executionId);
 
-        for (Trade trade : tradesAffected) {
-            sb.append("Trade: ").append(trade.print()).append("\n");
-            for (SplitExecution se : trade.getSplitExecutions()) {
-                sb.append(se.print()).append("\n");
-            }
-        }
+        int reportId = execution.getReportId();
+        String symbol = execution.getSymbol();
 
-        log.info(sb.toString());
+        List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        logTradesAffected(execution, tradesAffected);
+
         reportDao.deleteTrades(tradesAffected);
-        reportDao.deleteExecution(execution);
+        reportDao.deleteExecution(executionId);
+
         SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
         boolean isCleanCut = (firstSe.getSplitQuantity().equals(firstSe.getExecution().getQuantity()));
-        boolean omitFirstSe = (isCleanCut && !reportDao.existsExecution(firstSe.getExecution())); // cleanCut is redundant
-        List<Execution> executionsToAnalyzeAgain = reportDao.getExecutionsAfterExecution(firstSe.getExecution());
+        boolean omitFirstSe = (isCleanCut && !reportDao.existsExecution(firstSe.getExecution().getId())); // cleanCut is redundant
+
+        List<Execution> executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
         List<Trade> newTrades = analyzeSingleSymbol(executionsToAnalyzeAgain, (omitFirstSe ? null : firstSe));
 
         if (!newTrades.isEmpty()) {
@@ -92,33 +89,37 @@ public class ReportProcessor {
 
     @Transactional
     public void newExecution(Execution execution) {
-        List<Trade> tl = reportDao.getTradesAffectedByExecution(execution);
-        StringBuilder sb = new StringBuilder();
-        sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
+        int reportId = execution.getReportId();
+        String symbol = execution.getSymbol();
 
-        for (Trade t : tl) {
-           sb.append("Trade: ").append(t.print()).append("\n");
-            for (SplitExecution se : t.getSplitExecutions()) {
-                sb.append("Split execution: ").append(se.print()).append("\n");
-            }
-        }
-        log.info(sb.toString());
-        log.info("Deleting " + tl.size() + " trades");
+        List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        logTradesAffected(execution, tradesAffected);
 
-        reportDao.deleteTrades(tl);
+        log.info("Deleting " + tradesAffected.size() + " trades");
+        reportDao.deleteTrades(tradesAffected);
+
         reportDao.createExecution(execution);
+
         // refresh from db
         execution = reportDao.findExecution(execution.getId());
+
         List<Execution> executionsToAnalyzeAgain = new ArrayList<>();
         List<Trade> trades;
 
-        if (!tl.isEmpty()) {
-            SplitExecution firstSe = tl.get(0).getSplitExecutions().get(0);
+        if (!tradesAffected.isEmpty()) {
+            SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
             log.info("firstSe=" + firstSe.print());
+
             boolean isNewAfterFirst = execution.getFillDate().after(firstSe.getExecution().getFillDate());
             log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + execution.getFillDate().getTime() + ", " + firstSe.getExecution().getFillDate().getTime());
-            executionsToAnalyzeAgain = (isNewAfterFirst ? reportDao.getExecutionsAfterExecution(firstSe.getExecution()) : reportDao.getExecutionsAfterExecutionInclusive(execution));
-            trades = analyzeSingleSymbol(executionsToAnalyzeAgain, (isNewAfterFirst ? firstSe : null));
+
+            if (isNewAfterFirst) {
+                executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
+            } else {
+                executionsToAnalyzeAgain = reportDao.getExecutionsAfterDateInclusive(reportId, execution.getFillDate(), symbol);
+            }
+            trades = analyzeSingleSymbol(executionsToAnalyzeAgain, isNewAfterFirst ? firstSe : null);
+
         } else {
             executionsToAnalyzeAgain.add(execution);
             trades = analyzeSingleSymbol(executionsToAnalyzeAgain, null);
@@ -270,6 +271,7 @@ public class ReportProcessor {
             int ePos = (e.getAction() == Action.BUY ? e.getQuantity() : -e.getQuantity());
             int newPos = currentPos + ePos;
             SplitExecution se;
+
             if (currentPos < 0 && newPos > 0) {
                 // split
                 se = new SplitExecution(); // first
@@ -284,6 +286,7 @@ public class ReportProcessor {
                 se.setSplitQuantity(newPos);
                 se.setCurrentPosition(newPos);
                 sesSingleSymbol.add(se);
+
             } else if (currentPos > 0 && newPos < 0) {
                 // split
                 se = new SplitExecution(); // first
@@ -298,6 +301,7 @@ public class ReportProcessor {
                 se.setSplitQuantity(-newPos);
                 se.setCurrentPosition(newPos);
                 sesSingleSymbol.add(se);
+
             } else {
                 // normal
                 se = new SplitExecution();
@@ -316,15 +320,11 @@ public class ReportProcessor {
         List<Trade> trades = new ArrayList<>();
         Set<String> symbols = splitExecutions.stream().map(se -> se.getExecution().getSymbol()).collect(Collectors.toSet());
         Map<String, List<SplitExecution>> mapSe = new HashMap<>();
-        for (String s : symbols) {
-            mapSe.put(s, new ArrayList<>());
-        }
-        for (SplitExecution se : splitExecutions) {
-            mapSe.get(se.getExecution().getSymbol()).add(se);
-        }
-        for (String s : symbols) {
-            trades.addAll(createTradesSingleSymbol(mapSe.get(s)));
-        }
+
+        symbols.forEach(s -> mapSe.put(s, new ArrayList<>()));
+        splitExecutions.forEach(se -> mapSe.get(se.getExecution().getSymbol()).add(se));
+        symbols.forEach(s -> trades.addAll(createTradesSingleSymbol(mapSe.get(s))));
+
         return trades;
     }
     
@@ -350,5 +350,16 @@ public class ReportProcessor {
             singleSymbolSet.removeAll(singleTradeSet);
         }
         return trades;
+    }
+
+    private void logTradesAffected(Execution execution, List<Trade> tradesAffected) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
+
+        tradesAffected.forEach(t -> {
+            sb.append("Trade: ").append(t.print()).append("\n");
+            t.getSplitExecutions().forEach(se -> sb.append(se.print()).append("\n"));
+        });
+        log.info(sb.toString());
     }
 }

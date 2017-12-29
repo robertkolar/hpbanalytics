@@ -1,11 +1,12 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.highpowerbear.hpbanalytics.report.ReportInfo;
+
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.Serializable;
-import java.util.Calendar;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -25,19 +26,7 @@ public class Report implements Serializable {
     private boolean fx;
     private boolean cfd;
     @Transient
-    private Long numExecutions;
-    @Transient
-    private Long numTrades;
-    @Transient
-    private Long numOpenTrades;
-    @Transient
-    private Long numUnderlyings;
-    @Transient
-    private Long numOpenUnderlyings;
-    @Transient
-    private Calendar firstExecutionDate;
-    @Transient
-    private Calendar lastExecutionDate;
+    private ReportInfo reportInfo;
 
     public Integer getId() {
         return id;
@@ -103,60 +92,12 @@ public class Report implements Serializable {
         this.reportName = name;
     }
 
-    public Long getNumExecutions() {
-        return numExecutions;
+    public ReportInfo getReportInfo() {
+        return reportInfo;
     }
 
-    public void setNumExecutions(Long numExecutions) {
-        this.numExecutions = numExecutions;
-    }
-
-    public Long getNumTrades() {
-        return numTrades;
-    }
-
-    public void setNumTrades(Long numTrades) {
-        this.numTrades = numTrades;
-    }
-
-    public Long getNumOpenTrades() {
-        return numOpenTrades;
-    }
-
-    public void setNumOpenTrades(Long numOpenTrades) {
-        this.numOpenTrades = numOpenTrades;
-    }
-
-    public Long getNumUnderlyings() {
-        return numUnderlyings;
-    }
-
-    public void setNumUnderlyings(Long numUnderlyings) {
-        this.numUnderlyings = numUnderlyings;
-    }
-
-    public Long getNumOpenUnderlyings() {
-        return numOpenUnderlyings;
-    }
-
-    public void setNumOpenUnderlyings(Long numOpenUnderlyings) {
-        this.numOpenUnderlyings = numOpenUnderlyings;
-    }
-
-    public Calendar getFirstExecutionDate() {
-        return firstExecutionDate;
-    }
-
-    public void setFirstExecutionDate(Calendar firstExecutionDate) {
-        this.firstExecutionDate = firstExecutionDate;
-    }
-
-    public Calendar getLastExecutionDate() {
-        return lastExecutionDate;
-    }
-
-    public void setLastExecutionDate(Calendar lastExecutionDate) {
-        this.lastExecutionDate = lastExecutionDate;
+    public void setReportInfo(ReportInfo reportInfo) {
+        this.reportInfo = reportInfo;
     }
 
     @Override

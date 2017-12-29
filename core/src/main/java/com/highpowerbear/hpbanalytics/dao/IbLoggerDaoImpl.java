@@ -5,8 +5,6 @@ import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -26,15 +24,10 @@ import java.util.Set;
 @Transactional(propagation = Propagation.SUPPORTS)
 public class IbLoggerDaoImpl implements IbLoggerDao {
 
-    private static final Logger log = LoggerFactory.getLogger(IbLoggerDaoImpl.class);
-
     @PersistenceContext
     private EntityManager em;
 
     @Autowired private QueryBuilder queryBuilder;
-
-    private final String B = "BEGIN " + this.getClass().getSimpleName() + ".";
-    private final String E = "END " + this.getClass().getSimpleName() + ".";
 
     @Override
     public IbAccount findIbAccount(String accountId) {
@@ -54,7 +47,8 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     }
 
     @Override
-    public List<IbOrder> getFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter, Integer start, Integer limit) {
+    public List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, Integer start, Integer limit) {
+        IbAccount ibAccount = findIbAccount(accountId);
         TypedQuery<IbOrder> q = queryBuilder.buildFilteredIbOrdersQuery(em, ibAccount, filter);
 
         q.setFirstResult(start != null ? start : 0);
@@ -64,16 +58,18 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     }
 
     @Override
-    public Long getNumFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter) {
+    public long getNumFilteredIbOrders(String accountId, IbOrderFilter filter) {
+        IbAccount ibAccount = findIbAccount(accountId);
         TypedQuery<Long> q = queryBuilder.buildFilteredIbOrdersCountQuery(em, ibAccount, filter);
+
         return q.getSingleResult();
     }
 
     @Override
-    public List<IbOrder> getOpenIbOrders(IbAccount ibAccount) {
-        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount = :ibAccount AND io.status IN :statuses", IbOrder.class);
+    public List<IbOrder> getOpenIbOrders(String accountId) {
+        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount.accountId = :accountId AND io.status IN :statuses", IbOrder.class);
 
-        q.setParameter("ibAccount", ibAccount);
+        q.setParameter("accountId", accountId);
         Set<OrderStatus> statuses = new HashSet<>();
         statuses.add(OrderStatus.SUBMITTED);
         statuses.add(OrderStatus.UPDATED);
@@ -85,24 +81,20 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     @Transactional
     @Override
     public void newIbOrder(IbOrder ibOrder) {
-        log.info(B + "newIbOrder, dbId=" + ibOrder.getId() + ", account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
         em.persist(ibOrder);
-        log.info(E + "newIbOrder, dbId=" + ibOrder.getId() + ", account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
     }
 
     @Transactional
     @Override
     public void updateIbOrder(IbOrder ibOrder) {
-        log.info(B + "updateIbOrder, account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
         em.merge(ibOrder);
-        log.info(E + "updateIbOrder, account=" + ibOrder.getIbAccount().getAccountId() + ", permId=" + ibOrder.getPermId());
     }
 
     @Override
-    public IbOrder getIbOrderByPermId(IbAccount ibAccount, Long permId) {
-        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount = :ibAccount AND io.permId = :permId", IbOrder.class);
+    public IbOrder getIbOrderByPermId(String accountId, long permId) {
+        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount.accountId = :accountId AND io.permId = :permId", IbOrder.class);
 
-        q.setParameter("ibAccount", ibAccount);
+        q.setParameter("accountId", accountId);
         q.setParameter("permId", permId);
         List<IbOrder> ibOrders = q.getResultList();
 

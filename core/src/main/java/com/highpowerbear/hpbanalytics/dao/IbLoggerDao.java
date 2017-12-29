@@ -14,10 +14,10 @@ public interface IbLoggerDao {
     IbAccount findIbAccount(String accountId);
     List<IbAccount> getIbAccounts();
     IbAccount updateIbAccount(IbAccount ibAccount);
-    List<IbOrder> getFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter, Integer start, Integer limit);
-    Long getNumFilteredIbOrders(IbAccount ibAccount, IbOrderFilter filter);
-    List<IbOrder> getOpenIbOrders(IbAccount ibAccount);
+    List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, Integer start, Integer limit);
+    long getNumFilteredIbOrders(String accountId, IbOrderFilter filter);
+    List<IbOrder> getOpenIbOrders(String accountId);
     void newIbOrder(IbOrder ibOrder);
     void updateIbOrder(IbOrder ibOrder);
-    IbOrder getIbOrderByPermId(IbAccount ibAccount, Long permId);
+    IbOrder getIbOrderByPermId(String accountId, long permId);
 }

@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.iblogger.dto.IbExecution;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -56,22 +55,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Temporal(TemporalType.TIMESTAMP)
     private Calendar fillDate;
     private BigDecimal fillPrice;
-
-    public Execution() {
-    }
-
-    public Execution(IbExecution ibExecution) {
-        origin = ibExecution.getOrigin();
-        referenceId = ibExecution.getReferenceId();
-        action = ibExecution.getAction();
-        quantity = ibExecution.getQuantity();
-        underlying = ibExecution.getUnderlying();
-        currency = ibExecution.getCurrency();
-        symbol = ibExecution.getSymbol();
-        secType = ibExecution.getSecType();
-        fillDate = ibExecution.getFillDate();
-        fillPrice = BigDecimal.valueOf(ibExecution.getFillPrice());
-    }
 
     @JsonProperty
     public Integer getReportId() {
