@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
-import com.highpowerbear.hpbanalytics.report.ReportInfo;
+import com.highpowerbear.hpbanalytics.report.ReportInfoVO;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;
@@ -26,7 +26,7 @@ public class Report implements Serializable {
     private boolean fx;
     private boolean cfd;
     @Transient
-    private ReportInfo reportInfo;
+    private ReportInfoVO reportInfo;
 
     public Integer getId() {
         return id;
@@ -92,11 +92,11 @@ public class Report implements Serializable {
         this.reportName = name;
     }
 
-    public ReportInfo getReportInfo() {
+    public ReportInfoVO getReportInfo() {
         return reportInfo;
     }
 
-    public void setReportInfo(ReportInfo reportInfo) {
+    public void setReportInfo(ReportInfoVO reportInfo) {
         this.reportInfo = reportInfo;
     }
 

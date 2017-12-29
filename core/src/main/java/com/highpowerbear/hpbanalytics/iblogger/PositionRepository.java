@@ -3,7 +3,9 @@ package com.highpowerbear.hpbanalytics.iblogger;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by robertk on 12/28/2017.
@@ -11,17 +13,17 @@ import java.util.List;
 @Component
 public class PositionRepository {
 
-    private List<Position> positions = new ArrayList<>();
+    private Map<String, List<PositionVO>> positionMap = new HashMap<>();
 
-    public void clearPositions() {
-        positions.clear();
+    public void initPositions(String accountId) {
+        positionMap.put(accountId, new ArrayList<>());
     }
 
-    public void addPosition(Position position) {
-        positions.add(position);
+    public void addPosition(String accountId, PositionVO position) {
+        positionMap.get(accountId).add(position);
     }
 
-    public List<Position> getPositions() {
-        return positions;
+    public List<PositionVO> getPositions(String accountId) {
+        return positionMap.get(accountId);
     }
 }

@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.common.OptionParseResult;
+import com.highpowerbear.hpbanalytics.common.OptionParseResultVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -16,7 +16,7 @@ import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
 import com.highpowerbear.hpbanalytics.report.ReportProcessor;
-import com.highpowerbear.hpbanalytics.report.Statistics;
+import com.highpowerbear.hpbanalytics.report.StatisticsVO;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -178,7 +178,7 @@ public class ReportRestController {
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") Integer id,
             @PathVariable("tradeid") Long tradeId,
-            @RequestBody CloseTradeDto closeTradeDto) {
+            @RequestBody CloseTradeVO closeTradeVO) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -192,9 +192,9 @@ public class ReportRestController {
         }
 
         // fix fill date timezone, JAXB JSON converter sets it to UTC
-        closeTradeDto.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        closeTradeVO.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
-        reportProcessor.closeTrade(trade, closeTradeDto.getCloseDate(), closeTradeDto.getClosePrice());
+        reportProcessor.closeTrade(trade, closeTradeVO.getCloseDate(), closeTradeVO.getClosePrice());
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade closed");
 
         return ResponseEntity.ok().build();
@@ -255,9 +255,9 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<StatisticsVO> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
         Collections.reverse(statistics);
-        List<Statistics> statisticsPage = new ArrayList<>();
+        List<StatisticsVO> statisticsPage = new ArrayList<>();
 
         for (int i = 0; i < statistics.size(); i++) {
             if (i >= start && i < (start + limit)) {
@@ -277,7 +277,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<StatisticsVO> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
 
         return ResponseEntity.ok(new RestList<>(statistics, (long) statistics.size()));
     }
@@ -312,7 +312,7 @@ public class ReportRestController {
     public ResponseEntity<?> optionUtilParse(
             @RequestParam("optionsymbol") String optionSymbol) {
 
-        OptionParseResult optionParseResult;
+        OptionParseResultVO optionParseResult;
         try {
             optionParseResult = CoreUtil.parseOptionSymbol(optionSymbol);
         } catch (Exception e) {

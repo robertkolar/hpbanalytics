@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.riskmgmt;
+package com.highpowerbear.hpbanalytics.riskmgt;
 
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import org.slf4j.Logger;

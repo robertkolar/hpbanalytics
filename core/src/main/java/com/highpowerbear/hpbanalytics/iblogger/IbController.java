@@ -65,4 +65,11 @@ public class IbController {
         c.getClientSocket().reqAllOpenOrders();
         c.getClientSocket().reqAutoOpenOrders(true);
     }
+
+    public void requestPositions(String accountId) {
+        log.info("Requesting positions for ibAccount " + accountId);
+
+        IbConnection c = ibConnectionMap.get(accountId);
+        c.getClientSocket().reqPositions();
+    }
 }

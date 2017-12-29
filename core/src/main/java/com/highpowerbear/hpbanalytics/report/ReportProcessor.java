@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.OptionParseResult;
+import com.highpowerbear.hpbanalytics.common.OptionParseResultVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
@@ -150,7 +150,7 @@ public class ReportProcessor {
     }
 
     public void expireTrade(Trade trade) {
-        OptionParseResult opr;
+        OptionParseResultVO opr;
         try {
             opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
         } catch (Exception e) {
@@ -180,7 +180,7 @@ public class ReportProcessor {
     }
 
     public void assignTrade(Trade trade) {
-        OptionParseResult opr;
+        OptionParseResultVO opr;
         try {
             opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
         } catch (Exception exception) {

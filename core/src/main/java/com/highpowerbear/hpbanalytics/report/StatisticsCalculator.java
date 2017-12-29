@@ -33,11 +33,11 @@ public class StatisticsCalculator {
     @Autowired private MessageSender messageSender;
     @Autowired private TradeCalculator tradeCalculator;
 
-    private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
+    private final Map<String, List<StatisticsVO>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
-    public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
+    public List<StatisticsVO> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
 
-        List<Statistics> allStatistics = statisticsMap.get(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying));
+        List<StatisticsVO> allStatistics = statisticsMap.get(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying));
         if (allStatistics == null) {
             return new ArrayList<>();
         }
@@ -60,7 +60,7 @@ public class StatisticsCalculator {
 
         List<Trade> trades = reportDao.getTradesByUnderlying(reportId, normalizeUnderlying(underlying));
 
-        List<Statistics> stats = doCalculate(trades, interval);
+        List<StatisticsVO> stats = doCalculate(trades, interval);
         statisticsMap.put(reportId + "_" + interval.name() + "_" + underlyingKey(underlying), stats);
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
@@ -76,8 +76,8 @@ public class StatisticsCalculator {
         return "ALLUNDLS".equals(underlying) ? null : underlying;
     }
 
-    private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {
-        List<Statistics> stats = new ArrayList<>();
+    private List<StatisticsVO> doCalculate(List<Trade> trades, StatisticsInterval interval) {
+        List<StatisticsVO> stats = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
             return stats;
@@ -95,14 +95,10 @@ public class StatisticsCalculator {
         int statsCount = 1;
 
         while (periodDate.getTimeInMillis() <= lastPeriodDate.getTimeInMillis()) {
-            Statistics s = new Statistics(statsCount++);
 
             Calendar periodDateCopy = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
             periodDateCopy.setTimeInMillis(periodDate.getTimeInMillis());
-            s.setPeriodDate(periodDateCopy);
-            s.setNumOpened(this.getNumTradesOpenedForPeriod(trades, periodDate, interval));
             List<Trade> tradesClosedForPeriod = this.getTradesClosedForPeriod(trades, periodDate, interval);
-            s.setNumClosed(tradesClosedForPeriod.size());
 
             int numWinners = 0;
             int numLosers = 0;
@@ -134,15 +130,20 @@ public class StatisticsCalculator {
             profitLoss = winnersProfit + losersLoss;
             cumulProfitLoss += profitLoss;
 
-            s.setNumWinners(numWinners);
-            s.setNumLosers(numLosers);
-            s.setWinnersProfit(CoreUtil.round2(winnersProfit));
-            s.setLosersLoss(CoreUtil.round2(losersLoss));
-            s.setBigWinner(CoreUtil.round2(bigWinner));
-            s.setBigLoser(CoreUtil.round2(bigLoser));
-            s.setProfitLoss(CoreUtil.round2(profitLoss));
-            s.setCumulProfitLoss(CoreUtil.round2(cumulProfitLoss));
-
+            StatisticsVO s = new StatisticsVO(
+                    statsCount++,
+                    periodDateCopy,
+                    getNumTradesOpenedForPeriod(trades, periodDate, interval),
+                    tradesClosedForPeriod.size(),
+                    numWinners,
+                    numLosers,
+                    CoreUtil.round2(winnersProfit),
+                    CoreUtil.round2(losersLoss),
+                    CoreUtil.round2(bigWinner),
+                    CoreUtil.round2(bigLoser),
+                    CoreUtil.round2(profitLoss),
+                    CoreUtil.round2(cumulProfitLoss)
+            );
             stats.add(s);
 
             if (StatisticsInterval.DAY.equals(interval)) {

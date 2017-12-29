@@ -14,6 +14,7 @@ public class IbLoggerScheduler {
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
+    @Autowired private PositionRepository positionRepository;
 
     @Scheduled(fixedRate = 5000)
     private void reconnect() {
@@ -27,14 +28,18 @@ public class IbLoggerScheduler {
     }
 
     @Scheduled(fixedRate = 300000)
-    private void requestOpenOrders() {
+    private void performPeriodicTasks() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
+
             String accountId = ibAccount.getAccountId();
             IbConnection c = ibController.getIbConnection(accountId);
 
             if (c.isConnected()) {
                 heartbeatControl.updateHeartbeats(accountId);
                 ibController.requestOpenOrders(accountId);
+
+                positionRepository.initPositions(accountId);
+                ibController.requestPositions(accountId);
             }
         });
     }
