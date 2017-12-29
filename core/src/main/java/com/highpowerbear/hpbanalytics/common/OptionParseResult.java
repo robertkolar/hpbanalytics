@@ -8,6 +8,7 @@ import java.util.Date;
  * Created by robertk on 10/9/2015.
  */
 public class OptionParseResult {
+
     private String underlying;
     private OptionType optType;
     private Date expDate;

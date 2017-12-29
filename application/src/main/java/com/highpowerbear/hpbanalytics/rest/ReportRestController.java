@@ -1,8 +1,8 @@
 package com.highpowerbear.hpbanalytics.rest;
 
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.common.OptionParseResult;
-import com.highpowerbear.hpbanalytics.common.OptionUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -314,7 +314,7 @@ public class ReportRestController {
 
         OptionParseResult optionParseResult;
         try {
-            optionParseResult = OptionUtil.parse(optionSymbol);
+            optionParseResult = CoreUtil.parseOptionSymbol(optionSymbol);
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
