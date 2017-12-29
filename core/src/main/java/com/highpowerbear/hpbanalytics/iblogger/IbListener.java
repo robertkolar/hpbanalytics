@@ -9,13 +9,13 @@ import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_RISKMGT;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.*;
 
 /**
  *
@@ -24,13 +24,13 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGG
 @Component
 @Scope("prototype")
 public class IbListener extends GenericIbListener {
+    private static final Logger log = LoggerFactory.getLogger(IbListener.class);
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private OpenOrderHandler openOrderHandler;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private MessageSender messageSender;
-    @Autowired private PositionRepository positionRepository;
 
     private String accountId;
 
@@ -89,6 +89,7 @@ public class IbListener extends GenericIbListener {
         super.position(account, contract, pos, avgCost);
 
         PositionVO position = new PositionVO(
+                accountId,
                 contract.localSymbol(),
                 contract.symbol(),
                 Currency.valueOf(contract.currency()),
@@ -96,13 +97,14 @@ public class IbListener extends GenericIbListener {
                 pos,
                 avgCost
         );
-
-        positionRepository.addPosition(account, position);
+        ibController.addPosition(position);
     }
 
     @Override
     public void positionEnd() {
         super.positionEnd();
-        messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, String.valueOf("position end"));
+
+        ibController.positionEnd(accountId);
+        messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, "position end " + accountId);
     }
 }

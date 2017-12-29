@@ -12,7 +12,6 @@ Ext.define('HanGui.view.iblogger.grid.OrdersGrid', {
     ],
     plugins: 'gridfilters',
     bind: '{ibOrders}',
-    title: 'IB Orders',
     listeners: {
         'cellclick': 'showEvents'
     },

@@ -8,6 +8,7 @@ import com.highpowerbear.hpbanalytics.enums.SecType;
  */
 public class PositionVO {
 
+    private String accountId;
     private String symbol;
     private String underlying;
     private Currency currency;
@@ -15,13 +16,18 @@ public class PositionVO {
     private double position;
     private double avgCost;
 
-    public PositionVO(String symbol, String underlying, Currency currency, SecType secType, double position, double avgCost) {
+    public PositionVO(String accountId, String symbol, String underlying, Currency currency, SecType secType, double position, double avgCost) {
+        this.accountId = accountId;
         this.symbol = symbol;
         this.underlying = underlying;
         this.currency = currency;
         this.secType = secType;
         this.position = position;
         this.avgCost = avgCost;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 
     public String getSymbol() {
@@ -51,7 +57,8 @@ public class PositionVO {
     @Override
     public String toString() {
         return "PositionVO{" +
-                "symbol='" + symbol + '\'' +
+                "accountId='" + accountId + '\'' +
+                ", symbol='" + symbol + '\'' +
                 ", underlying='" + underlying + '\'' +
                 ", currency=" + currency +
                 ", secType=" + secType +

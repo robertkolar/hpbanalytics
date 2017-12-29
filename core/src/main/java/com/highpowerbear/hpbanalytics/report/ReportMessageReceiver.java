@@ -33,12 +33,18 @@ public class ReportMessageReceiver {
     @Autowired private MessageSender messageSender;
 
     @JmsListener(destination = JMS_DEST_IBLOGGER_TO_REPORT)
-    public void receiveExecutionNotification(long ibOrderId) {
-        log.info("received execution notification for ibOrder " + ibOrderId);
+    public void receiveJmsMessage(String message) {
+        log.info("receiveJmsMessage " + JMS_DEST_IBLOGGER_TO_REPORT + ": " + message);
 
+        handleExecution(Long.valueOf(message));
+    }
+
+    private void handleExecution(long ibOrderId) {
         IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
+
         if (ibOrder.getStatus() != OrderStatus.FILLED) {
-            throw new IllegalArgumentException("cannot create execution, ibOrder " + ibOrderId + " not filled");
+            log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
+            return;
         }
 
         Execution execution = new Execution();

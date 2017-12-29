@@ -12,7 +12,11 @@ Ext.define('HanGui.view.iblogger.IbLogger', {
         'HanGui.view.iblogger.grid.AccountsGrid',
         'HanGui.view.iblogger.IbLoggerController',
         'HanGui.view.iblogger.IbLoggerModel',
-        'HanGui.view.iblogger.grid.OrdersGrid'
+        'HanGui.view.iblogger.grid.OrdersGrid',
+        'HanGui.view.iblogger.grid.PositionsGrid',
+        'HanGui.common.Glyphs',
+        'Ext.tab.Panel'
+
     ],
     controller: 'han-iblogger',
     viewModel: {
@@ -27,7 +31,19 @@ Ext.define('HanGui.view.iblogger.IbLogger', {
         xtype: 'han-iblogger-accounts-grid',
         reference: 'accountsGrid'
     }, {
-        xtype: 'han-iblogger-orders-grid',
-        reference: 'ordersGrid'
+        xtype: 'tabpanel',
+        title: 'Details',
+        listeners: {
+            beforerender: 'setGlyphs'
+        },
+        items: [{
+            xtype: 'han-iblogger-orders-grid',
+            title: 'IB Orders',
+            reference: 'ordersPanel'
+        }, {
+            xtype: 'han-iblogger-positions-grid',
+            title: 'Positions',
+            reference: 'positionsPanel'
+        }]
     }]
 });

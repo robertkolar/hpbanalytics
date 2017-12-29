@@ -5,6 +5,7 @@ Ext.define('HanGui.view.iblogger.IbLoggerModel', {
     extend: 'Ext.app.ViewModel',
     requires: [
         'HanGui.model.iblogger.IbOrder',
+        'HanGui.model.iblogger.Position',
         'HanGui.model.iblogger.IbAccount'
     ],
 
@@ -17,6 +18,11 @@ Ext.define('HanGui.view.iblogger.IbLoggerModel', {
             pageSize: 25,
             remoteFilter: true,
             remoteSort: false
+        },
+        positions: {
+            model: 'HanGui.model.iblogger.Position',
+            autoload: true,
+            pageSize: 25
         },
         ibAccounts: {
             model: 'HanGui.model.iblogger.IbAccount',

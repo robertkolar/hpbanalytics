@@ -7,7 +7,6 @@ import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.iblogger.HeartbeatControl;
 import com.highpowerbear.hpbanalytics.iblogger.IbController;
-import com.highpowerbear.hpbanalytics.iblogger.PositionRepository;
 import com.highpowerbear.hpbanalytics.iblogger.PositionVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,7 +32,6 @@ public class IbLoggerRestController {
     @Autowired private IbController ibController;
     @Autowired FilterParser filterParser;
     @Autowired HeartbeatControl heartbeatControl;
-    @Autowired private PositionRepository positionRepository;
 
     @RequestMapping("/ibaccounts")
     public RestList<IbAccount> getIbAccount() {
@@ -116,7 +114,7 @@ public class IbLoggerRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<PositionVO> positions = positionRepository.getPositions(accountId);
+        List<PositionVO> positions = ibController.getPositions(accountId);
         if (positions == null) {
             positions = new ArrayList<>();
         }

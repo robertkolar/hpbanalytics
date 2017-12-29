@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.iblogger;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
@@ -13,7 +14,10 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -28,9 +32,14 @@ public class IbController {
     @Autowired private Provider<IbListener> ibListeners;
 
     private Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
+    private Map<String, List<PositionVO>> positionMap = new HashMap<>(); // accountId --> positions
 
     public IbConnection getIbConnection(String accountId) {
         return ibConnectionMap.get(accountId);
+    }
+
+    public List<PositionVO> getPositions(String accountId) {
+        return positionMap.get(accountId);
     }
 
     @PostConstruct
@@ -50,26 +59,58 @@ public class IbController {
     }
 
     public void connect(String accountId) {
-        ibConnectionMap.get(accountId).connect();
+        IbConnection c = ibConnectionMap.get(accountId);
+        c.connect();
+
+        CoreUtil.waitMilliseconds(1000);
+        requestOpenOrders(accountId);
+        requestPositions(accountId);
     }
 
     public void disconnect(String accountId) {
-        ibConnectionMap.get(accountId).disconnect();
+        IbConnection c = ibConnectionMap.get(accountId);
+
+        if (c.isConnected()) {
+            c.disconnect();
+        }
     }
 
     public void requestOpenOrders(String accountId) {
-        log.info("requesting open orders for ibAccount " + accountId);
-
         IbConnection c = ibConnectionMap.get(accountId);
-        c.getClientSocket().reqOpenOrders();
-        c.getClientSocket().reqAllOpenOrders();
-        c.getClientSocket().reqAutoOpenOrders(true);
+
+        if (c.isConnected()) {
+            log.info("requesting open orders for ibAccount " + accountId);
+
+            c.getClientSocket().reqOpenOrders();
+            c.getClientSocket().reqAllOpenOrders();
+            c.getClientSocket().reqAutoOpenOrders(true);
+        }
     }
 
     public void requestPositions(String accountId) {
-        log.info("requesting positions for ibAccount " + accountId);
-
         IbConnection c = ibConnectionMap.get(accountId);
-        c.getClientSocket().reqPositions();
+
+        if (c.isConnected()) {
+            log.info("requesting positions for ibAccount " + accountId);
+            positionMap.put(accountId, new ArrayList<>());
+
+            c.getClientSocket().reqPositions();
+        }
+    }
+
+    public void addPosition(PositionVO position) {
+        positionMap.get(position.getAccountId()).add(position);
+    }
+
+    public void positionEnd(String accountId) {
+        IbConnection c = ibConnectionMap.get(accountId);
+
+        if (c.isConnected()) {
+            c.getClientSocket().cancelPositions();
+        }
+
+        List<PositionVO> positions = positionMap.get(accountId);
+        positions.sort(Comparator.comparing(PositionVO::getAccountId));
+        positions.sort(Comparator.comparing(PositionVO::getSymbol));
     }
 }

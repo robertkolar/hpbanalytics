@@ -20,9 +20,15 @@ public class RiskMgtMessageReceiver {
     @Autowired private MessageSender messageSender;
 
     @JmsListener(destination = JMS_DEST_IBLOGGER_TO_RISKMGT)
-    public void receivePositionNotification() {
-        log.info("received position notification");
+    public void receiveJmsMessage(String message) {
+        log.info("receiveJmsMessage " + JMS_DEST_IBLOGGER_TO_RISKMGT + ": " + message);
 
-        messageSender.sendWsMessage(WS_TOPIC_RISKMGT, "positions updated");
+        performRiskMgt(message);
+    }
+
+    private void performRiskMgt(String message) {
+
+        // TODO risk management logic
+        messageSender.sendWsMessage(WS_TOPIC_RISKMGT, message);
     }
 }
