@@ -35,7 +35,7 @@ public interface ReportDao {
     Execution findExecution(long executionId);
     void createExecution(Execution execution);
     void deleteExecution(long executionId);
-    List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, Integer start, Integer limit);
+    List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, int start, int limit);
     long getNumFilteredExecutions(int reportId, ExecutionFilter filter);
 
     List<Trade> getTradesByUnderlying(int reportId, String underlying);
@@ -44,7 +44,7 @@ public interface ReportDao {
     void deleteAllTrades(int reportId);
     void deleteTrades(List<Trade> trades);
     Trade findTrade(long tradeId);
-    List<Trade> getFilteredTrades(int reportId, TradeFilter filter, Integer start, Integer limit);
+    List<Trade> getFilteredTrades(int reportId, TradeFilter filter, int start, int limit);
     long getNumFilteredTrades(int reportId, TradeFilter filter);
     List<Trade> getTradesBetweenDates(int reportId, Calendar beginDate, Calendar endDate, TradeType tradeType);
 

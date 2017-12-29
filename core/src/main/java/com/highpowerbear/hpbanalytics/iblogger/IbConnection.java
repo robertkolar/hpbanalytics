@@ -47,12 +47,12 @@ public class IbConnection {
         this.markConnected = true;
 
         if (!isConnected()) {
-            log.info("Connecting " + print());
+            log.info("connecting " + print());
             eClientSocket.eConnect(host, port, clientId);
             CoreUtil.waitMilliseconds(1000);
 
             if (isConnected()) {
-                log.info("Successfully connected " + print());
+                log.info("successfully connected " + print());
 
                 final EReader eReader = new EReader(eClientSocket, eReaderSignal);
 
@@ -64,7 +64,7 @@ public class IbConnection {
                         try {
                             eReader.processMsgs();
                         } catch (Exception e) {
-                            log.error("Error", e);
+                            log.error("error", e);
                         }
                     }
                 }).start();
@@ -78,11 +78,11 @@ public class IbConnection {
         }
         this.markConnected = false;
         if (isConnected()) {
-            log.info("Disconnecting " + print());
+            log.info("disconnecting " + print());
             eClientSocket.eDisconnect();
             CoreUtil.waitMilliseconds(1000);
             if (!isConnected()) {
-                log.info("Successfully disconnected " + print());
+                log.info("successfully disconnected " + print());
                 this.accounts = null;
             }
         }

@@ -35,7 +35,7 @@ public class SplitExecution implements Serializable {
     private Calendar fillDate;
     @ManyToOne
     @JsonIgnore
-    Execution execution;
+    private Execution execution;
     @ManyToOne
     @JsonIgnore
     private Trade trade;

@@ -71,7 +71,7 @@ public class ReportRestController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}")
     public ResponseEntity<?> analyzeReport(
-            @PathVariable("id") Integer id) {
+            @PathVariable("id") int id) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -79,14 +79,14 @@ public class ReportRestController {
         }
 
         reportProcessor.analyzeAll(id);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report analyzed");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " analyzed");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}")
     public ResponseEntity<?> deleteReport(
-            @PathVariable("id") Integer id) {
+            @PathVariable("id") int id) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -94,17 +94,17 @@ public class ReportRestController {
         }
 
         reportProcessor.deleteReport(id);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report deleted");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " deleted");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/executions")
     public ResponseEntity<?> getFilteredExecutions(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") int id,
             @RequestParam(required = false, value = "filter") String jsonFilter,
-            @RequestParam("start") Integer start,
-            @RequestParam("limit") Integer limit) {
+            @RequestParam("start") int start,
+            @RequestParam("limit") int limit) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -120,7 +120,7 @@ public class ReportRestController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/reports/{id}/executions")
     public ResponseEntity<?> createExecution(
-            @PathVariable("id") Integer reportId,
+            @PathVariable("id") int reportId,
             @RequestBody Execution execution) {
 
         Report report = reportDao.findReport(reportId);
@@ -150,17 +150,17 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         reportProcessor.deleteExecution(executionId);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "execution deleted");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "execution " + executionId + " deleted");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/trades")
     public ResponseEntity<?> getFilteredTrades(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") int id,
             @RequestParam(required = false, value = "filter") String jsonFilter,
-            @RequestParam("start") Integer start,
-            @RequestParam("limit") Integer limit) {
+            @RequestParam("start") int start,
+            @RequestParam("limit") int limit) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -176,8 +176,8 @@ public class ReportRestController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/close")
     public ResponseEntity<?> closeTrade(
-            @PathVariable("id") Integer id,
-            @PathVariable("tradeid") Long tradeId,
+            @PathVariable("id") int id,
+            @PathVariable("tradeid") long tradeId,
             @RequestBody CloseTradeVO closeTradeVO) {
 
         Report report = reportDao.findReport(id);
@@ -195,15 +195,15 @@ public class ReportRestController {
         closeTradeVO.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
         reportProcessor.closeTrade(trade, closeTradeVO.getCloseDate(), closeTradeVO.getClosePrice());
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade closed");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/expire")
     public ResponseEntity<?> expireTrade(
-            @PathVariable("id") Integer id,
-            @PathVariable("tradeid") Long tradeId) {
+            @PathVariable("id") int id,
+            @PathVariable("tradeid") long tradeId) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -216,15 +216,15 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
         reportProcessor.expireTrade(trade);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade expired");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " expired");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/assign")
     public ResponseEntity<?> assignTrade(
-            @PathVariable("id") Integer id,
-            @PathVariable("tradeid") Long tradeId) {
+            @PathVariable("id") int id,
+            @PathVariable("tradeid") long tradeId) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -237,18 +237,18 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
         reportProcessor.assignTrade(trade);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade assigned");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " assigned");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/statistics/{interval}")
     public ResponseEntity<?> getStatistics(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "underlying") String underlying,
-            @RequestParam("start") Integer start,
-            @RequestParam("limit") Integer limit) {
+            @RequestParam("start") int start,
+            @RequestParam("limit") int limit) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -269,7 +269,7 @@ public class ReportRestController {
 
     @RequestMapping("reports/{id}/charts/{interval}")
     public ResponseEntity<?> getCharts(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
@@ -284,7 +284,7 @@ public class ReportRestController {
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")
     public ResponseEntity<?> calculateStatistics(
-            @PathVariable("id") Integer id,
+            @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
@@ -299,7 +299,7 @@ public class ReportRestController {
 
     @RequestMapping("/reports/{id}/underlyings")
     public ResponseEntity<?> getUnderlyings(
-            @PathVariable("id") Integer id) {
+            @PathVariable("id") int id) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
@@ -323,8 +323,8 @@ public class ReportRestController {
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{tradetype}")
     public ResponseEntity<?> getIfiCsv(
-            @PathVariable("id") Integer id,
-            @PathVariable("year") Integer year,
+            @PathVariable("id") int id,
+            @PathVariable("year") int year,
             @PathVariable("tradetype") TradeType tradeType) {
 
         Report report = reportDao.findReport(id);

@@ -65,7 +65,7 @@ public class StatisticsCalculator {
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated");
+        messageSender.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated for report " + reportId);
     }
 
     private String underlyingKey(String underlying) {

@@ -3,7 +3,9 @@ package com.highpowerbear.hpbanalytics.iblogger;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
+import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
@@ -12,6 +14,7 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_RISKMGT;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
 
 /**
@@ -27,6 +30,7 @@ public class IbListener extends GenericIbListener {
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private MessageSender messageSender;
+    @Autowired private PositionRepository positionRepository;
 
     private String accountId;
 
@@ -83,10 +87,22 @@ public class IbListener extends GenericIbListener {
     @Override
     public void position(String account, Contract contract, double pos, double avgCost) {
         super.position(account, contract, pos, avgCost);
+
+        PositionVO position = new PositionVO(
+                contract.localSymbol(),
+                contract.symbol(),
+                Currency.valueOf(contract.currency()),
+                SecType.valueOf(contract.getSecType()),
+                pos,
+                avgCost
+        );
+
+        positionRepository.addPosition(account, position);
     }
 
     @Override
     public void positionEnd() {
         super.positionEnd();
+        messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, String.valueOf("position end"));
     }
 }

@@ -58,7 +58,7 @@ public class IbController {
     }
 
     public void requestOpenOrders(String accountId) {
-        log.info("Requesting open orders for ibAccount " + accountId);
+        log.info("requesting open orders for ibAccount " + accountId);
 
         IbConnection c = ibConnectionMap.get(accountId);
         c.getClientSocket().reqOpenOrders();
@@ -67,7 +67,7 @@ public class IbController {
     }
 
     public void requestPositions(String accountId) {
-        log.info("Requesting positions for ibAccount " + accountId);
+        log.info("requesting positions for ibAccount " + accountId);
 
         IbConnection c = ibConnectionMap.get(accountId);
         c.getClientSocket().reqPositions();

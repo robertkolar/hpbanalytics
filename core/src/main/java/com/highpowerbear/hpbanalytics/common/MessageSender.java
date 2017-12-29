@@ -32,7 +32,7 @@ public class MessageSender {
     }
 
     public void sendJmsMesage(String destination, String message) {
-        log.info("sendJmsMesage " + destination + ": " + message);
+        log.info("sendJmsMessage " + destination + ": " + message);
         jmsTemplate.convertAndSend(destination, message);
     }
 

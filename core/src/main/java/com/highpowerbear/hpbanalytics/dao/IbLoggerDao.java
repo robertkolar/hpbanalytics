@@ -14,7 +14,7 @@ public interface IbLoggerDao {
     IbAccount findIbAccount(String accountId);
     List<IbAccount> getIbAccounts();
     IbAccount updateIbAccount(IbAccount ibAccount);
-    List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, Integer start, Integer limit);
+    List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, int start, int limit);
     long getNumFilteredIbOrders(String accountId, IbOrderFilter filter);
     List<IbOrder> getOpenIbOrders(String accountId);
     void newIbOrder(IbOrder ibOrder);

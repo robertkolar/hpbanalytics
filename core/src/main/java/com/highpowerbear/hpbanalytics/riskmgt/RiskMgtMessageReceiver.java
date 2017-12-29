@@ -19,8 +19,9 @@ public class RiskMgtMessageReceiver {
 
     @Autowired private MessageSender messageSender;
 
-    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_RISKMGT, containerFactory = "jmsFactory")
+    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_RISKMGT)
     public void receivePositionNotification() {
+        log.info("received position notification");
 
         messageSender.sendWsMessage(WS_TOPIC_RISKMGT, "positions updated");
     }

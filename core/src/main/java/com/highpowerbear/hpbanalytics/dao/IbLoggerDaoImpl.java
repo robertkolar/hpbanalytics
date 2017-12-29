@@ -47,12 +47,12 @@ public class IbLoggerDaoImpl implements IbLoggerDao {
     }
 
     @Override
-    public List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, Integer start, Integer limit) {
+    public List<IbOrder> getFilteredIbOrders(String accountId, IbOrderFilter filter, int start, int limit) {
         IbAccount ibAccount = findIbAccount(accountId);
         TypedQuery<IbOrder> q = queryBuilder.buildFilteredIbOrdersQuery(em, ibAccount, filter);
 
-        q.setFirstResult(start != null ? start : 0);
-        q.setMaxResults(limit != null ? limit : CoreSettings.JPA_MAX_RESULTS);
+        q.setFirstResult(start);
+        q.setMaxResults(limit);
 
         return q.getResultList();
     }

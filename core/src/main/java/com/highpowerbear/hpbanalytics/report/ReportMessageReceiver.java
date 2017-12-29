@@ -32,11 +32,11 @@ public class ReportMessageReceiver {
     @Autowired private ReportProcessor reportProcessor;
     @Autowired private MessageSender messageSender;
 
-    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_REPORT, containerFactory = "jmsFactory")
+    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_REPORT)
     public void receiveExecutionNotification(long ibOrderId) {
+        log.info("received execution notification for ibOrder " + ibOrderId);
 
         IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
-
         if (ibOrder.getStatus() != OrderStatus.FILLED) {
             throw new IllegalArgumentException("cannot create execution, ibOrder " + ibOrderId + " not filled");
         }
@@ -60,7 +60,7 @@ public class ReportMessageReceiver {
         Report report = reportDao.getReportByOriginAndSecType(execution.getOrigin(), execution.getSecType());
 
         if (report == null) {
-            log.warn("No report for origin=" + execution.getOrigin() + " and secType=" + execution.getSecType() + ", skipping");
+            log.warn("no report for origin=" + execution.getOrigin() + " and secType=" + execution.getSecType() + ", skipping");
             return;
         }
         execution.setReport(report);

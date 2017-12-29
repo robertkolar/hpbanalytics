@@ -41,7 +41,7 @@ public class ReportProcessor {
 
     @Transactional
     public void analyzeAll(int reportId) {
-        log.info("START report processing for report " + reportId);
+        log.info("BEGIN report processing for report " + reportId);
 
         reportDao.deleteAllTrades(reportId);
         List<Execution> executions = reportDao.getExecutions(reportId);
@@ -95,7 +95,7 @@ public class ReportProcessor {
         List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
-        log.info("Deleting " + tradesAffected.size() + " trades");
+        log.info("deleting " + tradesAffected.size() + " trades");
         reportDao.deleteTrades(tradesAffected);
 
         reportDao.createExecution(execution);
@@ -125,7 +125,7 @@ public class ReportProcessor {
             trades = analyzeSingleSymbol(executionsToAnalyzeAgain, null);
         }
 
-        log.info("Creating " + trades.size() + " trades");
+        log.info("creating " + trades.size() + " trades");
         reportDao.createTrades(trades);
     }
 
@@ -154,7 +154,7 @@ public class ReportProcessor {
         try {
             opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
         } catch (Exception e) {
-            log.error("Error", e);
+            log.error("error", e);
             return;
         }
 
@@ -184,7 +184,7 @@ public class ReportProcessor {
         try {
             opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
         } catch (Exception exception) {
-            log.error("Error", exception);
+            log.error("error", exception);
             return;
         }
 

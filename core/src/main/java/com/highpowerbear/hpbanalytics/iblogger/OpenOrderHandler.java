@@ -33,23 +33,23 @@ public class OpenOrderHandler {
             return;
         }
         if (!(ibAccount.mayProcessAccount(order.account()))) {
-            log.info("Account filter active, account=" + order.account() + ", permitted=" + ibAccount.getPermittedAccounts() + ", order will be ignored");
+            log.info("account filter active, account=" + order.account() + ", permitted=" + ibAccount.getPermittedAccounts() + ", order will be ignored");
             return;
         }
         if (!(ibAccount.mayProcessClient(order.clientId()))) {
-            log.info("Account filter active, clientId=" + order.clientId() + ", permitted=" + ibAccount.getPermittedClients() + ", order will be ignored");
+            log.info("account filter active, clientId=" + order.clientId() + ", permitted=" + ibAccount.getPermittedClients() + ", order will be ignored");
             return;
         }
         if (!checkOrderType(order.getOrderType())) {
-            log.info("Unsupported order type=" + order.getOrderType() + ", order will be ignored");
+            log.info("unsupported order type=" + order.getOrderType() + ", order will be ignored");
             return;
         }
         if (!checkSecType(contract.getSecType())) {
-            log.info("Unsupported security type=" + contract.getSecType() + ", order will be ignored");
+            log.info("unsupported security type=" + contract.getSecType() + ", order will be ignored");
             return;
         }
         if (!checkInstrumentFilter(ibAccount, contract.getSecType())) {
-            log.info("Processing disabled, security type=" + contract.getSecType() + ", order will be ignored");
+            log.info("processing disabled, security type=" + contract.getSecType() + ", order will be ignored");
             return;
         }
 
