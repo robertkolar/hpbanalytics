@@ -36,9 +36,12 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
             console.log("WS iblogger connected");
 
             stompClient.subscribe('/topic/iblogger', function(message) {
-                console.log('WS message, content=' + message + ' --> reloading stores...');
-                ibOrders.reload();
-                positions.reload();
+
+                if (message.body.startsWith('order')) {
+                    ibOrders.reload();
+                } else if (message.body.startsWith('positions')) {
+                    positions.reload();
+                }
             });
 
         }, function() {

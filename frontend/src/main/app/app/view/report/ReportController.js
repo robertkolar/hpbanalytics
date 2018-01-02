@@ -32,7 +32,6 @@ Ext.define('HanGui.view.report.ReportController', {
             console.log("WS report connected");
 
             stompClient.subscribe('/topic/report', function(message) {
-                console.log('WS message, content=' + message + ' --> reloading stores...');
                 me.reloadAll();
             });
 

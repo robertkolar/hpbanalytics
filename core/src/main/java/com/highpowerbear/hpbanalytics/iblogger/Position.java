@@ -19,7 +19,8 @@ public class Position {
 
     private double position;
     private double avgCost;
-    private double lastPrice;
+    private Double lastPrice;
+    private Double underlyingPrice;
 
     public Position(String accountId, Contract contract, double position, double avgCost) {
         this.accountId = accountId;
@@ -31,35 +32,11 @@ public class Position {
         secType = SecType.valueOf(contract.getSecType());
 
         if (exchange == null) {
-            switch (secType) {
-                case CASH: exchange = "IDEALPRO"; break;
-                case FUT: exchange = "GLOBEX"; break;
-                default: exchange = "SMART";
-            }
+            exchange = secType.getDefaultExchange();
         }
 
         this.position = position;
         this.avgCost = avgCost;
-    }
-
-    public Contract createHistDataContract() {
-        Contract contract = new Contract();
-
-        contract.symbol(underlying);
-        contract.localSymbol(symbol);
-        contract.currency(currency.name());
-        contract.exchange(exchange);
-        contract.secType(secType.name());
-
-        if (secType == SecType.CFD) {
-            if (symbol.endsWith("n")) {
-                contract.localSymbol(symbol.substring(0, symbol.length() - 1));
-            }
-            if (currency == Currency.USD) {
-                contract.secType(SecType.STK.name());
-            }
-        }
-        return contract;
     }
 
     public String getAccountId() {
@@ -94,12 +71,20 @@ public class Position {
         return avgCost;
     }
 
-    public double getLastPrice() {
+    public Double getLastPrice() {
         return lastPrice;
     }
 
     public void setLastPrice(double lastPrice) {
         this.lastPrice = lastPrice;
+    }
+
+    public Double getUnderlyingPrice() {
+        return underlyingPrice;
+    }
+
+    public void setUnderlyingPrice(double underlyingPrice) {
+        this.underlyingPrice = underlyingPrice;
     }
 
     @Override
@@ -114,6 +99,7 @@ public class Position {
                 ", position=" + position +
                 ", avgCost=" + avgCost +
                 ", lastPrice=" + lastPrice +
+                ", underlyingPrice=" + underlyingPrice +
                 '}';
     }
 }

@@ -54,7 +54,7 @@ public class StatisticsCalculator {
         return new ArrayList<>(allStatistics.subList(firstIndex, size));
     }
 
-    @Async
+    @Async("taskExecutor")
     public void calculateStatistics(int reportId, StatisticsInterval interval, String underlying) {
         log.info("BEGIN statistics calculation for report " + reportId + ", undl=" + underlying + ", interval=" + interval);
 

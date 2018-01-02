@@ -4,12 +4,17 @@ import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.enums.Currency;
+import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
 import com.ib.client.EReaderSignal;
+import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -38,11 +43,14 @@ public class IbController {
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private Provider<IbListener> ibListeners;
+    @Autowired TaskExecutor taskExecutor;
     @Autowired private MessageSender messageSender;
 
     private final Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
     private final Map<String, List<Position>> positionMap = new HashMap<>(); // accountId --> positions
-    private final Map<Integer, Position> historicalDataRequestMap = new HashMap<>(); // ib request id -> position
+    private final Map<String, Map<Integer, Position>> ibRequestPositionMap = new HashMap<>(); // accountId -> (ib request id -> position)
+    private final Map<Integer, String> ibRequestUnderlyingMap = new HashMap<>(); // ib request id -> underlying
+    private final Map<String, Double> underlyingPriceMap = new HashMap<>(); // underlying -> price
 
     private final AtomicInteger requestIdGenerator = new AtomicInteger();
     private final DateFormat df = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
@@ -75,12 +83,8 @@ public class IbController {
         IbConnection c = ibConnectionMap.get(accountId);
         c.connect();
 
-        CoreUtil.waitMilliseconds(1000);
         requestOpenOrders(accountId);
-
         requestPositions(accountId);
-        CoreUtil.waitMilliseconds(1000);
-        requestPositionsHistoricalData(accountId);
     }
 
     public void disconnect(String accountId) {
@@ -109,8 +113,48 @@ public class IbController {
         if (c.isConnected()) {
             log.info("requesting positions for account " + accountId);
             positionMap.put(accountId, new ArrayList<>());
+            ibRequestPositionMap.put(accountId, new HashMap<>());
 
             c.getClientSocket().reqPositions();
+
+            CoreUtil.waitMilliseconds(3000);
+            log.info("requesting positions historical data for account " + accountId);
+
+            String endDate = df.format(Calendar.getInstance().getTime()) + " " + CoreSettings.IB_TIMEZONE;
+
+            positionMap.get(accountId).forEach(p -> {
+                ibRequestPositionMap.get(accountId).put(requestIdGenerator.incrementAndGet(), p);
+
+                if (p.getSecType() == SecType.OPT) {
+                    String underlying = p.getUnderlying();
+
+                    if (!ibRequestUnderlyingMap.values().contains(underlying)) {
+                        ibRequestUnderlyingMap.put(requestIdGenerator.incrementAndGet(), underlying);
+                    }
+                }
+            });
+
+            ibRequestUnderlyingMap.keySet().forEach(reqId -> {
+                String undl = ibRequestUnderlyingMap.get(reqId);
+                c.getClientSocket().reqHistoricalData(reqId, createStockContract(undl), endDate, "60 S", "1 min", SecType.STK.getIbWhatToShow(), 1, 2, null);
+            });
+
+            CoreUtil.waitMilliseconds(2000);
+
+            ibRequestPositionMap.get(accountId).keySet().forEach(reqId -> {
+                Position p = ibRequestPositionMap.get(accountId).get(reqId);
+                c.getClientSocket().reqHistoricalData(reqId, createHistDataContract(p), endDate, "60 S", "1 min", p.getSecType().getIbWhatToShow(), 1, 2, null);
+            });
+
+            taskExecutor.execute(() -> {
+                CoreUtil.waitMilliseconds(10000);
+
+                positionMap.get(accountId).stream().filter(p -> p.getSecType() == SecType.OPT).forEach(p -> p.setUnderlyingPrice(underlyingPriceMap.get(p.getUnderlying())));
+
+                String msg = "positions updated for account " + accountId;
+                messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, msg);
+                messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, msg);
+            });
         }
     }
 
@@ -130,34 +174,47 @@ public class IbController {
         positions.sort(Comparator.comparing(Position::getSymbol));
     }
 
-    public void requestPositionsHistoricalData(String accountId) {
-        IbConnection c = ibConnectionMap.get(accountId);
+    public void updateLastPrice(String accountId, int reqId, double close) {
 
-        if (c.isConnected()) {
-            log.info("requesting positions historical data for account " + accountId);
-            String endDate = df.format(Calendar.getInstance().getTime()) + " " + CoreSettings.IB_TIMEZONE;
+        if (ibRequestUnderlyingMap.containsKey(reqId)) {
+            underlyingPriceMap.put(ibRequestUnderlyingMap.get(reqId), close);
+            ibRequestUnderlyingMap.remove(reqId);
 
-            positionMap.get(accountId).forEach(p -> historicalDataRequestMap.put(requestIdGenerator.incrementAndGet(), p));
-
-            historicalDataRequestMap.keySet().forEach(reqId -> {
-                Position p = historicalDataRequestMap.get(reqId);
-                c.getClientSocket().reqHistoricalData(reqId, p.createHistDataContract(), endDate, "60 S", "1 min", p.getSecType().getIbWhatToShow(), 1, 2, null);
-            });
+        } else if (ibRequestPositionMap.get(accountId).containsKey(reqId)) {
+            ibRequestPositionMap.get(accountId).get(reqId).setLastPrice(close);
+            ibRequestPositionMap.get(accountId).remove(reqId);
         }
     }
 
-    public void updateLastPrice(int reqId, double close) {
-        Position position = historicalDataRequestMap.get(reqId);
+    private Contract createHistDataContract(Position p) {
+        Contract contract = new Contract();
 
-        if (position != null) {
-            position.setLastPrice(close);
-            historicalDataRequestMap.remove(reqId);
+        contract.symbol(p.getUnderlying());
+        contract.localSymbol(p.getSymbol());
+        contract.currency(p.getCurrency().name());
+        contract.exchange(p.getExchange());
+        contract.secType(p.getSecType().name());
 
-            if (historicalDataRequestMap.isEmpty()) {
-                String msg = "positions updated";
-                messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, msg);
-                messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, msg);
+        if (p.getSecType() == SecType.CFD) {
+            if (p.getSymbol().endsWith("n")) {
+                contract.localSymbol(p.getSymbol().substring(0, p.getSymbol().length() - 1));
+            }
+            if (p.getCurrency() == Currency.USD) {
+                contract.secType(SecType.STK.name());
             }
         }
+        return contract;
+    }
+
+    private Contract createStockContract(String symbol) {
+        Contract contract = new Contract();
+
+        contract.symbol(symbol);
+        contract.localSymbol(symbol);
+        contract.currency(Currency.USD.name());
+        contract.exchange(SecType.STK.getDefaultExchange());
+        contract.secType(Types.SecType.STK);
+
+        return contract;
     }
 }

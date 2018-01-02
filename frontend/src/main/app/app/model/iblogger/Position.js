@@ -14,6 +14,7 @@ Ext.define('HanGui.model.iblogger.Position', {
         'secType',
         'position',
         'avgCost',
-        'lastPrice'
+        'lastPrice',
+        'underlyingPrice'
     ]
 });

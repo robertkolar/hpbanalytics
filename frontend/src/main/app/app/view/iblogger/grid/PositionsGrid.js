@@ -31,7 +31,7 @@ Ext.define('HanGui.view.iblogger.grid.PositionsGrid', {
         width: 60,
         dataIndex: 'currency'
     }, {
-        text: 'Exch',
+        text: 'Exchange',
         width: 100,
         dataIndex: 'exchange'
     }, {
@@ -44,12 +44,20 @@ Ext.define('HanGui.view.iblogger.grid.PositionsGrid', {
         dataIndex: 'position',
         align: 'right'
     }, {
-        text: 'Last',
-        width: 80,
+        text: 'Last Prc',
+        width: 100,
         dataIndex: 'lastPrice',
         align: 'right',
         renderer: function(val, metadata, record) {
-            return Ext.util.Format.number(val, '0.00###');
+            return val ? Ext.util.Format.number(val, '0.00###') : '-';
+        }
+    }, {
+        text: 'Undl Prc',
+        width: 100,
+        dataIndex: 'underlyingPrice',
+        align: 'right',
+        renderer: function(val, metadata, record) {
+            return val ? Ext.util.Format.number(val, '0.00###') : '-';
         }
     }, {
         flex: 1
