@@ -12,6 +12,7 @@ import java.text.SimpleDateFormat;
 public class CoreSettings {
 
     public static final Integer IB_CONNECT_CLIENT_ID = 0;
+    public static final String IB_TIMEZONE = "EST";
     public static final Integer MAX_ORDER_HEARTBEAT_FAILS = 5;
     public static final String EXCHANGE_RATE_URL = "http://api.fixer.io/";
     public static final Integer EXCHANGE_RATE_DAYS_BACK = 5;

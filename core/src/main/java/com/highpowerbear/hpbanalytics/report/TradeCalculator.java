@@ -150,11 +150,17 @@ public class TradeCalculator {
 
         if (exchangeRate == null) {
             exchangeRate = reportDao.getExchangeRate(date);
+
             if (exchangeRate != null) {
                 exchangeRateMap.put(date, exchangeRate);
             } else {
                 String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(calendar));
                 exchangeRate = exchangeRateMap.get(previousDate);
+
+                if (exchangeRate == null) {
+                    exchangeRate = reportDao.getExchangeRate(previousDate);
+                    exchangeRateMap.put(date, exchangeRate);
+                }
             }
         }
 

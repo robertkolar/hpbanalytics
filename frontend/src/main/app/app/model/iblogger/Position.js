@@ -10,8 +10,10 @@ Ext.define('HanGui.model.iblogger.Position', {
         'symbol',
         'underlying',
         'currency',
+        'exchange',
         'secType',
         'position',
-        'avgCost'
+        'avgCost',
+        'lastPrice'
     ]
 });

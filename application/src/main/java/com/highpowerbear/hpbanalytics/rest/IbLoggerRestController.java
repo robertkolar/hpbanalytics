@@ -7,7 +7,7 @@ import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.iblogger.HeartbeatControl;
 import com.highpowerbear.hpbanalytics.iblogger.IbController;
-import com.highpowerbear.hpbanalytics.iblogger.PositionVO;
+import com.highpowerbear.hpbanalytics.iblogger.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -114,7 +114,7 @@ public class IbLoggerRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<PositionVO> positions = ibController.getPositions(accountId);
+        List<Position> positions = ibController.getPositions(accountId);
         if (positions == null) {
             positions = new ArrayList<>();
         }

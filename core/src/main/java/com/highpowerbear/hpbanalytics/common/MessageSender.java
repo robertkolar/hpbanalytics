@@ -1,7 +1,5 @@
 package com.highpowerbear.hpbanalytics.common;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jms.core.JmsTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -14,15 +12,12 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class MessageSender {
-    private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
     @Autowired public JavaMailSender emailSender;
     @Autowired private JmsTemplate jmsTemplate;
     @Autowired private SimpMessagingTemplate simpMessagingTemplate;
 
     public void sendEmailMessage(String subject, String text) {
-        log.info("sendEmailMessage " + subject + ": " + text);
-
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(CoreSettings.EMAIL_FROM);
         message.setTo(CoreSettings.EMAIL_TO);
@@ -32,12 +27,10 @@ public class MessageSender {
     }
 
     public void sendJmsMesage(String destination, String message) {
-        log.info("sendJmsMessage " + destination + ": " + message);
         jmsTemplate.convertAndSend(destination, message);
     }
 
     public void sendWsMessage(String topic, String message) {
-        log.info("sendWsMessage " + topic + ": " + message);
         simpMessagingTemplate.convertAndSend(topic, message);
     }
 }

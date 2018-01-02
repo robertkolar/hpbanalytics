@@ -3,19 +3,19 @@ package com.highpowerbear.hpbanalytics.iblogger;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.*;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
 
 /**
  *
@@ -24,13 +24,14 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.*;
 @Component
 @Scope("prototype")
 public class IbListener extends GenericIbListener {
-    private static final Logger log = LoggerFactory.getLogger(IbListener.class);
 
     @Autowired private IbLoggerDao ibLoggerDao;
     @Autowired private OpenOrderHandler openOrderHandler;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private MessageSender messageSender;
+
+    private final Map<Integer, Double> lastPriceMap = new HashMap<>();
 
     private String accountId;
 
@@ -88,16 +89,7 @@ public class IbListener extends GenericIbListener {
     public void position(String account, Contract contract, double pos, double avgCost) {
         super.position(account, contract, pos, avgCost);
 
-        PositionVO position = new PositionVO(
-                accountId,
-                contract.localSymbol(),
-                contract.symbol(),
-                Currency.valueOf(contract.currency()),
-                SecType.valueOf(contract.getSecType()),
-                pos,
-                avgCost
-        );
-        ibController.addPosition(position);
+        ibController.addPosition(new Position(accountId, contract, pos, avgCost));
     }
 
     @Override
@@ -105,6 +97,18 @@ public class IbListener extends GenericIbListener {
         super.positionEnd();
 
         ibController.positionEnd(accountId);
-        messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, "position end " + accountId);
+    }
+
+    @Override
+    public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double WAP, boolean hasGaps) {
+        //super.historicalData(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
+
+        if (date.startsWith("finish")) {
+            ibController.updateLastPrice(reqId, lastPriceMap.get(reqId));
+            lastPriceMap.remove(reqId);
+
+        } else {
+            lastPriceMap.put(reqId, close);
+        }
     }
 }

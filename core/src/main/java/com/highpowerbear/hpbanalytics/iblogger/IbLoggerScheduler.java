@@ -26,6 +26,19 @@ public class IbLoggerScheduler {
         });
     }
 
+    @Scheduled(fixedRate = 60000, initialDelay = 1000)
+    private void requestPositionsHistoricalData() {
+        ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
+
+            String accountId = ibAccount.getAccountId();
+            IbConnection c = ibController.getIbConnection(accountId);
+
+            if (c.isConnected()) {
+                ibController.requestPositionsHistoricalData(accountId);
+            }
+        });
+    }
+
     @Scheduled(fixedRate = 300000)
     private void performPeriodicTasks() {
         ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
