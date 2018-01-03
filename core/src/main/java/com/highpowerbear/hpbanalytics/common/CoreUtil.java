@@ -20,6 +20,13 @@ import java.util.TimeZone;
 public class CoreUtil {
     private static final Logger log = LoggerFactory.getLogger(CoreUtil.class);
 
+    private final static DateFormat optionDf = new SimpleDateFormat("yyMMdd");
+
+    static {
+        optionDf.setLenient(false);
+        optionDf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
+    }
+
     public static OptionInfoVO parseOptionSymbol(String optionSymbol) {
 
         if (optionSymbol.length() > 21 || optionSymbol.length() < 16) {
@@ -34,21 +41,16 @@ public class CoreUtil {
 
         String str = optionSymbol.substring(l-8, l-3);
         String strDec = optionSymbol.substring(l-3, l);
-        DateFormat df = new SimpleDateFormat("yyMMdd");
-        df.setLenient(false);
-        df.setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
         Date expDate;
         try {
-            expDate = df.parse(yy + MM + dd);
+            expDate = optionDf.parse(yy + MM + dd);
         } catch (ParseException pe) {
             log.error(pe.getMessage());
             return null;
         }
         expDate.setTime(expDate.getTime() + (1000 * 60 * 60 * 23)); // add 23 hours
 
-        DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        df1.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
         Number strikePrice;
@@ -118,6 +120,10 @@ public class CoreUtil {
 
     public static double round2(double number) {
         return round(number, 2);
+    }
+
+    public static String formatLogDate(final Calendar calendar) {
+        return CoreSettings.LOG_DATE_FORMAT.format(calendar.getTime());
     }
 
     public static String formatExchangeRateDate(final Calendar calendar) {

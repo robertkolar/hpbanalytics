@@ -348,10 +348,10 @@ public class ReportProcessor {
 
     private void logTradesAffected(Execution execution, List<Trade> tradesAffected) {
         StringBuilder sb = new StringBuilder();
-        sb.append("Trades affected by execution: ").append(execution.print()).append("\n");
+        sb.append("trades affected by execution: ").append(execution.print()).append("\n");
 
         tradesAffected.forEach(t -> {
-            sb.append("Trade: ").append(t.print()).append("\n");
+            sb.append("trade: ").append(t.print()).append("\n");
             t.getSplitExecutions().forEach(se -> sb.append(se.print()).append("\n"));
         });
         log.info(sb.toString());

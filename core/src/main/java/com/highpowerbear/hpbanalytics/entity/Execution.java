@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -19,8 +20,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -83,8 +82,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     }
 
     public String print() {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
-        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + df.format(fillDate.getTime()) + ", " + fillPrice);
+        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + CoreUtil.formatLogDate(fillDate) + ", " + fillPrice);
     }
 
     public Long getId() {

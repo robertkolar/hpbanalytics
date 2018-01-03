@@ -25,8 +25,6 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.List;
 
@@ -79,8 +77,7 @@ public class Trade implements Serializable {
     }
 
     public String print() {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
-        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? df.format(openDate.getTime()) : "-") + ", " + (closeDate != null ? df.format(closeDate.getTime()) : "-") + ", " + profitLoss);
+        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? CoreUtil.formatLogDate(openDate) : "-") + ", " + (closeDate != null ? CoreUtil.formatLogDate(closeDate) : "-") + ", " + profitLoss);
     }
 
     @Override

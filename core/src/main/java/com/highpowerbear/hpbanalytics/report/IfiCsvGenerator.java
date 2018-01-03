@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
@@ -45,7 +44,6 @@ public class IfiCsvGenerator {
     private final Map<TradeType, String> tradeTypeMap = new HashMap<>();
 
     private final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
-    private final DateFormat dfLog = new SimpleDateFormat("MM/dd/yyyy");
     private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
     @PostConstruct
@@ -72,7 +70,7 @@ public class IfiCsvGenerator {
         Calendar endDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
         List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
 
-        log.info("beginDate=" + dfLog.format(beginDate.getTime()) + ", endDate=" + dfLog.format(endDate.getTime()) + ", trades=" + trades.size());
+        log.info("beginDate=" + df.format(beginDate.getTime()) + ", endDate=" + df.format(endDate.getTime()) + ", trades=" + trades.size());
         StringBuilder sb = new StringBuilder();
 
         if (TradeType.SHORT.equals(tradeType)) {

@@ -8,7 +8,10 @@ public enum ContractMultiplier {
     NQ(20),
     YM(5),
     GC(100),
-    ZB(1000);
+    ZB(1000),
+    M6E(12500),
+    M6A(10000),
+    M6B(6250);
 
     private Integer multiplier;
 

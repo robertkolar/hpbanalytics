@@ -16,6 +16,7 @@ public class CoreSettings {
     public static final Integer MAX_ORDER_HEARTBEAT_FAILS = 5;
     public static final String EXCHANGE_RATE_URL = "http://api.fixer.io/";
     public static final Integer EXCHANGE_RATE_DAYS_BACK = 5;
+    public static final DateFormat LOG_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
     public static final DateFormat EXCHANGE_RATE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
     public static final Currency PORTFOLIO_BASE = Currency.EUR;
     public static final StatisticsPLMethod STATISTICS_PL_METHOD = StatisticsPLMethod.PORTFOLIO_BASE_CLOSE_ONLY;

@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -13,8 +14,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.io.Serializable;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 /**
@@ -51,8 +50,7 @@ public class SplitExecution implements Serializable {
     }
 
     public String print() {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
-        return (id + ", " + execution.getAction() + ", " + execution.getSymbol() + ", " + splitQuantity + " (" + execution.getQuantity() + ")"+ ", "+ currentPosition + ", " + df.format(execution.getFillDate().getTime()));
+        return (id + ", " + execution.getAction() + ", " + execution.getSymbol() + ", " + splitQuantity + " (" + execution.getQuantity() + ")"+ ", "+ currentPosition + ", " + CoreUtil.formatLogDate(execution.getFillDate()));
     }
 
     @Override
