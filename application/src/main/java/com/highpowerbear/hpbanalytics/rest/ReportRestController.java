@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.common.OptionParseResultVO;
+import com.highpowerbear.hpbanalytics.common.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -312,13 +312,12 @@ public class ReportRestController {
     public ResponseEntity<?> optionUtilParse(
             @RequestParam("optionsymbol") String optionSymbol) {
 
-        OptionParseResultVO optionParseResult;
-        try {
-            optionParseResult = CoreUtil.parseOptionSymbol(optionSymbol);
-        } catch (Exception e) {
+        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(optionSymbol);
+        if (optionInfo == null) {
             return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(optionParseResult);
+
+        return ResponseEntity.ok(optionInfo);
     }
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{tradetype}")

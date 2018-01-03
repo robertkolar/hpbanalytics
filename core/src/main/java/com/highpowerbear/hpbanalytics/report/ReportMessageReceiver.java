@@ -34,12 +34,12 @@ public class ReportMessageReceiver {
 
     @JmsListener(destination = JMS_DEST_IBLOGGER_TO_REPORT)
     public void receiveJmsMessage(String message) {
-        log.info("receiveJmsMessage " + JMS_DEST_IBLOGGER_TO_REPORT + ": " + message);
-
         handleExecution(Long.valueOf(message));
     }
 
     private void handleExecution(long ibOrderId) {
+        log.info("handling execution for order " + ibOrderId);
+
         IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
 
         if (ibOrder.getStatus() != OrderStatus.FILLED) {

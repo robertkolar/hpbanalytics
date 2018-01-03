@@ -2,9 +2,12 @@ package com.highpowerbear.hpbanalytics.common;
 
 import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -15,11 +18,13 @@ import java.util.TimeZone;
  * Created by robertk on 5/29/2017.
  */
 public class CoreUtil {
+    private static final Logger log = LoggerFactory.getLogger(CoreUtil.class);
 
-    public static OptionParseResultVO parseOptionSymbol(String optionSymbol) throws Exception {
+    public static OptionInfoVO parseOptionSymbol(String optionSymbol) {
 
         if (optionSymbol.length() > 21 || optionSymbol.length() < 16) {
-            throw new Exception(optionSymbol + " has not correct length");
+            log.error(optionSymbol + " has not correct length");
+            return null;
         }
         int l = optionSymbol.length();
 
@@ -32,18 +37,33 @@ public class CoreUtil {
         DateFormat df = new SimpleDateFormat("yyMMdd");
         df.setLenient(false);
         df.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        Date expDate = df.parse(yy+MM+dd);
+
+        Date expDate;
+        try {
+            expDate = df.parse(yy + MM + dd);
+        } catch (ParseException pe) {
+            log.error(pe.getMessage());
+            return null;
+        }
         expDate.setTime(expDate.getTime() + (1000 * 60 * 60 * 23)); // add 23 hours
 
         DateFormat df1 = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
         df1.setTimeZone(TimeZone.getTimeZone("America/New_York"));
         NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
-        return new OptionParseResultVO(
+        Number strikePrice;
+        try {
+            strikePrice = nf.parse(str + "." + strDec);
+        } catch (ParseException pe) {
+            log.error(pe.getMessage());
+            return null;
+        }
+
+        return new OptionInfoVO(
                 optionSymbol.substring(0, l-15).trim().toUpperCase(),
                 OptionType.getFromShortName(optionSymbol.substring(l - 9, l - 8)),
                 expDate,
-                nf.parse(str + "." + strDec).doubleValue()
+                strikePrice.doubleValue()
         );
     }
 

@@ -14,10 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
@@ -33,7 +33,7 @@ public class StatisticsCalculator {
     @Autowired private MessageSender messageSender;
     @Autowired private TradeCalculator tradeCalculator;
 
-    private final Map<String, List<StatisticsVO>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
+    private final Map<String, List<StatisticsVO>> statisticsMap = new ConcurrentHashMap<>(); // caching statistics to prevent excessive recalculation
 
     public List<StatisticsVO> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
 

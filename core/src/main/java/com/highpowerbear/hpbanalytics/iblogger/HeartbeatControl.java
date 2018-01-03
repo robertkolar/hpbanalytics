@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -22,7 +21,7 @@ public class HeartbeatControl {
 
     @Autowired private IbLoggerDao ibLoggerDao;
 
-    private Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new HashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
+    private Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new ConcurrentHashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
 
     @PostConstruct
     public void init() {

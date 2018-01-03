@@ -39,6 +39,10 @@ public class Position {
         this.avgCost = avgCost;
     }
 
+    public boolean isShort() {
+        return position < 0d;
+    }
+
     public String getAccountId() {
         return accountId;
     }

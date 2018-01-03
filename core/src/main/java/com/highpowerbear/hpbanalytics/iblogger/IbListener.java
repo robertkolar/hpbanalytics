@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
@@ -31,7 +31,7 @@ public class IbListener extends GenericIbListener {
     @Autowired private HeartbeatControl heartbeatControl;
     @Autowired private MessageSender messageSender;
 
-    private final Map<Integer, Double> lastPriceMap = new HashMap<>();
+    private final Map<Integer, Double> lastPriceMap = new ConcurrentHashMap<>();
 
     private String accountId;
 
@@ -87,7 +87,7 @@ public class IbListener extends GenericIbListener {
 
     @Override
     public void position(String account, Contract contract, double pos, double avgCost) {
-        super.position(account, contract, pos, avgCost);
+        //super.position(account, contract, pos, avgCost);
 
         ibController.addPosition(new Position(accountId, contract, pos, avgCost));
     }
@@ -101,7 +101,7 @@ public class IbListener extends GenericIbListener {
 
     @Override
     public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double WAP, boolean hasGaps) {
-        super.historicalData(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
+        //super.historicalData(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
 
         if (date.startsWith("finish")) {
             ibController.updateLastPrice(accountId, reqId, lastPriceMap.get(reqId));

@@ -21,7 +21,7 @@ public class IbLoggerScheduler {
             IbConnection c = ibController.getIbConnection(ibAccount.getAccountId());
 
             if (!c.isConnected() && c.isMarkConnected()) {
-                c.connect();
+                ibController.connect(ibAccount.getAccountId());
             }
         });
     }

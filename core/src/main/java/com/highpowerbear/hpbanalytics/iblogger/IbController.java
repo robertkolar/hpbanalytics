@@ -28,6 +28,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_RISKMGT;
@@ -46,11 +47,11 @@ public class IbController {
     @Autowired TaskExecutor taskExecutor;
     @Autowired private MessageSender messageSender;
 
-    private final Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
-    private final Map<String, List<Position>> positionMap = new HashMap<>(); // accountId --> positions
-    private final Map<String, Map<Integer, Position>> ibRequestPositionMap = new HashMap<>(); // accountId -> (ib request id -> position)
-    private final Map<Integer, String> ibRequestUnderlyingMap = new HashMap<>(); // ib request id -> underlying
-    private final Map<String, Double> underlyingPriceMap = new HashMap<>(); // underlying -> price
+    private final Map<String, IbConnection> ibConnectionMap = new ConcurrentHashMap<>(); // accountId --> ibConnection
+    private final Map<String, List<Position>> positionMap = new ConcurrentHashMap<>(); // accountId --> positions
+    private final Map<String, Map<Integer, Position>> ibRequestPositionMap = new ConcurrentHashMap<>(); // accountId -> (ib request id -> position)
+    private final Map<Integer, String> ibRequestUnderlyingMap = new ConcurrentHashMap<>(); // ib request id -> underlying
+    private final Map<String, Double> underlyingPriceMap = new ConcurrentHashMap<>(); // underlying -> price
 
     private final AtomicInteger requestIdGenerator = new AtomicInteger();
     private final DateFormat df = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
@@ -111,47 +112,47 @@ public class IbController {
         IbConnection c = ibConnectionMap.get(accountId);
 
         if (c.isConnected()) {
-            log.info("requesting positions for account " + accountId);
-            positionMap.put(accountId, new ArrayList<>());
-            ibRequestPositionMap.put(accountId, new HashMap<>());
-
-            c.getClientSocket().reqPositions();
-
-            CoreUtil.waitMilliseconds(3000);
-            log.info("requesting positions historical data for account " + accountId);
-
-            String endDate = df.format(Calendar.getInstance().getTime()) + " " + CoreSettings.IB_TIMEZONE;
-
-            positionMap.get(accountId).forEach(p -> {
-                ibRequestPositionMap.get(accountId).put(requestIdGenerator.incrementAndGet(), p);
-
-                if (p.getSecType() == SecType.OPT) {
-                    String underlying = p.getUnderlying();
-
-                    if (!ibRequestUnderlyingMap.values().contains(underlying)) {
-                        ibRequestUnderlyingMap.put(requestIdGenerator.incrementAndGet(), underlying);
-                    }
-                }
-            });
-
-            ibRequestUnderlyingMap.keySet().forEach(reqId -> {
-                String undl = ibRequestUnderlyingMap.get(reqId);
-                c.getClientSocket().reqHistoricalData(reqId, createStockContract(undl), endDate, "60 S", "1 min", SecType.STK.getIbWhatToShow(), 1, 2, null);
-            });
-
-            CoreUtil.waitMilliseconds(2000);
-
-            ibRequestPositionMap.get(accountId).keySet().forEach(reqId -> {
-                Position p = ibRequestPositionMap.get(accountId).get(reqId);
-                c.getClientSocket().reqHistoricalData(reqId, createHistDataContract(p), endDate, "60 S", "1 min", p.getSecType().getIbWhatToShow(), 1, 2, null);
-            });
-
             taskExecutor.execute(() -> {
-                CoreUtil.waitMilliseconds(10000);
+                log.info("requesting positions for account " + accountId);
+                positionMap.put(accountId, new ArrayList<>());
+                ibRequestPositionMap.put(accountId, new HashMap<>());
+
+                c.getClientSocket().reqPositions();
+
+                CoreUtil.waitMilliseconds(3000);
+                log.info("requesting positions historical data for account " + accountId);
+
+                String endDate = df.format(Calendar.getInstance().getTime()) + " " + CoreSettings.IB_TIMEZONE;
+
+                positionMap.get(accountId).forEach(p -> {
+                    ibRequestPositionMap.get(accountId).put(requestIdGenerator.incrementAndGet(), p);
+
+                    if (p.getSecType() == SecType.OPT) {
+                        String underlying = p.getUnderlying();
+
+                        if (!ibRequestUnderlyingMap.values().contains(underlying)) {
+                            ibRequestUnderlyingMap.put(requestIdGenerator.incrementAndGet(), underlying);
+                        }
+                    }
+                });
+
+                ibRequestUnderlyingMap.keySet().forEach(reqId -> {
+                    String undl = ibRequestUnderlyingMap.get(reqId);
+                    c.getClientSocket().reqHistoricalData(reqId, createStockContract(undl), endDate, "60 S", "1 min", SecType.STK.getIbWhatToShow(), 1, 2, null);
+                });
+
+                CoreUtil.waitMilliseconds(2000);
+
+                ibRequestPositionMap.get(accountId).keySet().forEach(reqId -> {
+                    Position p = ibRequestPositionMap.get(accountId).get(reqId);
+                    c.getClientSocket().reqHistoricalData(reqId, createHistDataContract(p), endDate, "60 S", "1 min", p.getSecType().getIbWhatToShow(), 1, 2, null);
+                });
+
+                CoreUtil.waitMilliseconds(5000);
 
                 positionMap.get(accountId).stream().filter(p -> p.getSecType() == SecType.OPT).forEach(p -> p.setUnderlyingPrice(underlyingPriceMap.get(p.getUnderlying())));
 
-                String msg = "positions updated for account " + accountId;
+                String msg = "positions updated for account: " + accountId;
                 messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, msg);
                 messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, msg);
             });

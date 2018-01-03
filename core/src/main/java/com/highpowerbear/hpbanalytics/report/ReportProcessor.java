@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.OptionParseResultVO;
+import com.highpowerbear.hpbanalytics.common.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
@@ -150,11 +150,8 @@ public class ReportProcessor {
     }
 
     public void expireTrade(Trade trade) {
-        OptionParseResultVO opr;
-        try {
-            opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
-        } catch (Exception e) {
-            log.error("error", e);
+        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(trade.getSymbol());
+        if (optionInfo == null) {
             return;
         }
 
@@ -172,7 +169,7 @@ public class ReportProcessor {
         e.setCurrency(trade.getCurrency());
         e.setSecType(trade.getSecType());
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(opr.getExpDate().getTime());
+        cal.setTimeInMillis(optionInfo.getExpirationDate().getTime());
         e.setFillDate(cal);
         e.setFillPrice(new BigDecimal(0.0));
 
@@ -180,11 +177,8 @@ public class ReportProcessor {
     }
 
     public void assignTrade(Trade trade) {
-        OptionParseResultVO opr;
-        try {
-            opr = CoreUtil.parseOptionSymbol(trade.getSymbol());
-        } catch (Exception exception) {
-            log.error("error", exception);
+        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(trade.getSymbol());
+        if (optionInfo == null) {
             return;
         }
 
@@ -202,7 +196,7 @@ public class ReportProcessor {
         e.setCurrency(trade.getCurrency());
         e.setSecType(trade.getSecType());
         Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(opr.getExpDate().getTime());
+        cal.setTimeInMillis(optionInfo.getExpirationDate().getTime());
         e.setFillDate(cal);
         e.setFillPrice(new BigDecimal(0.0));
 
@@ -214,7 +208,7 @@ public class ReportProcessor {
         ce.setComment("ASSIGN");
         ce.setOrigin("INTERNAL");
         ce.setReferenceId("N/A");
-        ce.setAction(OptionType.PUT.equals(opr.getOptType()) ? Action.BUY : Action.SELL);
+        ce.setAction(OptionType.PUT.equals(optionInfo.getOptionType()) ? Action.BUY : Action.SELL);
         ce.setQuantity(e.getQuantity() * 100);
         ce.setSymbol(e.getUnderlying());
         ce.setUnderlying(e.getUnderlying());
@@ -227,7 +221,7 @@ public class ReportProcessor {
         Calendar cal1 = Calendar.getInstance();
         cal1.setTimeInMillis(cal.getTimeInMillis() + randomLong);
         ce.setFillDate(cal1);
-        ce.setFillPrice(new BigDecimal(opr.getStrikePrice()));
+        ce.setFillPrice(new BigDecimal(optionInfo.getStrikePrice()));
 
         newExecution(ce);
     }

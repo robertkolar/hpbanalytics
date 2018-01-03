@@ -7,17 +7,17 @@ import java.util.Date;
 /**
  * Created by robertk on 10/9/2015.
  */
-public class OptionParseResultVO {
+public class OptionInfoVO {
 
     private String underlying;
-    private OptionType optType;
-    private Date expDate;
+    private OptionType optionType;
+    private Date expirationDate;
     private double strikePrice;
 
-    public OptionParseResultVO(String underlying, OptionType optType, Date expDate, double strikePrice) {
+    public OptionInfoVO(String underlying, OptionType optionType, Date expirationDate, double strikePrice) {
         this.underlying = underlying;
-        this.optType = optType;
-        this.expDate = expDate;
+        this.optionType = optionType;
+        this.expirationDate = expirationDate;
         this.strikePrice = strikePrice;
     }
 
@@ -25,12 +25,12 @@ public class OptionParseResultVO {
         return underlying;
     }
 
-    public OptionType getOptType() {
-        return optType;
+    public OptionType getOptionType() {
+        return optionType;
     }
 
-    public Date getExpDate() {
-        return expDate;
+    public Date getExpirationDate() {
+        return expirationDate;
     }
 
     public double getStrikePrice() {
@@ -39,10 +39,10 @@ public class OptionParseResultVO {
 
     @Override
     public String toString() {
-        return "OptionParseResultVO{" +
+        return "OptionInfoVO{" +
                 "underlying='" + underlying + '\'' +
-                ", optType=" + optType +
-                ", expDate=" + expDate +
+                ", optionType=" + optionType +
+                ", expirationDate=" + expirationDate +
                 ", strikePrice=" + strikePrice +
                 '}';
     }

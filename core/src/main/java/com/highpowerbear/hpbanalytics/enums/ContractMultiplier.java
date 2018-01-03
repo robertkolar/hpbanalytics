@@ -16,12 +16,18 @@ public enum ContractMultiplier {
         this.multiplier = multiplier;
     }
 
+    public Integer getMultiplier() {
+        return multiplier;
+    }
+
     public static Integer getByUnderlying(String underlying) {
-        if (ES.name().equalsIgnoreCase(underlying)) return ES.multiplier;
-        if (NQ.name().equalsIgnoreCase(underlying)) return NQ.multiplier;
-        if (YM.name().equalsIgnoreCase(underlying)) return YM.multiplier;
-        if (GC.name().equalsIgnoreCase(underlying)) return GC.multiplier;
-        if (ZB.name().equalsIgnoreCase(underlying)) return ZB.multiplier;
-        return 1;
+        int multiplier = 1;
+        for (ContractMultiplier cm : ContractMultiplier.values()) {
+            if (cm.name().equals(underlying)) {
+                multiplier = cm.multiplier;
+                break;
+            }
+        }
+        return multiplier;
     }
 }
