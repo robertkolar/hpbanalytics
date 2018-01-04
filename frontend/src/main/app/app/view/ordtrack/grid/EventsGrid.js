@@ -1,7 +1,7 @@
 /**
  * Created by robertk on 4/17/2015.
  */
-Ext.define('HanGui.view.iblogger.grid.EventsGrid', {
+Ext.define('HanGui.view.ordtrack.grid.EventsGrid', {
     extend: 'Ext.grid.Panel',
 
     requires: [

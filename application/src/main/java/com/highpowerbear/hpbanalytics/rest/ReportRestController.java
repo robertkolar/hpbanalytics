@@ -16,8 +16,8 @@ import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
 import com.highpowerbear.hpbanalytics.report.ReportProcessor;
-import com.highpowerbear.hpbanalytics.report.StatisticsVO;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
+import com.highpowerbear.hpbanalytics.report.StatisticsVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -178,7 +179,7 @@ public class ReportRestController {
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") int id,
             @PathVariable("tradeid") long tradeId,
-            @RequestBody CloseTradeVO closeTradeVO) {
+            @RequestBody CloseTrade closeTrade) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -192,9 +193,9 @@ public class ReportRestController {
         }
 
         // fix fill date timezone, JAXB JSON converter sets it to UTC
-        closeTradeVO.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        closeTrade.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
 
-        reportProcessor.closeTrade(trade, closeTradeVO.getCloseDate(), closeTradeVO.getClosePrice());
+        reportProcessor.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
@@ -331,5 +332,23 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, tradeType));
+    }
+
+    private static class CloseTrade {
+        private Calendar closeDate;
+        private BigDecimal closePrice;
+
+        private CloseTrade(Calendar closeDate, BigDecimal closePrice) {
+            this.closeDate = closeDate;
+            this.closePrice = closePrice;
+        }
+
+        private Calendar getCloseDate() {
+            return closeDate;
+        }
+
+        private BigDecimal getClosePrice() {
+            return closePrice;
+        }
     }
 }

@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ibclient;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;

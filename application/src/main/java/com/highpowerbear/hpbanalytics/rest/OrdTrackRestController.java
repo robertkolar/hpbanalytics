@@ -1,13 +1,13 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
 import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.iblogger.HeartbeatControl;
-import com.highpowerbear.hpbanalytics.iblogger.IbController;
-import com.highpowerbear.hpbanalytics.iblogger.Position;
+import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
+import com.highpowerbear.hpbanalytics.ibclient.IbController;
+import com.highpowerbear.hpbanalytics.ordtrack.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -25,17 +25,17 @@ import java.util.Map;
  * Created by robertk on 11/18/2017.
  */
 @RestController
-@RequestMapping("/iblogger")
-public class IbLoggerRestController {
+@RequestMapping("/ordtrack")
+public class OrdTrackRestController {
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
     @Autowired private IbController ibController;
     @Autowired FilterParser filterParser;
     @Autowired HeartbeatControl heartbeatControl;
 
     @RequestMapping("/ibaccounts")
     public RestList<IbAccount> getIbAccount() {
-        List<IbAccount> ibAccounts = ibLoggerDao.getIbAccounts();
+        List<IbAccount> ibAccounts = ordTrackDao.getIbAccounts();
         ibAccounts.forEach(ibAccount -> ibAccount.setIbConnection(ibController.getIbConnection(ibAccount.getAccountId())));
 
         return new RestList<>(ibAccounts, (long) ibAccounts.size());
@@ -45,11 +45,11 @@ public class IbLoggerRestController {
     public ResponseEntity<?> updateIbAccount(
             @RequestBody IbAccount ibAccount) {
 
-        IbAccount ibAccountDb = ibLoggerDao.findIbAccount(ibAccount.getAccountId());
+        IbAccount ibAccountDb = ordTrackDao.findIbAccount(ibAccount.getAccountId());
         if (ibAccountDb == null) {
             return ResponseEntity.notFound().build();
         }
-        ibAccountDb = ibLoggerDao.updateIbAccount(ibAccount);
+        ibAccountDb = ordTrackDao.updateIbAccount(ibAccount);
 
         return ResponseEntity.ok(ibAccountDb);
     }
@@ -59,7 +59,7 @@ public class IbLoggerRestController {
             @PathVariable("accountId") String accountId,
             @PathVariable("connect") boolean connect) {
 
-        IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
+        IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);
         if (ibAccount == null) {
             return ResponseEntity.notFound().build();
         }
@@ -87,7 +87,7 @@ public class IbLoggerRestController {
             @RequestParam("start") Integer start,
             @RequestParam("limit") Integer limit) {
 
-        IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
+        IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);
         if (ibAccount == null) {
             return ResponseEntity.notFound().build();
         }
@@ -97,19 +97,19 @@ public class IbLoggerRestController {
         IbOrderFilter filter = filterParser.parseIbOrderFilter(jsonFilter);
         Map<IbOrder, Integer> hm = heartbeatControl.getOpenOrderHeartbeatMap().get(accountId);
 
-        for (IbOrder ibOrder : ibLoggerDao.getFilteredIbOrders(accountId, filter, start, limit)) {
+        for (IbOrder ibOrder : ordTrackDao.getFilteredIbOrders(accountId, filter, start, limit)) {
             ibOrder.setHeartbeatCount(hm.get(ibOrder));
             ibOrders.add(ibOrder);
         }
 
-        return ResponseEntity.ok(new RestList<>(ibOrders, ibLoggerDao.getNumFilteredIbOrders(accountId, filter)));
+        return ResponseEntity.ok(new RestList<>(ibOrders, ordTrackDao.getNumFilteredIbOrders(accountId, filter)));
     }
 
     @RequestMapping("/ibaccounts/{accountId}/positions")
     public ResponseEntity<?> getPositions(
             @PathVariable("accountId") String accountId) {
 
-        IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
+        IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);
         if (ibAccount == null) {
             return ResponseEntity.notFound().build();
         }

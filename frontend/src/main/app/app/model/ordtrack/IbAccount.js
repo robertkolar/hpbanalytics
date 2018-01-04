@@ -1,8 +1,8 @@
 /**
  * Created by robertk on 4/11/2015.
  */
-Ext.define('HanGui.model.iblogger.IbAccount', {
-    extend: 'HanGui.model.iblogger.Base',
+Ext.define('HanGui.model.ordtrack.IbAccount', {
+    extend: 'HanGui.model.ordtrack.Base',
     idProperty: 'accountId',
 
     fields: [

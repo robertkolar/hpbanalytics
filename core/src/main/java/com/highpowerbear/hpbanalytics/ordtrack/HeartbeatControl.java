@@ -1,7 +1,7 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ordtrack;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,15 +19,15 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class HeartbeatControl {
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
 
     private Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new ConcurrentHashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
 
     @PostConstruct
     public void init() {
-        ibLoggerDao.getIbAccounts().forEach(ibAccount -> openOrderHeartbeatMap.put(ibAccount.getAccountId(), new ConcurrentHashMap<>()));
-        ibLoggerDao.getIbAccounts().stream()
-                .flatMap(ibAccount -> ibLoggerDao.getOpenIbOrders(ibAccount.getAccountId()).stream())
+        ordTrackDao.getIbAccounts().forEach(ibAccount -> openOrderHeartbeatMap.put(ibAccount.getAccountId(), new ConcurrentHashMap<>()));
+        ordTrackDao.getIbAccounts().stream()
+                .flatMap(ibAccount -> ordTrackDao.getOpenIbOrders(ibAccount.getAccountId()).stream())
                 .forEach(this::initHeartbeat);
     }
 
@@ -45,7 +45,7 @@ public class HeartbeatControl {
             if (failedHeartbeatsLeft <= 0) {
                 if (!OrderStatus.UNKNOWN.equals(ibOrder.getStatus())) {
                     ibOrder.addEvent(OrderStatus.UNKNOWN, null);
-                    ibLoggerDao.updateIbOrder(ibOrder);
+                    ordTrackDao.updateIbOrder(ibOrder);
                 }
                 hm.remove(ibOrder);
             } else {

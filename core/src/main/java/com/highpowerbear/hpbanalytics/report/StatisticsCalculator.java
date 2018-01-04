@@ -137,10 +137,10 @@ public class StatisticsCalculator {
                     tradesClosedForPeriod.size(),
                     numWinners,
                     numLosers,
-                    CoreUtil.round2(winnersProfit),
-                    CoreUtil.round2(losersLoss),
                     CoreUtil.round2(bigWinner),
                     CoreUtil.round2(bigLoser),
+                    CoreUtil.round2(winnersProfit),
+                    CoreUtil.round2(losersLoss),
                     CoreUtil.round2(profitLoss),
                     CoreUtil.round2(cumulProfitLoss)
             );

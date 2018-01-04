@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_REPORT;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
 
 /**
@@ -32,7 +32,7 @@ public class ReportMessageReceiver {
     @Autowired private ReportProcessor reportProcessor;
     @Autowired private MessageSender messageSender;
 
-    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_REPORT)
+    @JmsListener(destination = JMS_DEST_ORDTRACK_TO_REPORT)
     public void receiveJmsMessage(String message) {
         handleExecution(Long.valueOf(message));
     }

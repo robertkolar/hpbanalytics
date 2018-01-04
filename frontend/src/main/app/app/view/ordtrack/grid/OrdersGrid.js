@@ -1,13 +1,13 @@
 /**
  * Created by robertk on 4/11/2015.
  */
-Ext.define('HanGui.view.iblogger.grid.OrdersGrid', {
+Ext.define('HanGui.view.ordtrack.grid.OrdersGrid', {
     extend: 'Ext.grid.Panel',
-    xtype: 'han-iblogger-orders-grid',
+    xtype: 'han-ordtrack-orders-grid',
     requires: [
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging',
-        'HanGui.view.iblogger.IbLoggerController',
+        'HanGui.view.ordtrack.OrdTrackController',
         'Ext.grid.filters.Filters'
     ],
     plugins: 'gridfilters',

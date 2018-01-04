@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * Created by robertk on 3/28/2015.
  */
-public interface IbLoggerDao {
+public interface OrdTrackDao {
 
     IbAccount findIbAccount(String accountId);
     List<IbAccount> getIbAccounts();

@@ -1,26 +1,26 @@
 /**
  * Created by robertk on 4/17/2015.
  */
-Ext.define('HanGui.view.iblogger.IbLogger', {
+Ext.define('HanGui.view.ordtrack.OrdTrack', {
     extend: 'Ext.panel.Panel',
-    xtype: 'han-iblogger',
-    reference: 'iblogger',
+    xtype: 'han-ordtrack',
+    reference: 'ordtrack',
     header: false,
     border: false,
     requires: [
         'Ext.layout.container.VBox',
-        'HanGui.view.iblogger.grid.AccountsGrid',
-        'HanGui.view.iblogger.IbLoggerController',
-        'HanGui.view.iblogger.IbLoggerModel',
-        'HanGui.view.iblogger.grid.OrdersGrid',
-        'HanGui.view.iblogger.grid.PositionsGrid',
+        'HanGui.view.ordtrack.grid.AccountsGrid',
+        'HanGui.view.ordtrack.OrdTrackController',
+        'HanGui.view.ordtrack.OrdTrackModel',
+        'HanGui.view.ordtrack.grid.OrdersGrid',
+        'HanGui.view.ordtrack.grid.PositionsGrid',
         'HanGui.common.Glyphs',
         'Ext.tab.Panel'
 
     ],
-    controller: 'han-iblogger',
+    controller: 'han-ordtrack',
     viewModel: {
-        type: 'han-iblogger'
+        type: 'han-ordtrack'
     },
     layout: {
         type: 'vbox',
@@ -28,7 +28,7 @@ Ext.define('HanGui.view.iblogger.IbLogger', {
     },
     scrollable: true,
     items: [{
-        xtype: 'han-iblogger-accounts-grid',
+        xtype: 'han-ordtrack-accounts-grid',
         reference: 'accountsGrid'
     }, {
         xtype: 'tabpanel',
@@ -37,11 +37,11 @@ Ext.define('HanGui.view.iblogger.IbLogger', {
             beforerender: 'setGlyphs'
         },
         items: [{
-            xtype: 'han-iblogger-orders-grid',
+            xtype: 'han-ordtrack-orders-grid',
             title: 'IB Orders',
             reference: 'ordersPanel'
         }, {
-            xtype: 'han-iblogger-positions-grid',
+            xtype: 'han-ordtrack-positions-grid',
             title: 'Positions',
             reference: 'positionsPanel'
         }]

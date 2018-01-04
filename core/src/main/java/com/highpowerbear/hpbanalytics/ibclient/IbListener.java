@@ -1,9 +1,12 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ibclient;
 
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
+import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
+import com.highpowerbear.hpbanalytics.ordtrack.OpenOrderHandler;
+import com.highpowerbear.hpbanalytics.ordtrack.Position;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
@@ -14,8 +17,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_REPORT;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRACK;
 
 /**
  *
@@ -25,7 +28,7 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGG
 @Scope("prototype")
 public class IbListener extends GenericIbListener {
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
     @Autowired private OpenOrderHandler openOrderHandler;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
@@ -57,7 +60,7 @@ public class IbListener extends GenericIbListener {
             return;
         }
 
-        IbOrder ibOrder = ibLoggerDao.getIbOrderByPermId(accountId, (long) permId);
+        IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, (long) permId);
         if (ibOrder == null) {
             return;
         }
@@ -67,16 +70,16 @@ public class IbListener extends GenericIbListener {
 
         } else if (OrderStatus.FILLED.getIbStatus().equals(status) && remaining == 0 && !OrderStatus.FILLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
-            ibLoggerDao.updateIbOrder(ibOrder);
+            ordTrackDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
-            messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_REPORT, String.valueOf(ibOrder.getId()));
+            messageSender.sendJmsMesage(JMS_DEST_ORDTRACK_TO_REPORT, String.valueOf(ibOrder.getId()));
 
         } else if (OrderStatus.CANCELLED.getIbStatus().equals(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
-            ibLoggerDao.updateIbOrder(ibOrder);
+            ordTrackDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
         }
-        messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, "order status changed");
+        messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "order status changed");
     }
 
     @Override

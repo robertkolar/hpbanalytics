@@ -1,16 +1,16 @@
 /**
  * Created by robertk on 4/17/2015.
  */
-Ext.define('HanGui.view.iblogger.IbLoggerController', {
+Ext.define('HanGui.view.ordtrack.OrdTrackController', {
     extend: 'Ext.app.ViewController',
 
-    alias: 'controller.han-iblogger',
+    alias: 'controller.han-ordtrack',
 
     requires: [
         'Ext.Ajax',
         'HanGui.common.Definitions',
-        'HanGui.view.iblogger.grid.EventsGrid',
-        'HanGui.view.iblogger.window.EventsWindow'
+        'HanGui.view.ordtrack.grid.EventsGrid',
+        'HanGui.view.ordtrack.window.EventsWindow'
     ],
 
     init: function() {
@@ -21,7 +21,7 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
             accountsGrid = me.lookupReference('accountsGrid');
 
         if (ibAccounts) {
-            ibAccounts.getProxy().setUrl(HanGui.common.Definitions.urlPrefixIbLogger + '/ibaccounts');
+            ibAccounts.getProxy().setUrl(HanGui.common.Definitions.urlPrefixOrdTrack + '/ibaccounts');
             ibAccounts.load(function (records, operation, success) {
                 if (success) {
                     accountsGrid.setSelection(ibAccounts.first());
@@ -33,9 +33,9 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
         var stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function(frame) {
-            console.log("WS iblogger connected");
+            console.log("WS ordtrack connected");
 
-            stompClient.subscribe('/topic/iblogger', function(message) {
+            stompClient.subscribe('/topic/ordtrack', function(message) {
 
                 if (message.body.startsWith('order')) {
                     ibOrders.reload();
@@ -45,7 +45,7 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
             });
 
         }, function() {
-            console.log("WS iblogger disconnected");
+            console.log("WS ordtrack disconnected");
         });
     },
 
@@ -57,8 +57,8 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
             positionsPaging = me.lookupReference('positionsPaging');
 
         me.ibAccountId = record.data.accountId;
-        ibOrders.getProxy().setUrl(HanGui.common.Definitions.urlPrefixIbLogger + '/ibaccounts/' + me.ibAccountId  + '/iborders');
-        positions.getProxy().setUrl(HanGui.common.Definitions.urlPrefixIbLogger + '/ibaccounts/' + me.ibAccountId  + '/positions');
+        ibOrders.getProxy().setUrl(HanGui.common.Definitions.urlPrefixOrdTrack + '/ibaccounts/' + me.ibAccountId  + '/iborders');
+        positions.getProxy().setUrl(HanGui.common.Definitions.urlPrefixOrdTrack + '/ibaccounts/' + me.ibAccountId  + '/positions');
 
         if (ordersPaging.getStore().isLoaded()) {
             ordersPaging.moveFirst();
@@ -88,8 +88,8 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
         var me = this;
 
         if (!me.eventsGrid) {
-            me.eventsGrid =  Ext.create('HanGui.view.iblogger.grid.EventsGrid');
-            me.eventsWindow = Ext.create('widget.han-iblogger-events-window');
+            me.eventsGrid =  Ext.create('HanGui.view.ordtrack.grid.EventsGrid');
+            me.eventsWindow = Ext.create('widget.han-ordtrack-events-window');
             me.eventsWindow.add(me.eventsGrid);
         }
         var permId = record.get(record.getFields()[1].getName());
@@ -126,7 +126,7 @@ Ext.define('HanGui.view.iblogger.IbLoggerController', {
 
         Ext.Ajax.request({
             method: 'PUT',
-            url: HanGui.common.Definitions.urlPrefixIbLogger + '/ibaccounts/' + accountId + '/connect/' + (con ? 'true' : 'false'),
+            url: HanGui.common.Definitions.urlPrefixOrdTrack + '/ibaccounts/' + accountId + '/connect/' + (con ? 'true' : 'false'),
             success: function(response) {
                 box.hide();
                 grid.getStore().reload();

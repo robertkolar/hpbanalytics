@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.dao;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -22,7 +21,7 @@ import java.util.Set;
  */
 @Repository
 @Transactional(propagation = Propagation.SUPPORTS)
-public class IbLoggerDaoImpl implements IbLoggerDao {
+public class OrdTrackDaoImpl implements OrdTrackDao {
 
     @PersistenceContext
     private EntityManager em;

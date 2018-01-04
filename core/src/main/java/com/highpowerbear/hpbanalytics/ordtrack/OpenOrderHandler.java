@@ -1,7 +1,7 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ordtrack;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
@@ -22,11 +22,11 @@ public class OpenOrderHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
     @Autowired private HeartbeatControl heartbeatControl;
 
     public void handleOpenOrder(String accountId, int orderId, Contract contract, Order order) {
-        IbAccount ibAccount = ibLoggerDao.findIbAccount(accountId);
+        IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);
 
         if (!checkListenIb(ibAccount)) {
             log.info("IB listening disabled, order will be ignored");
@@ -60,7 +60,7 @@ public class OpenOrderHandler {
             symbol = CoreUtil.removeSpace(symbol);
         }
 
-        IbOrder ibOrderDb = ibLoggerDao.getIbOrderByPermId(accountId, order.permId());
+        IbOrder ibOrderDb = ordTrackDao.getIbOrderByPermId(accountId, order.permId());
         if (ibOrderDb != null) {
             updateExistingOrder(ibOrderDb, order);
         } else {
@@ -97,7 +97,7 @@ public class OpenOrderHandler {
     private void updateExistingOrder(IbOrder ibOrderDb, Order order) {
         if (ibOrderDb.getOrderId() == 0) {
             ibOrderDb.setOrderId(order.orderId());
-            ibLoggerDao.updateIbOrder(ibOrderDb);
+            ordTrackDao.updateIbOrder(ibOrderDb);
         }
         if (!OrderStatus.SUBMITTED.equals(ibOrderDb.getStatus()) && !OrderStatus.UPDATED.equals(ibOrderDb.getStatus())) {
             return;
@@ -115,7 +115,7 @@ public class OpenOrderHandler {
 
         if (update) {
             ibOrderDb.addEvent(OrderStatus.UPDATED, ibOrderDb.getOrderPrice());
-            ibLoggerDao.updateIbOrder(ibOrderDb);
+            ordTrackDao.updateIbOrder(ibOrderDb);
         }
     }
 
@@ -143,7 +143,7 @@ public class OpenOrderHandler {
         ibOrder.setParentId(order.parentId());
         ibOrder.setOcaGroup(order.ocaGroup());
         ibOrder.addEvent(OrderStatus.SUBMITTED, ibOrder.getOrderPrice());
-        ibLoggerDao.newIbOrder(ibOrder);
+        ordTrackDao.newIbOrder(ibOrder);
         heartbeatControl.initHeartbeat(ibOrder);
     }
 }

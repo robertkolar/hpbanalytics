@@ -22,9 +22,9 @@ public class CoreSettings {
     public static final StatisticsPLMethod STATISTICS_PL_METHOD = StatisticsPLMethod.PORTFOLIO_BASE_CLOSE_ONLY;
     public static final String EMAIL_FROM = "hpb@highpowerbear.com";
     public static final String EMAIL_TO = "info@highpowerbear.com";
-    public static final String JMS_DEST_IBLOGGER_TO_REPORT = "ibLoggerToReport";
-    public static final String JMS_DEST_IBLOGGER_TO_RISKMGT = "ibLoggerToRiskMgt";
-    public static final String WS_TOPIC_IBLOGGER = "/topic/iblogger";
+    public static final String JMS_DEST_ORDTRACK_TO_REPORT = "ordTrackToReport";
+    public static final String JMS_DEST_ORDTRACK_TO_RISKMGT = "ordTrackToRiskMgt";
+    public static final String WS_TOPIC_ORDTRACK = "/topic/ordtrack";
     public static final String WS_TOPIC_REPORT = "/topic/report";
     public static final String WS_TOPIC_RISKMGT = "/topic/riskmgt";
 }

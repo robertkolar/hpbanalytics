@@ -38,11 +38,6 @@
             <version>9.4-1206-jdbc42</version>
         </dependency>
         <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>1.4.196</version>
-        </dependency>
-        <dependency>
             <groupId>javax.json</groupId>
             <artifactId>javax.json-api</artifactId>
             <version>1.1.2</version>

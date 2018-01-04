@@ -1,8 +1,8 @@
 /**
  * Created by robertk on 12/29/2017.
  */
-Ext.define('HanGui.model.iblogger.Position', {
-    extend: 'HanGui.model.iblogger.Base',
+Ext.define('HanGui.model.ordtrack.Position', {
+    extend: 'HanGui.model.ordtrack.Base',
     idProperty: 'symbol',
 
     fields: [

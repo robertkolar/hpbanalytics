@@ -1,6 +1,8 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ordtrack;
 
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.ibclient.IbConnection;
+import com.highpowerbear.hpbanalytics.ibclient.IbController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -9,15 +11,15 @@ import org.springframework.stereotype.Component;
  * Created by robertk on 3/29/2015.
  */
 @Component
-public class IbLoggerScheduler {
+public class OrdTrackScheduler {
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
     @Autowired private IbController ibController;
     @Autowired private HeartbeatControl heartbeatControl;
 
     @Scheduled(fixedRate = 5000)
     private void reconnect() {
-        ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
+        ordTrackDao.getIbAccounts().forEach(ibAccount -> {
             IbConnection c = ibController.getIbConnection(ibAccount.getAccountId());
 
             if (!c.isConnected() && c.isMarkConnected()) {
@@ -28,7 +30,7 @@ public class IbLoggerScheduler {
 
     @Scheduled(fixedRate = 300000, initialDelay = 60000)
     private void performPeriodicTasks() {
-        ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
+        ordTrackDao.getIbAccounts().forEach(ibAccount -> {
 
             String accountId = ibAccount.getAccountId();
             IbConnection c = ibController.getIbConnection(accountId);

@@ -1,11 +1,12 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ibclient;
 
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.dao.IbLoggerDao;
+import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.highpowerbear.hpbanalytics.ordtrack.Position;
 import com.ib.client.Contract;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
@@ -31,8 +32,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_RISKMGT;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGGER;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_RISKMGT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRACK;
 
 /**
  *
@@ -42,7 +43,7 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_IBLOGG
 public class IbController {
     private static final Logger log = LoggerFactory.getLogger(IbController.class);
 
-    @Autowired private IbLoggerDao ibLoggerDao;
+    @Autowired private OrdTrackDao ordTrackDao;
     @Autowired private Provider<IbListener> ibListeners;
     @Autowired TaskExecutor taskExecutor;
     @Autowired private MessageSender messageSender;
@@ -66,7 +67,7 @@ public class IbController {
 
     @PostConstruct
     private void init() {
-        ibLoggerDao.getIbAccounts().forEach(ibAccount -> {
+        ordTrackDao.getIbAccounts().forEach(ibAccount -> {
             EReaderSignal eReaderSignal = new EJavaSignal();
             EClientSocket eClientSocket = new EClientSocket(ibListeners.get().configure(ibAccount.getAccountId()), eReaderSignal);
 
@@ -153,8 +154,8 @@ public class IbController {
                 positionMap.get(accountId).stream().filter(p -> p.getSecType() == SecType.OPT).forEach(p -> p.setUnderlyingPrice(underlyingPriceMap.get(p.getUnderlying())));
 
                 String msg = "positions updated for account: " + accountId;
-                messageSender.sendWsMessage(WS_TOPIC_IBLOGGER, msg);
-                messageSender.sendJmsMesage(JMS_DEST_IBLOGGER_TO_RISKMGT, msg);
+                messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, msg);
+                messageSender.sendJmsMesage(JMS_DEST_ORDTRACK_TO_RISKMGT, msg);
             });
         }
     }

@@ -4,7 +4,7 @@
 Ext.define('HanGui.common.Definitions', {
     statics: {
         urlPrefixReport: 'http://' + window.location.host + '/report',
-        urlPrefixIbLogger: 'http://' + window.location.host + '/iblogger',
+        urlPrefixOrdTrack: 'http://' + window.location.host + '/ordtrack',
 
         getIbOrderStatusColor: function(status) {
             var statusColor;

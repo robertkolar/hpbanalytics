@@ -10,10 +10,10 @@ Ext.define('HanGui.view.main.Main', {
     requires: [
         'HanGui.view.main.MainController',
         'HanGui.view.main.MainModel',
-        'HanGui.view.iblogger.IbLogger',
+        'HanGui.view.ordtrack.OrdTrack',
         'HanGui.view.report.Report',
-        'HanGui.model.iblogger.IbOrder',
-        'HanGui.model.iblogger.IbOrderEvent',
+        'HanGui.model.ordtrack.IbOrder',
+        'HanGui.model.ordtrack.IbOrderEvent',
         'HanGui.model.report.Trade',
         'HanGui.model.report.SplitExecution'
     ],
@@ -26,9 +26,9 @@ Ext.define('HanGui.view.main.Main', {
         beforerender: 'setGlyphs'
     },
     items: [{
-        xtype: 'han-iblogger',
-        title: 'IB Logger',
-        reference: 'ibLoggerPanel'
+        xtype: 'han-ordtrack',
+        title: 'Ord Track',
+        reference: 'ordTrackPanel'
     }, {
         xtype: 'han-report',
         title: 'Report',

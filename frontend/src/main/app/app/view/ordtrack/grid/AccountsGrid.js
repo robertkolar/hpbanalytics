@@ -1,7 +1,7 @@
 /**
  * Created by robertk on 4/18/2015.
  */
-Ext.define('HanGui.view.iblogger.grid.AccountsGrid', {
+Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
     extend: 'Ext.grid.Panel',
     requires: [
         'Ext.form.field.Checkbox',
@@ -10,9 +10,9 @@ Ext.define('HanGui.view.iblogger.grid.AccountsGrid', {
         'Ext.grid.column.Action',
         'Ext.grid.column.Check',
         'Ext.grid.plugin.RowEditing',
-        'HanGui.view.iblogger.IbLoggerController'
+        'HanGui.view.ordtrack.OrdTrackController'
     ],
-    xtype: 'han-iblogger-accounts-grid',
+    xtype: 'han-ordtrack-accounts-grid',
     listeners: {
         select: 'onAccountSelect'
     },

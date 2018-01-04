@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.iblogger;
+package com.highpowerbear.hpbanalytics.ibclient;
 
 import com.ib.client.CommissionReport;
 import com.ib.client.Contract;

@@ -1,14 +1,14 @@
 /**
  * Created by robertk on 12/29/2017.
  */
-Ext.define('HanGui.view.iblogger.grid.PositionsGrid', {
+Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
     extend: 'Ext.grid.Panel',
-    xtype: 'han-iblogger-positions-grid',
+    xtype: 'han-ordtrack-positions-grid',
 
     requires: [
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging',
-        'HanGui.view.iblogger.IbLoggerController'
+        'HanGui.view.ordtrack.OrdTrackController'
     ],
     bind: '{positions}',
     viewConfig: {

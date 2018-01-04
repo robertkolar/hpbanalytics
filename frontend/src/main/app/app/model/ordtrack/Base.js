@@ -1,7 +1,7 @@
 /**
  * Created by robertk on 4/17/2015.
  */
-Ext.define('HanGui.model.iblogger.Base', {
+Ext.define('HanGui.model.ordtrack.Base', {
     extend: 'Ext.data.Model',
 
     requires: [
@@ -13,9 +13,9 @@ Ext.define('HanGui.model.iblogger.Base', {
     ],
 
     schema: {
-        id: 'iblogger',
-        namespace: 'HanGui.model.iblogger',
-        urlPrefix: HanGui.common.Definitions.urlPrefixIbLogger,
+        id: 'ordtrack',
+        namespace: 'HanGui.model.ordtrack',
+        urlPrefix: HanGui.common.Definitions.urlPrefixOrdTrack,
         proxy: {
             type: 'ajax',
             actionMethods: {

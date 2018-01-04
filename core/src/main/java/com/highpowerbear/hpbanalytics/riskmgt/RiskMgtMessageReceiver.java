@@ -5,8 +5,8 @@ import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.common.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.iblogger.IbController;
-import com.highpowerbear.hpbanalytics.iblogger.Position;
+import com.highpowerbear.hpbanalytics.ibclient.IbController;
+import com.highpowerbear.hpbanalytics.ordtrack.Position;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_IBLOGGER_TO_RISKMGT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_RISKMGT;
 
 /**
  * Created by robertk on 12/28/2017.
@@ -33,7 +33,7 @@ public class RiskMgtMessageReceiver {
 
     private final Map<String, LocalDateTime> messageTimeMap = new ConcurrentHashMap<>();
 
-    @JmsListener(destination = JMS_DEST_IBLOGGER_TO_RISKMGT)
+    @JmsListener(destination = JMS_DEST_ORDTRACK_TO_RISKMGT)
     public void receiveJmsMessage(String message) {
 
         String accountId = message.split(":")[1].trim();
@@ -52,12 +52,12 @@ public class RiskMgtMessageReceiver {
 
             if (optionInfo != null) {
                 OptionType optionType = optionInfo.getOptionType();
-                double priceDiference = p.getUnderlyingPrice() - optionInfo.getStrikePrice();
+                double priceDifference = p.getUnderlyingPrice() - optionInfo.getStrikePrice();
 
-                if (optionType == OptionType.CALL && priceDiference > 0d || optionType == OptionType.PUT && priceDiference < 0d) {
+                if (optionType == OptionType.CALL && priceDifference > 0d || optionType == OptionType.PUT && priceDifference < 0d) {
                     LocalDateTime lastSentTime = messageTimeMap.get(p.getSymbol());
 
-                    if (lastSentTime == null || now.minusHours(4).isAfter(lastSentTime)) {
+                    if (lastSentTime == null || now.minusHours(24).isAfter(lastSentTime)) {
                         String subject = p.getSymbol() + " in the money";
                         String msg = p.toString() + "\n\n" + optionInfo.toString();
 
