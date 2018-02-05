@@ -4,11 +4,12 @@ package com.highpowerbear.hpbanalytics.enums;
  * Created by robertk on 11/18/2017.
  */
 public enum SecType {
-    STK (false, "SMART", "TRADES"),
-    OPT (true, "SMART", "TRADES"),
-    FUT (true, "GLOBEX", "TRADES"),
+    STK(false, "SMART", "TRADES"),
+    OPT(true, "SMART", "TRADES"),
+    FUT(true, "GLOBEX", "TRADES"),
     CASH(false, "IDEALPRO", "MIDPOINT"),
-    CFD (true, "SMART", "TRADES");
+    CFD(true, "SMART", "TRADES"),
+    CMDTY(false, "SMART", "TRADES");
 
     private boolean derivative;
     private String defaultExchange;

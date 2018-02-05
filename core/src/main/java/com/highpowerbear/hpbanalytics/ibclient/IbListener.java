@@ -4,6 +4,7 @@ import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
+import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
 import com.highpowerbear.hpbanalytics.ordtrack.OpenOrderHandler;
 import com.highpowerbear.hpbanalytics.ordtrack.Position;
@@ -92,7 +93,9 @@ public class IbListener extends GenericIbListener {
     public void position(String account, Contract contract, double pos, double avgCost) {
         //super.position(account, contract, pos, avgCost);
 
-        ibController.addPosition(new Position(accountId, contract, pos, avgCost));
+        if (pos != 0 && !contract.getSecType().equals(SecType.CMDTY.name())) {
+            ibController.addPosition(new Position(accountId, contract, pos, avgCost));
+        }
     }
 
     @Override

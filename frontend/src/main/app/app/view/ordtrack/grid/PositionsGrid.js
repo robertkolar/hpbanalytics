@@ -36,7 +36,7 @@ Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
         dataIndex: 'exchange'
     }, {
         text: 'Sec',
-        width: 60,
+        width: 100,
         dataIndex: 'secType'
     }, {
         text: 'Pos',
