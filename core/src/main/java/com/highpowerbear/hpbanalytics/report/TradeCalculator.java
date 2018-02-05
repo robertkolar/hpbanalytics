@@ -65,6 +65,7 @@ public class TradeCalculator {
             }
         }
 
+        t.setCumulativeQuantity(cumulativeQuantity);
         t.setOpenDate(seFirst.getExecution().getFillDate());
         t.setAvgOpenPrice(cumulativeOpenPrice.divide(new BigDecimal(cumulativeQuantity), mc));
 
