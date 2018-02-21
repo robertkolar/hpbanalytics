@@ -146,7 +146,9 @@ public class IbController {
 
                 ibRequestPositionMap.get(accountId).keySet().forEach(reqId -> {
                     Position p = ibRequestPositionMap.get(accountId).get(reqId);
-                    c.getClientSocket().reqHistoricalData(reqId, createHistDataContract(p), endDate, "60 S", "1 min", p.getSecType().getIbWhatToShow(), 1, 2, null);
+                    Contract contract = createHistDataContract(p);
+                    String whatToShow = SecType.valueOf(contract.getSecType()).getIbWhatToShow();
+                    c.getClientSocket().reqHistoricalData(reqId, contract, endDate, "60 S", "1 min", whatToShow, 1, 2, null);
                 });
 
                 CoreUtil.waitMilliseconds(5000);
@@ -215,6 +217,7 @@ public class IbController {
         contract.localSymbol(symbol);
         contract.currency(Currency.USD.name());
         contract.exchange(SecType.STK.getDefaultExchange());
+        contract.primaryExch("ARCA");
         contract.secType(Types.SecType.STK);
 
         return contract;

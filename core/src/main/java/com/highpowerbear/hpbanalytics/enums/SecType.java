@@ -8,7 +8,7 @@ public enum SecType {
     OPT(true, "SMART", "TRADES"),
     FUT(true, "GLOBEX", "TRADES"),
     CASH(false, "IDEALPRO", "MIDPOINT"),
-    CFD(true, "SMART", "TRADES"),
+    CFD(true, "SMART", "MIDPOINT"),
     CMDTY(false, "SMART", "TRADES");
 
     private boolean derivative;
