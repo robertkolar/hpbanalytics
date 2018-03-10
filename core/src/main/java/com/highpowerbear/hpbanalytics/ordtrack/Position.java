@@ -19,8 +19,6 @@ public class Position {
 
     private double position;
     private double avgCost;
-    private Double lastPrice;
-    private Double underlyingPrice;
 
     public Position(String accountId, Contract contract, double position, double avgCost) {
         this.accountId = accountId;
@@ -75,22 +73,6 @@ public class Position {
         return avgCost;
     }
 
-    public Double getLastPrice() {
-        return lastPrice;
-    }
-
-    public void setLastPrice(double lastPrice) {
-        this.lastPrice = lastPrice;
-    }
-
-    public Double getUnderlyingPrice() {
-        return underlyingPrice;
-    }
-
-    public void setUnderlyingPrice(double underlyingPrice) {
-        this.underlyingPrice = underlyingPrice;
-    }
-
     @Override
     public String toString() {
         return "Position{" +
@@ -102,8 +84,6 @@ public class Position {
                 ", secType=" + secType +
                 ", position=" + position +
                 ", avgCost=" + avgCost +
-                ", lastPrice=" + lastPrice +
-                ", underlyingPrice=" + underlyingPrice +
                 '}';
     }
 }

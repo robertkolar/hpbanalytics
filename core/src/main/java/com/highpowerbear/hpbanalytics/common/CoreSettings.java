@@ -12,7 +12,6 @@ import java.text.SimpleDateFormat;
 public class CoreSettings {
 
     public static final Integer IB_CONNECT_CLIENT_ID = 0;
-    public static final String IB_TIMEZONE = "EST";
     public static final Integer MAX_ORDER_HEARTBEAT_FAILS = 5;
     public static final String EXCHANGE_RATE_URL = "http://api.fixer.io/";
     public static final Integer EXCHANGE_RATE_DAYS_BACK = 5;
@@ -23,8 +22,6 @@ public class CoreSettings {
     public static final String EMAIL_FROM = "hpb@highpowerbear.com";
     public static final String EMAIL_TO = "info@highpowerbear.com";
     public static final String JMS_DEST_ORDTRACK_TO_REPORT = "ordTrackToReport";
-    public static final String JMS_DEST_ORDTRACK_TO_RISKMGT = "ordTrackToRiskMgt";
     public static final String WS_TOPIC_ORDTRACK = "/topic/ordtrack";
     public static final String WS_TOPIC_REPORT = "/topic/report";
-    public static final String WS_TOPIC_RISKMGT = "/topic/riskmgt";
 }

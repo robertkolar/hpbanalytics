@@ -44,22 +44,6 @@ Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
         dataIndex: 'position',
         align: 'right'
     }, {
-        text: 'Last Prc',
-        width: 100,
-        dataIndex: 'lastPrice',
-        align: 'right',
-        renderer: function(val, metadata, record) {
-            return val ? Ext.util.Format.number(val, '0.00###') : '-';
-        }
-    }, {
-        text: 'Undl Prc',
-        width: 100,
-        dataIndex: 'underlyingPrice',
-        align: 'right',
-        renderer: function(val, metadata, record) {
-            return val ? Ext.util.Format.number(val, '0.00###') : '-';
-        }
-    }, {
         flex: 1
     }],
     dockedItems: [{

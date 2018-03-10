@@ -104,17 +104,4 @@ public class IbListener extends GenericIbListener {
 
         ibController.positionEnd(accountId);
     }
-
-    @Override
-    public void historicalData(int reqId, String date, double open, double high, double low, double close, int volume, int count, double WAP, boolean hasGaps) {
-        //super.historicalData(reqId, date, open, high, low, close, volume, count, WAP, hasGaps);
-
-        if (date.startsWith("finish")) {
-            ibController.updateLastPrice(accountId, reqId, lastPriceMap.get(reqId));
-            lastPriceMap.remove(reqId);
-
-        } else {
-            lastPriceMap.put(reqId, close);
-        }
-    }
 }

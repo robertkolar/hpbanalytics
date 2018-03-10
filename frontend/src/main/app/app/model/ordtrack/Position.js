@@ -13,8 +13,6 @@ Ext.define('HanGui.model.ordtrack.Position', {
         'exchange',
         'secType',
         'position',
-        'avgCost',
-        'lastPrice',
-        'underlyingPrice'
+        'avgCost'
     ]
 });
