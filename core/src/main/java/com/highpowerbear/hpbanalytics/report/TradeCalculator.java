@@ -10,6 +10,7 @@ import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.ContractMultiplier;
 import com.highpowerbear.hpbanalytics.enums.Currency;
+import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -134,8 +135,8 @@ public class TradeCalculator {
 
     public int getMultiplier(Trade t) {
         switch (t.getSecType()) {
-            case OPT: return 100;
-            case FUT: return ContractMultiplier.getByUnderlying(t.getUnderlying());
+            case OPT: ContractMultiplier.getByUnderlying(SecType.OPT, t.getUnderlying());
+            case FUT: return ContractMultiplier.getByUnderlying(SecType.FUT, t.getUnderlying());
             default: return 1;
         }
     }
