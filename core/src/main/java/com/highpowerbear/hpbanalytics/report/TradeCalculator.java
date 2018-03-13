@@ -135,7 +135,7 @@ public class TradeCalculator {
 
     public int getMultiplier(Trade t) {
         switch (t.getSecType()) {
-            case OPT: ContractMultiplier.getByUnderlying(SecType.OPT, t.getUnderlying());
+            case OPT: return ContractMultiplier.getByUnderlying(SecType.OPT, t.getUnderlying());
             case FUT: return ContractMultiplier.getByUnderlying(SecType.FUT, t.getUnderlying());
             default: return 1;
         }
