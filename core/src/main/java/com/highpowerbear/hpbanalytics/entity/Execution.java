@@ -185,8 +185,8 @@ public class Execution implements Serializable, Comparable<Execution> {
         return fillDate;
     }
     
-    public void setFillDate(Calendar dateFilled) {
-        this.fillDate = dateFilled;
+    public void setFillDate(Calendar fillDate) {
+        this.fillDate = fillDate;
     }
 
     public BigDecimal getFillPrice() {

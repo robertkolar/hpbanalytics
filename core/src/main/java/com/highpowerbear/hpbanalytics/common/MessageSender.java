@@ -33,7 +33,7 @@ public class MessageSender {
         emailSender.send(message);
     }
 
-    public void sendJmsMesage(String destination, String message) {
+    public void sendJmsMesage(String destination, Object message) {
         log.info("sending jms message " + destination + ": " + message);
 
         jmsTemplate.convertAndSend(destination, message);

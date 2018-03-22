@@ -9,12 +9,9 @@ public enum OptionType {
 
     public static OptionType getFromShortName(String shortName) {
         switch (shortName) {
-            case "C":
-                return CALL;
-            case "P":
-                return PUT;
-            default:
-                return null;
+            case "C": return CALL;
+            case "P": return PUT;
+            default: return null;
         }
     }
 }

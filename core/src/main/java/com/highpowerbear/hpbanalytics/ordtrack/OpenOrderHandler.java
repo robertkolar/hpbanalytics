@@ -83,7 +83,8 @@ public class OpenOrderHandler {
                 SecType.FUT.name().equalsIgnoreCase(secType) ||
                 SecType.OPT.name().equalsIgnoreCase(secType) ||
                 SecType.CASH.name().equalsIgnoreCase(secType) ||
-                SecType.CFD.name().equalsIgnoreCase(secType);
+                SecType.CFD.name().equalsIgnoreCase(secType) ||
+                SecType.BAG.name().equalsIgnoreCase(secType);
     }
 
     private boolean checkInstrumentFilter(IbAccount ibAccount, String secType) {
@@ -91,7 +92,8 @@ public class OpenOrderHandler {
                 (SecType.FUT.name().equalsIgnoreCase(secType) && ibAccount.isFut()) ||
                 (SecType.OPT.name().equalsIgnoreCase(secType) && ibAccount.isOpt()) ||
                 (SecType.CASH.name().equalsIgnoreCase(secType) && ibAccount.isFx()) ||
-                (SecType.CFD.name().equalsIgnoreCase(secType) && ibAccount.isCfd());
+                (SecType.CFD.name().equalsIgnoreCase(secType) && ibAccount.isCfd()) ||
+                SecType.BAG.name().equalsIgnoreCase(secType);
     }
 
     private void updateExistingOrder(IbOrder ibOrderDb, Order order) {
@@ -129,7 +131,7 @@ public class OpenOrderHandler {
         ibOrder.setQuantity((int) order.totalQuantity());
         ibOrder.setUnderlying(underlying);
         ibOrder.setCurrency(contract.currency());
-        ibOrder.setSymbol(symbol);
+        ibOrder.setSymbol(SecType.BAG.name().equals(contract.getSecType()) ? underlying : symbol);
         ibOrder.setSecType(contract.getSecType());
         ibOrder.setOrderType(order.getOrderType());
 

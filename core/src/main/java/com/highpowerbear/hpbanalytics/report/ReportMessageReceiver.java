@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.ExecutionVO;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
@@ -18,7 +20,8 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.util.Calendar;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_EXECUTION_RECEIVED;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDER_FILLED;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
 
 /**
@@ -32,12 +35,17 @@ public class ReportMessageReceiver {
     @Autowired private ReportProcessor reportProcessor;
     @Autowired private MessageSender messageSender;
 
-    @JmsListener(destination = JMS_DEST_ORDTRACK_TO_REPORT)
-    public void receiveJmsMessage(String message) {
-        handleExecution(Long.valueOf(message));
+    @JmsListener(destination = JMS_DEST_ORDER_FILLED)
+    public void receiveJmsMessage(String ibOrderId) {
+        handleOrderFilled(Long.valueOf(ibOrderId));
     }
 
-    private void handleExecution(long ibOrderId) {
+    @JmsListener(destination = JMS_DEST_EXECUTION_RECEIVED)
+    public void receiveJmsMessage(ExecutionVO executionVO) {
+        handleExecutionReceived(executionVO);
+    }
+
+    private void handleOrderFilled(long ibOrderId) {
         log.info("handling execution for order " + ibOrderId);
 
         IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
@@ -47,21 +55,51 @@ public class ReportMessageReceiver {
             return;
         }
 
-        Execution execution = new Execution();
+        Execution e = new Execution();
 
-        execution.setOrigin("IB:" + ibOrder.getIbAccountId());
-        execution.setReferenceId(String.valueOf(ibOrder.getPermId()));
-        execution.setAction(Action.valueOf(ibOrder.getAction()));
-        execution.setQuantity(ibOrder.getQuantity());
-        execution.setUnderlying(ibOrder.getUnderlying());
-        execution.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
-        execution.setSymbol(ibOrder.getSymbol());
-        execution.setSecType(SecType.valueOf(ibOrder.getSecType()));
-        execution.setFillDate(ibOrder.getStatusDate());
-        execution.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
+        e.setOrigin("IB:" + ibOrder.getIbAccountId());
+        e.setReferenceId(String.valueOf(ibOrder.getPermId()));
+        e.setAction(Action.valueOf(ibOrder.getAction()));
+        e.setQuantity(ibOrder.getQuantity());
+        e.setUnderlying(ibOrder.getUnderlying());
+        e.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
+        e.setSymbol(ibOrder.getSymbol());
+        e.setSecType(SecType.valueOf(ibOrder.getSecType()));
+        e.setFillDate(ibOrder.getStatusDate());
+        e.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
 
+        processExecution(e);
+    }
+
+    private void handleExecutionReceived(ExecutionVO evo) {
+        Execution e = new Execution();
+
+        String symbol = evo.getLocalSymbol();
+
+        if (symbol.split(" ").length > 1) {
+            symbol = CoreUtil.removeSpace(symbol);
+        }
+
+        e.setOrigin("IB:" + evo.getAcctNumber());
+        e.setReferenceId(String.valueOf(evo.getPermId()));
+        e.setAction(Action.getByExecSide(evo.getSide()));
+        e.setQuantity(evo.getCumQty());
+        e.setUnderlying(evo.getSymbol());
+        e.setCurrency(Currency.valueOf(evo.getCurrency()));
+        e.setSymbol(symbol);
+        e.setSecType(SecType.valueOf(evo.getSecType()));
+        e.setFillPrice(BigDecimal.valueOf(evo.getPrice()));
+
+        processExecution(e);
+    }
+
+    private void processExecution(Execution execution) {
         Calendar now = Calendar.getInstance();
         execution.setReceivedDate(now);
+
+        if (execution.getFillDate() == null) {
+            execution.setFillDate(execution.getReceivedDate());
+        }
 
         Report report = reportDao.getReportByOriginAndSecType(execution.getOrigin(), execution.getSecType());
 

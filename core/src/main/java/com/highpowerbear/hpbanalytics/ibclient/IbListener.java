@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.ibclient;
 
+import com.highpowerbear.hpbanalytics.common.ExecutionVO;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -9,6 +10,7 @@ import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
 import com.highpowerbear.hpbanalytics.ordtrack.OpenOrderHandler;
 import com.highpowerbear.hpbanalytics.ordtrack.Position;
 import com.ib.client.Contract;
+import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +20,8 @@ import org.springframework.stereotype.Component;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDTRACK_TO_REPORT;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_EXECUTION_RECEIVED;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDER_FILLED;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRACK;
 
 /**
@@ -73,7 +76,9 @@ public class IbListener extends GenericIbListener {
             ibOrder.addEvent(OrderStatus.FILLED, avgFillPrice);
             ordTrackDao.updateIbOrder(ibOrder);
             heartbeatControl.removeHeartbeat(ibOrder);
-            messageSender.sendJmsMesage(JMS_DEST_ORDTRACK_TO_REPORT, String.valueOf(ibOrder.getId()));
+            if (!ibOrder.getSecType().equals(SecType.BAG.name())) {
+                messageSender.sendJmsMesage(JMS_DEST_ORDER_FILLED, String.valueOf(ibOrder.getId()));
+            }
 
         } else if (OrderStatus.CANCELLED.getIbStatus().equals(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
             ibOrder.addEvent(OrderStatus.CANCELLED, null);
@@ -103,5 +108,22 @@ public class IbListener extends GenericIbListener {
         super.positionEnd();
 
         ibController.positionEnd(accountId);
+    }
+
+    @Override
+    public void execDetails(int reqId, Contract c, Execution e) {
+        super.execDetails(reqId, c, e);
+
+        long permId = (long) e.permId();
+        IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, permId);
+        if (ibOrder == null) {
+            return;
+        }
+
+        if (ibOrder.getSecType().equalsIgnoreCase(SecType.BAG.name()) && !c.getSecType().equalsIgnoreCase(SecType.BAG.name())) {
+
+            ExecutionVO executionVO = new ExecutionVO(e.acctNumber(), permId, e.side(), e.cumQty(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
+            messageSender.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionVO);
+        }
     }
 }

@@ -4,21 +4,20 @@ package com.highpowerbear.hpbanalytics.enums;
  * Created by robertk on 11/18/2017.
  */
 public enum SecType {
-    STK(false, "SMART", "TRADES"),
-    OPT(true, "SMART", "TRADES"),
-    FUT(true, "GLOBEX", "TRADES"),
-    CASH(false, "IDEALPRO", "MIDPOINT"),
-    CFD(true, "SMART", "MIDPOINT"),
-    CMDTY(false, "SMART", "TRADES");
+    STK(false, "SMART"),
+    OPT(true, "SMART"),
+    FUT(true, "GLOBEX"),
+    CASH(false, "IDEALPRO"),
+    CFD(true, "SMART"),
+    CMDTY(false, "SMART"),
+    BAG(false, "SMART");
 
     private boolean derivative;
     private String defaultExchange;
-    private String ibWhatToShow;
 
-    SecType(boolean derivative, String defaultExchange, String ibWhatToShow) {
+    SecType(boolean derivative, String defaultExchange) {
         this.derivative = derivative;
         this.defaultExchange = defaultExchange;
-        this.ibWhatToShow = ibWhatToShow;
     }
 
     public boolean isDerivative() {
@@ -27,9 +26,5 @@ public enum SecType {
 
     public String getDefaultExchange() {
         return defaultExchange;
-    }
-
-    public String getIbWhatToShow() {
-        return ibWhatToShow;
     }
 }

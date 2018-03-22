@@ -5,5 +5,13 @@ package com.highpowerbear.hpbanalytics.enums;
  */
 public enum Action {
     BUY,
-    SELL
+    SELL;
+
+    public static Action getByExecSide(String execAction) {
+        switch(execAction) {
+            case "BOT": return BUY;
+            case "SLD": return SELL;
+            default: return null;
+        }
+    }
 }
