@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.common;
+package com.highpowerbear.hpbanalytics.common.vo;
 
 import com.highpowerbear.hpbanalytics.enums.OptionType;
 

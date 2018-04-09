@@ -32,7 +32,7 @@ Ext.define('HanGui.view.report.TradesController', {
                     optionsymbol: trade.symbol
                 },
                 success: function (response, opts) {
-                    var expDate = JSON.parse(response.responseText).expDate;
+                    var expDate = JSON.parse(response.responseText).expirationDate;
                     maxCloseDate = new Date(expDate + 24 * 60 * 60 * 1000);
                     ready = true;
                 }

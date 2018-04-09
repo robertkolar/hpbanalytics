@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.rest;
 
+import com.highpowerbear.hpbanalytics.common.vo.CloseTradeVO;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.common.OptionInfoVO;
+import com.highpowerbear.hpbanalytics.common.vo.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -27,7 +28,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -179,7 +179,7 @@ public class ReportRestController {
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") int id,
             @PathVariable("tradeid") long tradeId,
-            @RequestBody CloseTrade closeTrade) {
+            @RequestBody CloseTradeVO closeTrade) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -332,23 +332,5 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, tradeType));
-    }
-
-    private static class CloseTrade {
-        private Calendar closeDate;
-        private BigDecimal closePrice;
-
-        private CloseTrade(Calendar closeDate, BigDecimal closePrice) {
-            this.closeDate = closeDate;
-            this.closePrice = closePrice;
-        }
-
-        private Calendar getCloseDate() {
-            return closeDate;
-        }
-
-        private BigDecimal getClosePrice() {
-            return closePrice;
-        }
     }
 }

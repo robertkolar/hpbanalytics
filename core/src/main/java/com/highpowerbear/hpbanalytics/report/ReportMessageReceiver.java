@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.ExecutionVO;
+import com.highpowerbear.hpbanalytics.common.vo.ExecutionVO;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;

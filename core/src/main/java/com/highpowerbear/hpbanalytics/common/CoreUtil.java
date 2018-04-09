@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.common;
 
+import com.highpowerbear.hpbanalytics.common.vo.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import org.slf4j.Logger;

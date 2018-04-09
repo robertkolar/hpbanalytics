@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.ibclient;
 
-import com.highpowerbear.hpbanalytics.common.ExecutionVO;
+import com.highpowerbear.hpbanalytics.common.vo.ExecutionVO;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
