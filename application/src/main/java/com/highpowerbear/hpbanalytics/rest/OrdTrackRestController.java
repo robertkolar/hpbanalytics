@@ -107,7 +107,9 @@ public class OrdTrackRestController {
 
     @RequestMapping("/ibaccounts/{accountId}/positions")
     public ResponseEntity<?> getPositions(
-            @PathVariable("accountId") String accountId) {
+            @PathVariable("accountId") String accountId,
+            @RequestParam("start") Integer start,
+            @RequestParam("limit") Integer limit) {
 
         IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);
         if (ibAccount == null) {
@@ -118,6 +120,16 @@ public class OrdTrackRestController {
         if (positions == null) {
             positions = new ArrayList<>();
         }
-        return ResponseEntity.ok(new RestList<>(positions, (long) positions.size()));
+        int total = positions.size();
+
+        if (!positions.isEmpty()) {
+            int fromIndex = Math.min(start, total - 1);
+            int toIndex = Math.min(fromIndex + limit, total);
+            List<Position> positionsPaged = positions.subList(fromIndex, toIndex);
+
+            return ResponseEntity.ok(new RestList<>(positionsPaged, (long) total));
+        } else {
+            return ResponseEntity.ok(new RestList<>(positions, (long) total));
+        }
     }
 }
