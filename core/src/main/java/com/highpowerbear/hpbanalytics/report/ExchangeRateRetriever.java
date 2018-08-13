@@ -7,13 +7,10 @@ import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonReader;
-import java.io.StringReader;
 import java.util.Calendar;
 
 /**
@@ -25,10 +22,13 @@ public class ExchangeRateRetriever {
 
     @Autowired private ReportDao reportDao;
 
+    @Value( "${fixer.access-key}" )
+    private String fixerAccessKey;
+
     private final RestTemplate restTemplate = new RestTemplate();
 
     public void retrieve() {
-        log.info("BEGIN ExchangeRateRetriever.retrive");
+        log.info("BEGIN ExchangeRateRetriever.retrieve");
 
         for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
@@ -37,28 +37,25 @@ public class ExchangeRateRetriever {
             String date = CoreUtil.formatExchangeRateDate(calendar);
 
             exchangeRate.setDate(date);
-            exchangeRate.setEurUsd(retrievePair(date, "EUR", "USD"));
-            exchangeRate.setEurGbp(retrievePair(date, "EUR", "GBP"));
-            exchangeRate.setEurChf(retrievePair(date, "EUR", "CHF"));
-            exchangeRate.setEurAud(retrievePair(date, "EUR", "AUD"));
-            exchangeRate.setEurJpy(retrievePair(date, "EUR", "JPY"));
+            RatesVO ratesVO = retrieveRates(date);
+
+            exchangeRate.setEurUsd(ratesVO.getRates().getUsd());
+            exchangeRate.setEurGbp(ratesVO.getRates().getGbp());
+            exchangeRate.setEurChf(ratesVO.getRates().getChf());
+            exchangeRate.setEurAud(ratesVO.getRates().getAud());
+            exchangeRate.setEurJpy(ratesVO.getRates().getJpy());
 
             reportDao.createOrUpdateExchangeRate(exchangeRate);
         }
 
-        log.info("END ExchangeRateRetriever.retrive");
+        log.info("END ExchangeRateRetriever.retrieve");
     }
 
-    private double retrievePair(String date, String base, String symbol) {
-        String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?base=" + base + "&symbol=" + symbol;
-        String response = restTemplate.getForEntity(query, String.class).getBody();
-        log.info(response);
+    private RatesVO retrieveRates(String date) {
+        String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY";
+        RatesVO ratesVO = restTemplate.getForObject(query, RatesVO.class);
+        log.info(ratesVO.toString());
 
-        JsonReader reader = Json.createReader(new StringReader(response));
-        JsonObject jsonObject = (JsonObject) reader.read();
-        Double rate = jsonObject.getJsonObject("rates").getJsonNumber(symbol).doubleValue();
-        reader.close();
-
-        return rate;
+        return ratesVO;
     }
 }
