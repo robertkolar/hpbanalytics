@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.dao;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
@@ -296,7 +295,7 @@ public class ReportDaoImpl implements ReportDao {
 
     @Override
     public List<String> getUnderlyings(int reportId) {
-        TypedQuery<String> query = em.createQuery("SELECT DISTINCT e.underlying FROM Execution e WHERE e.report.id = :reportId", String.class);
+        TypedQuery<String> query = em.createQuery("SELECT DISTINCT e.underlying AS u FROM Execution e WHERE e.report.id = :reportId ORDER BY u", String.class);
         query.setParameter("reportId", reportId);
 
         return query.getResultList();
