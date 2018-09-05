@@ -9,10 +9,10 @@ import java.util.Date;
  */
 public class OptionInfoVO {
 
-    private String underlying;
-    private OptionType optionType;
-    private Date expirationDate;
-    private double strikePrice;
+    private final String underlying;
+    private final OptionType optionType;
+    private final Date expirationDate;
+    private final double strikePrice;
 
     public OptionInfoVO(String underlying, OptionType optionType, Date expirationDate, double strikePrice) {
         this.underlying = underlying;

@@ -32,15 +32,24 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRA
 @Scope("prototype")
 public class IbListener extends GenericIbListener {
 
-    @Autowired private OrdTrackDao ordTrackDao;
-    @Autowired private OpenOrderHandler openOrderHandler;
-    @Autowired private IbController ibController;
-    @Autowired private HeartbeatControl heartbeatControl;
-    @Autowired private MessageSender messageSender;
+    private final OrdTrackDao ordTrackDao;
+    private final OpenOrderHandler openOrderHandler;
+    private final IbController ibController;
+    private final HeartbeatControl heartbeatControl;
+    private final MessageSender messageSender;
 
     private final Map<Integer, Double> lastPriceMap = new ConcurrentHashMap<>();
 
     private String accountId;
+
+    @Autowired
+    public IbListener(OrdTrackDao ordTrackDao, OpenOrderHandler openOrderHandler, IbController ibController, HeartbeatControl heartbeatControl, MessageSender messageSender) {
+        this.ordTrackDao = ordTrackDao;
+        this.openOrderHandler = openOrderHandler;
+        this.ibController = ibController;
+        this.heartbeatControl = heartbeatControl;
+        this.messageSender = messageSender;
+    }
 
     public IbListener configure(String accountId) {
         this.accountId = accountId;

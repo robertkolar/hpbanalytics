@@ -12,7 +12,7 @@ public enum OrderStatus {
     FILLED(com.ib.client.OrderStatus.Filled),
     UNKNOWN(null);
 
-    private com.ib.client.OrderStatus ibStatus;
+    private final com.ib.client.OrderStatus ibStatus;
 
     OrderStatus(com.ib.client.OrderStatus ibStatus) {
         this.ibStatus = ibStatus;

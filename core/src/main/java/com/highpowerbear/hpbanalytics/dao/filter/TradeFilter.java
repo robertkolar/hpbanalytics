@@ -14,10 +14,10 @@ import java.util.Set;
  */
 public class TradeFilter {
 
-    private Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorCalendar, Calendar> openDateFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorEnum, Set<TradeStatus>> statusFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorCalendar, Calendar> openDateFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorEnum, Set<TradeStatus>> statusFilterMap = new HashMap<>();
 
     public Map<FilterEnums.FilterOperatorString, String> getSymbolFilterMap() {
         return symbolFilterMap;

@@ -13,9 +13,16 @@ import org.springframework.stereotype.Component;
 @Component
 public class OrdTrackScheduler {
 
-    @Autowired private OrdTrackDao ordTrackDao;
-    @Autowired private IbController ibController;
-    @Autowired private HeartbeatControl heartbeatControl;
+    private final OrdTrackDao ordTrackDao;
+    private final IbController ibController;
+    private final HeartbeatControl heartbeatControl;
+
+    @Autowired
+    public OrdTrackScheduler(OrdTrackDao ordTrackDao, IbController ibController, HeartbeatControl heartbeatControl) {
+        this.ordTrackDao = ordTrackDao;
+        this.ibController = ibController;
+        this.heartbeatControl = heartbeatControl;
+    }
 
     @Scheduled(fixedRate = 5000)
     private void reconnect() {

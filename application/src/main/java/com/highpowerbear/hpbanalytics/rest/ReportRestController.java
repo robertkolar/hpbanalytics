@@ -43,12 +43,22 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT
 @RequestMapping("/report")
 public class ReportRestController {
 
-    @Autowired ReportDao reportDao;
-    @Autowired private StatisticsCalculator statisticsCalculator;
-    @Autowired private ReportProcessor reportProcessor;
-    @Autowired private FilterParser filterParser;
-    @Autowired private IfiCsvGenerator ifiCsvGenerator;
-    @Autowired private MessageSender messageSender;
+    private final ReportDao reportDao;
+    private final StatisticsCalculator statisticsCalculator;
+    private final ReportProcessor reportProcessor;
+    private final FilterParser filterParser;
+    private final IfiCsvGenerator ifiCsvGenerator;
+    private final MessageSender messageSender;
+
+    @Autowired
+    public ReportRestController(ReportDao reportDao, StatisticsCalculator statisticsCalculator, ReportProcessor reportProcessor, FilterParser filterParser, IfiCsvGenerator ifiCsvGenerator, MessageSender messageSender) {
+        this.reportDao = reportDao;
+        this.statisticsCalculator = statisticsCalculator;
+        this.reportProcessor = reportProcessor;
+        this.filterParser = filterParser;
+        this.ifiCsvGenerator = ifiCsvGenerator;
+        this.messageSender = messageSender;
+    }
 
     @RequestMapping("/reports")
     public ResponseEntity<?> getReports() {

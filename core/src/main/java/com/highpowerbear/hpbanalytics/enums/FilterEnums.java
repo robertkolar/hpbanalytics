@@ -8,7 +8,7 @@ public class FilterEnums {
     public enum FilterOperatorString {
         LIKE("LIKE");
 
-        private String sql;
+        private final String sql;
         FilterOperatorString(String sql) {
             this.sql = sql;
         }
@@ -22,7 +22,7 @@ public class FilterEnums {
         GT(">"),
         LT("<");
 
-        private String sql;
+        private final String sql;
         FilterOperatorNumber(String sql) {
             this.sql = sql;
         }
@@ -36,7 +36,7 @@ public class FilterEnums {
         GT(">"),
         LT("<");
 
-        private String sql;
+        private final String sql;
         FilterOperatorCalendar(String sql) {
             this.sql = sql;
         }
@@ -48,7 +48,7 @@ public class FilterEnums {
     public enum FilterOperatorEnum {
         IN("IN");
 
-        private String sql;
+        private final String sql;
         FilterOperatorEnum(String sql) {
             this.sql = sql;
         }
@@ -74,7 +74,7 @@ public class FilterEnums {
         SUBMIT_DATE("submitDate"),
         STATUS("status");
 
-        private String varName;
+        private final String varName;
 
         IbOrderFilterField(String varName) {
             this.varName = varName;
@@ -90,7 +90,7 @@ public class FilterEnums {
         SEC_TYPE("secType"),
         FILL_DATE("fillDate");
 
-        private String varName;
+        private final String varName;
 
         ExecutionFilterField(String varName) {
             this.varName = varName;
@@ -107,7 +107,7 @@ public class FilterEnums {
         OPEN_DATE("openDate"),
         STATUS("status");
 
-        private String varName;
+        private final String varName;
 
         TradeFilterField(String varName) {
             this.varName = varName;

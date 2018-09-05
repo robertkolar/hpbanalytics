@@ -33,7 +33,12 @@ public class ReportDaoImpl implements ReportDao {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired private QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
+
+    @Autowired
+    public ReportDaoImpl(QueryBuilder queryBuilder) {
+        this.queryBuilder = queryBuilder;
+    }
 
     @Override
     public IbOrder findIbOrder(long ibOrderId) {

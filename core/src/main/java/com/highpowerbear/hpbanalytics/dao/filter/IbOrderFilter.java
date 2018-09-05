@@ -13,10 +13,10 @@ import java.util.Set;
  */
 public class IbOrderFilter {
 
-    private Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorEnum, Set<String>> secTypeFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorCalendar, Calendar> submitDateFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorEnum, Set<OrderStatus>> statusFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorEnum, Set<String>> secTypeFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorCalendar, Calendar> submitDateFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorEnum, Set<OrderStatus>> statusFilterMap = new HashMap<>();
 
     public Map<FilterEnums.FilterOperatorString, String> getSymbolFilterMap() {
         return symbolFilterMap;

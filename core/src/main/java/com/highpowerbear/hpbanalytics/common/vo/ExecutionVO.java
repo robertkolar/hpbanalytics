@@ -8,15 +8,15 @@ import java.io.Serializable;
 public class ExecutionVO implements Serializable {
     private static final long serialVersionUID = -1776809755883405517L;
 
-    private String acctNumber;
-    private long permId;
-    private String side;
-    private int cumQty;
-    private String symbol;
-    private String localSymbol;
-    private String currency;
-    private String secType;
-    private double price;
+    private final String acctNumber;
+    private final long permId;
+    private final String side;
+    private final int cumQty;
+    private final String symbol;
+    private final String localSymbol;
+    private final String currency;
+    private final String secType;
+    private final double price;
 
     public ExecutionVO(String acctNumber, long permId, String side, int cumQty, String symbol, String localSymbol, String currency, String secType, double price) {
         this.acctNumber = acctNumber;

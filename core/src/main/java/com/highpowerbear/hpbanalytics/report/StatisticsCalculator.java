@@ -29,11 +29,18 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT
 public class StatisticsCalculator {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculator.class);
 
-    @Autowired private ReportDao reportDao;
-    @Autowired private MessageSender messageSender;
-    @Autowired private TradeCalculator tradeCalculator;
+    private final ReportDao reportDao;
+    private final MessageSender messageSender;
+    private final TradeCalculator tradeCalculator;
 
     private final Map<String, List<StatisticsVO>> statisticsMap = new ConcurrentHashMap<>(); // caching statistics to prevent excessive recalculation
+
+    @Autowired
+    public StatisticsCalculator(ReportDao reportDao, MessageSender messageSender, TradeCalculator tradeCalculator) {
+        this.reportDao = reportDao;
+        this.messageSender = messageSender;
+        this.tradeCalculator = tradeCalculator;
+    }
 
     public List<StatisticsVO> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
 
@@ -48,7 +55,7 @@ public class StatisticsCalculator {
             maxPoints = size;
         }
 
-        Integer firstIndex = size - maxPoints;
+        int firstIndex = size - maxPoints;
         // copy because reverse will be performed on it
 
         return new ArrayList<>(allStatistics.subList(firstIndex, size));

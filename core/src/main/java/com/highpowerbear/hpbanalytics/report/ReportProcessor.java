@@ -36,8 +36,14 @@ import java.util.stream.Collectors;
 public class ReportProcessor {
     private static final Logger log = LoggerFactory.getLogger(ReportProcessor.class);
 
-    @Autowired private ReportDao reportDao;
-    @Autowired private TradeCalculator tradeCalculator;
+    private final ReportDao reportDao;
+    private final TradeCalculator tradeCalculator;
+
+    @Autowired
+    public ReportProcessor(ReportDao reportDao, TradeCalculator tradeCalculator) {
+        this.reportDao = reportDao;
+        this.tradeCalculator = tradeCalculator;
+    }
 
     @Transactional
     public void analyzeAll(int reportId) {

@@ -19,9 +19,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class HeartbeatControl {
 
-    @Autowired private OrdTrackDao ordTrackDao;
+    private final OrdTrackDao ordTrackDao;
 
-    private Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new ConcurrentHashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
+    private final Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new ConcurrentHashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
+
+    @Autowired
+    public HeartbeatControl(OrdTrackDao ordTrackDao) {
+        this.ordTrackDao = ordTrackDao;
+    }
 
     @PostConstruct
     public void init() {

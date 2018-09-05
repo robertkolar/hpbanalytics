@@ -31,9 +31,16 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT
 public class ReportMessageReceiver {
     private static final Logger log = LoggerFactory.getLogger(ReportMessageReceiver.class);
 
-    @Autowired private ReportDao reportDao;
-    @Autowired private ReportProcessor reportProcessor;
-    @Autowired private MessageSender messageSender;
+    private final ReportDao reportDao;
+    private final ReportProcessor reportProcessor;
+    private final MessageSender messageSender;
+
+    @Autowired
+    public ReportMessageReceiver(ReportDao reportDao, ReportProcessor reportProcessor, MessageSender messageSender) {
+        this.reportDao = reportDao;
+        this.reportProcessor = reportProcessor;
+        this.messageSender = messageSender;
+    }
 
     @JmsListener(destination = JMS_DEST_ORDER_FILLED)
     public void receiveJmsMessage(String ibOrderId) {

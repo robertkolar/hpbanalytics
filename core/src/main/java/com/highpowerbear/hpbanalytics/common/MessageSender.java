@@ -16,9 +16,16 @@ import org.springframework.stereotype.Service;
 public class MessageSender {
     private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
 
-    @Autowired public JavaMailSender emailSender;
-    @Autowired private JmsTemplate jmsTemplate;
-    @Autowired private SimpMessagingTemplate simpMessagingTemplate;
+    private final JavaMailSender emailSender;
+    private final JmsTemplate jmsTemplate;
+    private final SimpMessagingTemplate simpMessagingTemplate;
+
+    @Autowired
+    public MessageSender(JavaMailSender emailSender, JmsTemplate jmsTemplate, SimpMessagingTemplate simpMessagingTemplate) {
+        this.emailSender = emailSender;
+        this.jmsTemplate = jmsTemplate;
+        this.simpMessagingTemplate = simpMessagingTemplate;
+    }
 
     public void sendEmailMessage(String subject, String text) {
         log.info("sending email message: " + subject);

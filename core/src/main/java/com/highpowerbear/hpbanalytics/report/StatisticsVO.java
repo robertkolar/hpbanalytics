@@ -8,18 +8,18 @@ import java.util.Calendar;
  */
 public class StatisticsVO {
 
-    private int id;
-    private Calendar periodDate;
-    private int numOpened;
-    private int numClosed;
-    private int numWinners;
-    private int numLosers;
-    private double bigWinner;
-    private double bigLoser;
-    private double winnersProfit;
-    private double losersLoss;
-    private double profitLoss;
-    private double cumulProfitLoss;
+    private final int id;
+    private final Calendar periodDate;
+    private final int numOpened;
+    private final int numClosed;
+    private final int numWinners;
+    private final int numLosers;
+    private final double bigWinner;
+    private final double bigLoser;
+    private final double winnersProfit;
+    private final double losersLoss;
+    private final double profitLoss;
+    private final double cumulProfitLoss;
 
     public StatisticsVO(
             int id, Calendar periodDate, int numOpened,int numClosed, int numWinners, int numLosers, double bigWinner,

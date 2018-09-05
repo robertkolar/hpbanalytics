@@ -29,9 +29,14 @@ import java.util.Map;
 @Service
 public class TradeCalculator {
 
-    @Autowired ReportDao reportDao;
+    private final ReportDao reportDao;
 
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
+
+    @Autowired
+    public TradeCalculator(ReportDao reportDao) {
+        this.reportDao = reportDao;
+    }
 
     public void calculateFields(Trade t) {
         MathContext mc = new MathContext(8);
@@ -94,8 +99,8 @@ public class TradeCalculator {
     public Double calculatePLPortfolioBaseOpenClose(Trade t) {
         validateClosed(t);
 
-        Double cumulativeOpenPrice = 0d;
-        Double cumulativeClosePrice = 0d;
+        double cumulativeOpenPrice = 0d;
+        double cumulativeClosePrice = 0d;
 
         for (SplitExecution se : t.getSplitExecutions()) {
             Execution e = se.getExecution();
@@ -111,7 +116,7 @@ public class TradeCalculator {
             }
         }
 
-        Double profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
+        double profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
         profitLoss *= getMultiplier(t);
 
         return profitLoss;

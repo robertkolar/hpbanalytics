@@ -33,13 +33,21 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRA
 public class IbController {
     private static final Logger log = LoggerFactory.getLogger(IbController.class);
 
-    @Autowired private OrdTrackDao ordTrackDao;
-    @Autowired private Provider<IbListener> ibListeners;
-    @Autowired TaskExecutor taskExecutor;
-    @Autowired private MessageSender messageSender;
+    private final OrdTrackDao ordTrackDao;
+    private final Provider<IbListener> ibListeners;
+    private final TaskExecutor taskExecutor;
+    private final MessageSender messageSender;
 
     private final Map<String, IbConnection> ibConnectionMap = new ConcurrentHashMap<>(); // accountId --> ibConnection
     private final Map<String, List<Position>> positionMap = new ConcurrentHashMap<>(); // accountId --> positions
+
+    @Autowired
+    public IbController(OrdTrackDao ordTrackDao, Provider<IbListener> ibListeners, TaskExecutor taskExecutor, MessageSender messageSender) {
+        this.ordTrackDao = ordTrackDao;
+        this.ibListeners = ibListeners;
+        this.taskExecutor = taskExecutor;
+        this.messageSender = messageSender;
+    }
 
     public IbConnection getIbConnection(String accountId) {
         return ibConnectionMap.get(accountId);

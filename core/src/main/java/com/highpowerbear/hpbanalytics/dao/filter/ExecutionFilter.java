@@ -13,9 +13,9 @@ import java.util.Set;
  */
 public class ExecutionFilter {
 
-    private Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
-    private Map<FilterEnums.FilterOperatorCalendar, Calendar> fillDateFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorCalendar, Calendar> fillDateFilterMap = new HashMap<>();
 
     public Map<FilterEnums.FilterOperatorString, String> getSymbolFilterMap() {
         return symbolFilterMap;

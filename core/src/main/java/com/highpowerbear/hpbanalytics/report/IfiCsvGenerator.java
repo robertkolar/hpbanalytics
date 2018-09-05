@@ -33,8 +33,8 @@ import java.util.Map;
 public class IfiCsvGenerator {
     private static final Logger log = LoggerFactory.getLogger(IfiCsvGenerator.class);
 
-    @Autowired private ReportDao reportDao;
-    @Autowired private TradeCalculator tradeCalculator;
+    private final ReportDao reportDao;
+    private final TradeCalculator tradeCalculator;
 
     private final String NL = "\n";
     private final String DL = ",";
@@ -45,6 +45,12 @@ public class IfiCsvGenerator {
 
     private final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
     private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
+
+    @Autowired
+    public IfiCsvGenerator(ReportDao reportDao, TradeCalculator tradeCalculator) {
+        this.reportDao = reportDao;
+        this.tradeCalculator = tradeCalculator;
+    }
 
     @PostConstruct
     private void init() {
@@ -118,7 +124,7 @@ public class IfiCsvGenerator {
 
         sb.append(NL).append("SKUPAJ");
         for (int k = 0; k < 14; k++) {
-            sb.append(DL).append("");
+            sb.append(DL);
         }
         sb.append(nf.format(sumPlEur));
 
@@ -200,7 +206,7 @@ public class IfiCsvGenerator {
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
-            sb.append(DL).append("");
+            sb.append(DL);
         }
 
         sb.append(DL);
@@ -254,7 +260,7 @@ public class IfiCsvGenerator {
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
-            sb.append(DL).append("");
+            sb.append(DL);
         }
         sb.append(DL);
         sb.append(df.format(se.getFillDate().getTime())).append(DL);

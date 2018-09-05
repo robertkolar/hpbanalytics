@@ -15,18 +15,15 @@ import org.slf4j.LoggerFactory;
 public class IbConnection {
     private static final Logger log = LoggerFactory.getLogger(IbConnection.class);
 
-    private String host;
-    private Integer port;
-    private Integer clientId;
+    private final String host;
+    private final Integer port;
+    private final Integer clientId;
     private String accounts; // csv, filled upon connection to IB, main account + FA subaccounts if any
     private boolean markConnected = false;
     @JsonIgnore
-    private EClientSocket eClientSocket; // null means not connected yet or manually disconnected
+    private final EClientSocket eClientSocket; // null means not connected yet or manually disconnected
     @JsonIgnore
-    private EReaderSignal eReaderSignal;
-
-    public IbConnection() {
-    }
+    private final EReaderSignal eReaderSignal;
 
     public IbConnection(String host, Integer port, Integer clientId, EClientSocket eClientSocket, EReaderSignal eReaderSignal) {
         this.host = host;

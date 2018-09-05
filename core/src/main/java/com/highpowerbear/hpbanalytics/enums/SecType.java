@@ -12,8 +12,8 @@ public enum SecType {
     CMDTY(false, "SMART"),
     BAG(false, "SMART");
 
-    private boolean derivative;
-    private String defaultExchange;
+    private final boolean derivative;
+    private final String defaultExchange;
 
     SecType(boolean derivative, String defaultExchange) {
         this.derivative = derivative;

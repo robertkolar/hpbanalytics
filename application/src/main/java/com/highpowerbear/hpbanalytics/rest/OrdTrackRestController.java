@@ -28,10 +28,18 @@ import java.util.Map;
 @RequestMapping("/ordtrack")
 public class OrdTrackRestController {
 
-    @Autowired private OrdTrackDao ordTrackDao;
-    @Autowired private IbController ibController;
-    @Autowired FilterParser filterParser;
-    @Autowired HeartbeatControl heartbeatControl;
+    private final OrdTrackDao ordTrackDao;
+    private final IbController ibController;
+    private final FilterParser filterParser;
+    private final HeartbeatControl heartbeatControl;
+
+    @Autowired
+    public OrdTrackRestController(OrdTrackDao ordTrackDao, IbController ibController, FilterParser filterParser, HeartbeatControl heartbeatControl) {
+        this.ordTrackDao = ordTrackDao;
+        this.ibController = ibController;
+        this.filterParser = filterParser;
+        this.heartbeatControl = heartbeatControl;
+    }
 
     @RequestMapping("/ibaccounts")
     public RestList<IbAccount> getIbAccount() {

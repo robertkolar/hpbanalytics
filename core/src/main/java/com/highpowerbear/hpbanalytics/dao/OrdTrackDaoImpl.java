@@ -26,7 +26,12 @@ public class OrdTrackDaoImpl implements OrdTrackDao {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired private QueryBuilder queryBuilder;
+    private final QueryBuilder queryBuilder;
+
+    @Autowired
+    public OrdTrackDaoImpl(QueryBuilder queryBuilder) {
+        this.queryBuilder = queryBuilder;
+    }
 
     @Override
     public IbAccount findIbAccount(String accountId) {

@@ -9,16 +9,16 @@ import com.ib.client.Contract;
  */
 public class Position {
 
-    private String accountId;
+    private final String accountId;
 
-    private String symbol;
-    private String underlying;
-    private Currency currency;
-    private String exchange;
-    private SecType secType;
+    private final String symbol;
+    private final String underlying;
+    private final Currency currency;
+    private final String exchange;
+    private final SecType secType;
 
-    private double position;
-    private double avgCost;
+    private final double position;
+    private final double avgCost;
 
     public Position(String accountId, Contract contract, double position, double avgCost) {
         this.accountId = accountId;
@@ -26,12 +26,8 @@ public class Position {
         symbol = contract.localSymbol();
         underlying = contract.symbol();
         currency = Currency.valueOf(contract.currency());
-        exchange = contract.exchange();
         secType = SecType.valueOf(contract.getSecType());
-
-        if (exchange == null) {
-            exchange = secType.getDefaultExchange();
-        }
+        exchange = contract.exchange() != null ? contract.exchange() : secType.getDefaultExchange();
 
         this.position = position;
         this.avgCost = avgCost;

@@ -22,8 +22,14 @@ public class OpenOrderHandler {
 
     private static final Logger log = LoggerFactory.getLogger(OpenOrderHandler.class);
 
-    @Autowired private OrdTrackDao ordTrackDao;
-    @Autowired private HeartbeatControl heartbeatControl;
+    private final OrdTrackDao ordTrackDao;
+    private final HeartbeatControl heartbeatControl;
+
+    @Autowired
+    public OpenOrderHandler(OrdTrackDao ordTrackDao, HeartbeatControl heartbeatControl) {
+        this.ordTrackDao = ordTrackDao;
+        this.heartbeatControl = heartbeatControl;
+    }
 
     public void handleOpenOrder(String accountId, int orderId, Contract contract, Order order) {
         IbAccount ibAccount = ordTrackDao.findIbAccount(accountId);

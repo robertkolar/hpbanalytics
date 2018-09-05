@@ -16,14 +16,10 @@ public enum ContractMultiplier {
     DAX(5),
     SMI(10);
 
-    private Integer multiplier;
+    private final Integer multiplier;
 
     ContractMultiplier(Integer multiplier) {
         this.multiplier = multiplier;
-    }
-
-    public Integer getMultiplier() {
-        return multiplier;
     }
 
     public static Integer getByUnderlying(SecType secType, String underlying) {

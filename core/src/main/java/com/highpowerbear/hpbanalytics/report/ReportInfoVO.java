@@ -7,13 +7,13 @@ import java.util.Calendar;
  */
 public class ReportInfoVO {
 
-    private long numExecutions;
-    private long numTrades;
-    private long numOpenTrades;
-    private long numUnderlyings;
-    private long numOpenUnderlyings;
-    private Calendar firstExecutionDate;
-    private Calendar lastExecutionDate;
+    private final long numExecutions;
+    private final long numTrades;
+    private final long numOpenTrades;
+    private final long numUnderlyings;
+    private final long numOpenUnderlyings;
+    private final Calendar firstExecutionDate;
+    private final Calendar lastExecutionDate;
 
     public ReportInfoVO(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, Calendar firstExecutionDate, Calendar lastExecutionDate) {
         this.numExecutions = numExecutions;

@@ -10,7 +10,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReportScheduler {
 
-    @Autowired private ExchangeRateRetriever exchangeRateRetriever;
+    private final ExchangeRateRetriever exchangeRateRetriever;
+
+    @Autowired
+    public ReportScheduler(ExchangeRateRetriever exchangeRateRetriever) {
+        this.exchangeRateRetriever = exchangeRateRetriever;
+    }
 
     @Scheduled(cron="0 0 6 * * *")
     private void retrieveExchangeRates() {

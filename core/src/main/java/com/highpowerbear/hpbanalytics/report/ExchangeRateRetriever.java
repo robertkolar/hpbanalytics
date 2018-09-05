@@ -20,12 +20,17 @@ import java.util.Calendar;
 public class ExchangeRateRetriever {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetriever.class);
 
-    @Autowired private ReportDao reportDao;
+    private final ReportDao reportDao;
 
     @Value( "${fixer.access-key}" )
     private String fixerAccessKey;
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @Autowired
+    public ExchangeRateRetriever(ReportDao reportDao) {
+        this.reportDao = reportDao;
+    }
 
     public void retrieve() {
         log.info("BEGIN ExchangeRateRetriever.retrieve");
