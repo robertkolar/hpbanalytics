@@ -131,7 +131,7 @@ public class IbListener extends GenericIbListener {
 
         if (ibOrder.getSecType().equalsIgnoreCase(SecType.BAG.name()) && !c.getSecType().equalsIgnoreCase(SecType.BAG.name())) {
 
-            ExecutionVO executionVO = new ExecutionVO(e.acctNumber(), permId, e.side(), e.cumQty(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
+            ExecutionVO executionVO = new ExecutionVO(e.acctNumber(), permId, e.side(), (int) e.shares(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
             messageSender.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionVO);
         }
     }
