@@ -59,6 +59,8 @@ public class RatesVO {
         private double aud;
         @JsonProperty("JPY")
         private double jpy;
+        @JsonProperty("KRW")
+        private double krw;
 
         public double getUsd() {
             return usd;
@@ -80,6 +82,10 @@ public class RatesVO {
             return jpy;
         }
 
+        public double getKrw() {
+            return krw;
+        }
+
         @Override
         public String toString() {
             return "Rates{" +
@@ -88,6 +94,7 @@ public class RatesVO {
                     ", chf=" + chf +
                     ", aud=" + aud +
                     ", jpy=" + jpy +
+                    ", krw=" + krw +
                     '}';
         }
     }

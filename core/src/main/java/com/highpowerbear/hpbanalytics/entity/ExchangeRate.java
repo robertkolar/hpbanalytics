@@ -22,6 +22,7 @@ public class ExchangeRate implements Serializable {
     private Double eurChf;
     private Double eurAud;
     private Double eurJpy;
+    private Double eurKrw;
 
     public Double getRate(Currency base, Currency transaction) {
         switch (base) {
@@ -33,6 +34,7 @@ public class ExchangeRate implements Serializable {
                     case CHF: return eurChf;
                     case AUD: return eurAud;
                     case JPY: return eurJpy;
+                    case KRW: return eurKrw;
                     default: return null;
                 }
             default: return null;
@@ -101,5 +103,13 @@ public class ExchangeRate implements Serializable {
 
     public void setEurJpy(Double eurJpy) {
         this.eurJpy = eurJpy;
+    }
+
+    public Double getEurKrw() {
+        return eurKrw;
+    }
+
+    public void setEurKrw(Double eurKrw) {
+        this.eurKrw = eurKrw;
     }
 }
