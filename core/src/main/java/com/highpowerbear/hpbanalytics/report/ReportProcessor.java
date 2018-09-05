@@ -1,13 +1,10 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.vo.OptionInfoVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
-import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
@@ -24,7 +21,6 @@ import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -140,7 +136,7 @@ public class ReportProcessor {
 
         e.setReceivedDate(Calendar.getInstance());
         e.setReport(trade.getReport());
-        e.setComment("CLOSE");
+        e.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
         e.setOrigin("INTERNAL");
         e.setReferenceId("N/A");
         e.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
@@ -153,83 +149,6 @@ public class ReportProcessor {
         e.setFillPrice(closePrice);
 
         newExecution(e);
-    }
-
-    public void expireTrade(Trade trade) {
-        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(trade.getSymbol());
-        if (optionInfo == null) {
-            return;
-        }
-
-        Execution e = new Execution();
-
-        e.setReceivedDate(Calendar.getInstance());
-        e.setReport(trade.getReport());
-        e.setComment("EXPIRE");
-        e.setOrigin("INTERNAL");
-        e.setReferenceId("N/A");
-        e.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
-        e.setQuantity(Math.abs(trade.getOpenPosition()));
-        e.setSymbol(trade.getSymbol());
-        e.setUnderlying(trade.getUnderlying());
-        e.setCurrency(trade.getCurrency());
-        e.setSecType(trade.getSecType());
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(optionInfo.getExpirationDate().getTime());
-        e.setFillDate(cal);
-        e.setFillPrice(new BigDecimal(0.0));
-
-        newExecution(e);
-    }
-
-    public void assignTrade(Trade trade) {
-        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(trade.getSymbol());
-        if (optionInfo == null) {
-            return;
-        }
-
-        Execution e = new Execution();
-
-        e.setReceivedDate(Calendar.getInstance());
-        e.setReport(trade.getReport());
-        e.setComment("ASSIGN");
-        e.setOrigin("INTERNAL");
-        e.setReferenceId("N/A");
-        e.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
-        e.setQuantity(Math.abs(trade.getOpenPosition()));
-        e.setSymbol(trade.getSymbol());
-        e.setUnderlying(trade.getUnderlying());
-        e.setCurrency(trade.getCurrency());
-        e.setSecType(trade.getSecType());
-        Calendar cal = Calendar.getInstance();
-        cal.setTimeInMillis(optionInfo.getExpirationDate().getTime());
-        e.setFillDate(cal);
-        e.setFillPrice(new BigDecimal(0.0));
-
-        newExecution(e);
-
-        Execution ce = new Execution();
-        ce.setReceivedDate(e.getReceivedDate());
-        ce.setReport(trade.getReport());
-        ce.setComment("ASSIGN");
-        ce.setOrigin("INTERNAL");
-        ce.setReferenceId("N/A");
-        ce.setAction(OptionType.PUT.equals(optionInfo.getOptionType()) ? Action.BUY : Action.SELL);
-        ce.setQuantity(e.getQuantity() * 100);
-        ce.setSymbol(e.getUnderlying());
-        ce.setUnderlying(e.getUnderlying());
-        ce.setCurrency(e.getCurrency());
-        ce.setSecType(SecType.STK);
-        // introduce random offset for stocks that were purchased/sold as a result of assignment so in case of same symbol they don't get exactly the same date
-        // this is required constraint for all executions for the same symbol and execution source, see Execution entity
-        Random r = new Random();
-        long randomLong = r.nextInt(59000);
-        Calendar cal1 = Calendar.getInstance();
-        cal1.setTimeInMillis(cal.getTimeInMillis() + randomLong);
-        ce.setFillDate(cal1);
-        ce.setFillPrice(new BigDecimal(optionInfo.getStrikePrice()));
-
-        newExecution(ce);
     }
 
     private List<Trade> analyze(List<Execution> executions) {

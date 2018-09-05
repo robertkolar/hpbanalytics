@@ -38,7 +38,7 @@ Ext.define('HanGui.view.report.window.TradeCloseWindow', {
             fieldLabel: 'Close Price',
             name: 'closePrice',
             decimalPrecision: 5,
-            minValue: 0,
+            minValue: 0.0,
             value: 0.01
         }],
         dockedItems: [{

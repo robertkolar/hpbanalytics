@@ -1,9 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.common.vo.CloseTradeVO;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.common.vo.OptionInfoVO;
+import com.highpowerbear.hpbanalytics.common.vo.CloseTradeVO;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -11,7 +9,6 @@ import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
@@ -211,48 +208,6 @@ public class ReportRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/expire")
-    public ResponseEntity<?> expireTrade(
-            @PathVariable("id") int id,
-            @PathVariable("tradeid") long tradeId) {
-
-        Report report = reportDao.findReport(id);
-        Trade trade = reportDao.findTrade(tradeId);
-
-        if (report == null || trade == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (!SecType.OPT.equals(trade.getSecType()) || !TradeStatus.OPEN.equals(trade.getStatus())) {
-            return ResponseEntity.badRequest().build();
-        }
-        reportProcessor.expireTrade(trade);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " expired");
-
-        return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/assign")
-    public ResponseEntity<?> assignTrade(
-            @PathVariable("id") int id,
-            @PathVariable("tradeid") long tradeId) {
-
-        Report report = reportDao.findReport(id);
-        Trade trade = reportDao.findTrade(tradeId);
-
-        if (report == null || trade == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        if (!SecType.OPT.equals(trade.getSecType()) || !TradeStatus.OPEN.equals(trade.getStatus())) {
-            return ResponseEntity.badRequest().build();
-        }
-        reportProcessor.assignTrade(trade);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " assigned");
-
-        return ResponseEntity.ok().build();
-    }
-
     @RequestMapping("/reports/{id}/statistics/{interval}")
     public ResponseEntity<?> getStatistics(
             @PathVariable("id") int id,
@@ -317,18 +272,6 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(reportDao.getUnderlyings(id));
-    }
-
-    @RequestMapping("/optionutil/parse")
-    public ResponseEntity<?> optionUtilParse(
-            @RequestParam("optionsymbol") String optionSymbol) {
-
-        OptionInfoVO optionInfo = CoreUtil.parseOptionSymbol(optionSymbol);
-        if (optionInfo == null) {
-            return ResponseEntity.badRequest().build();
-        }
-
-        return ResponseEntity.ok(optionInfo);
     }
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{tradetype}")

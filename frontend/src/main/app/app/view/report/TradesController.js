@@ -16,49 +16,15 @@ Ext.define('HanGui.view.report.TradesController', {
         var me = this,
             trade = button.getWidgetRecord().data;
 
-        var closeDate = new Date(),
-            maxCloseDate,
-            closePrice = trade.avgOpenPrice,
-            ready = false;
-
-        me.getView().setLoading({border: false, msg: 'Loading...'});
-        if ('OPT' != trade.secType) {
-            ready = true;
-        } else {
-            Ext.Ajax.request({
-                method: 'GET',
-                url: HanGui.common.Definitions.urlPrefixReport + '/optionutil/parse',
-                params: {
-                    optionsymbol: trade.symbol
-                },
-                success: function (response, opts) {
-                    var expDate = JSON.parse(response.responseText).expirationDate;
-                    maxCloseDate = new Date(expDate + 24 * 60 * 60 * 1000);
-                    ready = true;
-                }
-            });
-        }
-
-        var interval = setInterval(function() {
-            if (ready) {
-                clearInterval(interval);
-                var window = Ext.create('HanGui.view.report.window.TradeCloseWindow', {
-                    reference: 'tradeCloseWindow',
-                    title: 'Close Trade, id=' + trade.id
-                });
-                me.getView().add(window);
-                window.trade = trade;
-                me.lookupReference('closeDate').setValue(closeDate);
-                if (maxCloseDate) {
-                    me.lookupReference('closeDate').setMaxValue(maxCloseDate);
-                }
-                me.lookupReference('closePrice').setValue(closePrice);
-                me.getView().setLoading(false);
-                window.show();
-            } else {
-                console.log('Waiting for completion...');
-            }
-        }, 1000);
+        var window = Ext.create('HanGui.view.report.window.TradeCloseWindow', {
+            reference: 'tradeCloseWindow',
+            title: 'Close Trade, id=' + trade.id
+        });
+        me.getView().add(window);
+        window.trade = trade;
+        me.lookupReference('closeDate').setValue(new Date());
+        me.lookupReference('closePrice').setValue(0.0);
+        window.show();
     },
 
     onSubmitCloseTrade: function(button, evt) {
@@ -86,50 +52,6 @@ Ext.define('HanGui.view.report.TradesController', {
 
     onCancelCloseTrade: function(button, evt) {
         this.lookupReference('tradeCloseWindow').close();
-    },
-
-    onExpireTrade: function(button, evt) {
-        var me = this,
-            trade = button.getWidgetRecord().data;
-
-        me.assignOrExpire('EXPIRE', trade);
-    },
-
-    onAssignTrade: function(button, evt) {
-        var me = this,
-            trade = button.getWidgetRecord().data;
-
-        me.assignOrExpire('ASSIGN', trade);
-    },
-
-    assignOrExpire: function(requestType, trade, closeDate, closePrice) {
-        var urlString = HanGui.common.Definitions.urlPrefixReport + '/reports/' + trade.reportId  + '/trades/' + trade.id + '/' + requestType.toLowerCase();
-
-        Ext.Msg.show({
-            title: requestType + ' Trade?',
-            message: 'Are you sure you want to ' + requestType + ' the trade, id=' + trade.id + '?',
-            buttons: Ext.Msg.YESNO,
-            icon: Ext.Msg.QUESTION,
-            fn: function(btn) {
-                if (btn === 'yes') {
-                    if ('CLOSE' == requestType) {
-                        Ext.Ajax.request({
-                            method: 'PUT',
-                            jsonData: {
-                                closeDate: closeDate,
-                                closePrice: closePrice
-                            },
-                            url: urlString
-                        });
-                    } else {
-                        Ext.Ajax.request({
-                            method: 'PUT',
-                            url: urlString
-                        });
-                    }
-                }
-            }
-        });
     },
 
     showSplitExecutions: function (view, cell, cellIndex, record, row, rowIndex, e) {

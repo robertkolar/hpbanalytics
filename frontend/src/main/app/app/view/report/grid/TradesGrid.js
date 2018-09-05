@@ -138,38 +138,6 @@ Ext.define('HanGui.view.report.grid.TradesGrid', {
                 widget.hide();
             }
         }
-    }, {
-        xtype: 'widgetcolumn',
-        width : 50,
-        widget: {
-            xtype: 'button',
-            width: 30,
-            text: 'E',
-            tooltip: 'Expire Trade (Option)',
-            handler: 'onExpireTrade'
-        },
-        onWidgetAttach: function(col, widget, rec) {
-            widget.show();
-            if ("OPEN" != rec.data.status || "OPT" != rec.data.secType) {
-                widget.hide();
-            }
-        }
-    }, {
-        xtype: 'widgetcolumn',
-        width : 50,
-        widget: {
-            xtype: 'button',
-            width: 30,
-            text: 'A',
-            tooltip: 'Assign Trade (Option)',
-            handler: 'onAssignTrade'
-        },
-        onWidgetAttach: function(col, widget, rec) {
-            widget.show();
-            if ("OPEN" != rec.data.status || "OPT" != rec.data.secType) {
-                widget.hide();
-            }
-        }
     }],
     dockedItems: [{
         xtype: 'pagingtoolbar',

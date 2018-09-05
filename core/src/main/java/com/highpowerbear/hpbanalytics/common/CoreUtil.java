@@ -1,18 +1,12 @@
 package com.highpowerbear.hpbanalytics.common;
 
-import com.highpowerbear.hpbanalytics.common.vo.OptionInfoVO;
-import com.highpowerbear.hpbanalytics.enums.OptionType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.DateFormat;
-import java.text.NumberFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -26,48 +20,6 @@ public class CoreUtil {
     static {
         optionDf.setLenient(false);
         optionDf.setTimeZone(TimeZone.getTimeZone("America/New_York"));
-    }
-
-    public static OptionInfoVO parseOptionSymbol(String optionSymbol) {
-
-        if (optionSymbol.length() > 21 || optionSymbol.length() < 16) {
-            log.error(optionSymbol + " has not correct length");
-            return null;
-        }
-        int l = optionSymbol.length();
-
-        String yy = optionSymbol.substring(l-15, l-13);
-        String MM = optionSymbol.substring(l-13, l-11);
-        String dd = optionSymbol.substring(l-11, l-9);
-
-        String str = optionSymbol.substring(l-8, l-3);
-        String strDec = optionSymbol.substring(l-3, l);
-
-        Date expDate;
-        try {
-            expDate = optionDf.parse(yy + MM + dd);
-        } catch (ParseException pe) {
-            log.error(pe.getMessage());
-            return null;
-        }
-        expDate.setTime(expDate.getTime() + (1000 * 60 * 60 * 23)); // add 23 hours
-
-        NumberFormat nf = NumberFormat.getInstance(Locale.US);
-
-        Number strikePrice;
-        try {
-            strikePrice = nf.parse(str + "." + strDec);
-        } catch (ParseException pe) {
-            log.error(pe.getMessage());
-            return null;
-        }
-
-        return new OptionInfoVO(
-                optionSymbol.substring(0, l-15).trim().toUpperCase(),
-                OptionType.getFromShortName(optionSymbol.substring(l - 9, l - 8)),
-                expDate,
-                strikePrice.doubleValue()
-        );
     }
 
     public static void waitMilliseconds(int milliseconds) {
