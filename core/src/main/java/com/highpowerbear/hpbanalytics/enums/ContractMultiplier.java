@@ -14,7 +14,11 @@ public enum ContractMultiplier {
     M6B(6250),
     ESTX50(10),
     DAX(5),
-    SMI(10);
+    SMI(10),
+    N225(1000),
+    N225M(100),
+    K200(250000),
+    K200M(50000);
 
     private final Integer multiplier;
 
