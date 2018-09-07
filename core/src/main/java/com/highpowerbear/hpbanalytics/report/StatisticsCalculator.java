@@ -154,10 +154,13 @@ public class StatisticsCalculator {
             stats.add(s);
 
             if (StatisticsInterval.DAY.equals(interval)) {
-                periodDate.add(Calendar.DAY_OF_MONTH, +1);
+                periodDate.add(Calendar.DAY_OF_MONTH, 1);
 
             } else if (StatisticsInterval.MONTH.equals(interval)) {
-                periodDate.add(Calendar.MONTH, +1);
+                periodDate.add(Calendar.MONTH, 1);
+
+            } else if (StatisticsInterval.YEAR.equals(interval)) {
+                periodDate.add(Calendar.YEAR, 1);
             }
         }
         return stats;

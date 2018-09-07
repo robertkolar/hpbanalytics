@@ -116,7 +116,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
                 fields: ['abbr', 'name'],
                 data: [
                     {"abbr": "DAY", "name": "Daily"},
-                    {"abbr": "MONTH", "name": "Monthly"}
+                    {"abbr": "MONTH", "name": "Monthly"},
+                    {"abbr": "YEAR", "name": "Yearly"}
                 ]
             }),
             value: 'MONTH',
