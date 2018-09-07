@@ -162,6 +162,51 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
                 },
                 toggle: 'onChartsToggle'
             }
+        }, {
+            xtype: 'combobox',
+            margin: '0 0 0 20',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'year',
+            valueField: 'year',
+            reference: 'ifiYearCombo',
+            fieldLabel: 'IFI Report',
+            width: 140,
+            labelWidth: 65,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['year'],
+                data: [{"year": "2016"}, {"year": "2017"}, {"year": "2018"}, {"year": "2019"}]
+            }),
+            value: '2018'
+        }, {
+            xtype: 'combobox',
+            margin: '0 0 0 10',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'abbr',
+            reference: 'ifiTradeTypeCombo',
+            fieldLabel: 'Type',
+            width: 110,
+            labelWidth: 35,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['abbr', 'name'],
+                data: [
+                    {"abbr": "LONG", "name": "Long"},
+                    {"abbr": "SHORT", "name": "Short"}
+                ]
+            }),
+            value: 'SHORT'
+        }, {
+            xtype: 'button',
+            margin: '0 0 0 10',
+            text: 'Generate',
+            handler: 'onDownloadIfiReport',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('download'));
+                }
+            }
         }]
     }]
 });

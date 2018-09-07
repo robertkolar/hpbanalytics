@@ -19,7 +19,8 @@ Ext.define('HanGui.common.Glyphs', {
         destroy: 'xf1f8',
         logger: 'xf039',
         signal: 'xf012',
-        report: 'xf201'
+        report: 'xf201',
+        download: 'xf019'
     },
 
     constructor: function(config) {

@@ -144,6 +144,28 @@ Ext.define('HanGui.view.report.ReportController', {
         me.reloadStatisticsAndCharts();
     },
 
+    onDownloadIfiReport: function(button, evt) {
+        var me = this,
+            year = me.lookupReference('ifiYearCombo').getValue(),
+            tradeType =  me.lookupReference('ifiTradeTypeCombo').getValue();
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/ificsv/' + year + '/' + tradeType,
+
+            success: function(response, opts) {
+                var content = response.responseText;
+                var filename = 'IFI_' + year + '_' + tradeType + '.csv';
+
+                console.log(content);
+                var blob = new Blob([content], {
+                    type: 'text/plain;charset=utf-8'
+                });
+                saveAs(blob, filename);
+            }
+        });
+    },
+
     onAnalyzeReport: function(button) {
         var me = this;
 
