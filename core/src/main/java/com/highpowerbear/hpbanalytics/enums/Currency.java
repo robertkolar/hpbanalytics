@@ -10,5 +10,6 @@ public enum Currency {
     GBP,
     CHF,
     JPY,
-    KRW
+    KRW,
+    HKD
 }
