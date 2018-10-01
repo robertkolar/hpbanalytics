@@ -1,11 +1,11 @@
-package com.highpowerbear.hpbanalytics.common.vo;
+package com.highpowerbear.hpbanalytics.common.model;
 
 import java.io.Serializable;
 
 /**
  * Created by robertk on 3/21/2018.
  */
-public class ExecutionVO implements Serializable {
+public class ExecutionDto implements Serializable {
     private static final long serialVersionUID = -1776809755883405517L;
 
     private final String acctNumber;
@@ -18,7 +18,7 @@ public class ExecutionVO implements Serializable {
     private final String secType;
     private final double price;
 
-    public ExecutionVO(String acctNumber, long permId, String side, int cumQty, String symbol, String localSymbol, String currency, String secType, double price) {
+    public ExecutionDto(String acctNumber, long permId, String side, int cumQty, String symbol, String localSymbol, String currency, String secType, double price) {
         this.acctNumber = acctNumber;
         this.permId = permId;
         this.side = side;
@@ -68,7 +68,7 @@ public class ExecutionVO implements Serializable {
 
     @Override
     public String toString() {
-        return "ExecutionVO{" +
+        return "ExecutionDto{" +
                 "acctNumber='" + acctNumber + '\'' +
                 ", permId=" + permId +
                 ", side='" + side + '\'' +

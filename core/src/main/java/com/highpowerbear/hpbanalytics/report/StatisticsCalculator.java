@@ -6,6 +6,7 @@ import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
+import com.highpowerbear.hpbanalytics.report.model.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +34,7 @@ public class StatisticsCalculator {
     private final MessageSender messageSender;
     private final TradeCalculator tradeCalculator;
 
-    private final Map<String, List<StatisticsVO>> statisticsMap = new ConcurrentHashMap<>(); // caching statistics to prevent excessive recalculation
+    private final Map<String, List<Statistics>> statisticsMap = new ConcurrentHashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
     public StatisticsCalculator(ReportDao reportDao, MessageSender messageSender, TradeCalculator tradeCalculator) {
@@ -42,9 +43,9 @@ public class StatisticsCalculator {
         this.tradeCalculator = tradeCalculator;
     }
 
-    public List<StatisticsVO> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
 
-        List<StatisticsVO> allStatistics = statisticsMap.get(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying));
+        List<Statistics> allStatistics = statisticsMap.get(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying));
         if (allStatistics == null) {
             return new ArrayList<>();
         }
@@ -67,7 +68,7 @@ public class StatisticsCalculator {
 
         List<Trade> trades = reportDao.getTradesByUnderlying(reportId, normalizeUnderlying(underlying));
 
-        List<StatisticsVO> stats = doCalculate(trades, interval);
+        List<Statistics> stats = doCalculate(trades, interval);
         statisticsMap.put(reportId + "_" + interval.name() + "_" + underlyingKey(underlying), stats);
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
@@ -83,8 +84,8 @@ public class StatisticsCalculator {
         return "ALLUNDLS".equals(underlying) ? null : underlying;
     }
 
-    private List<StatisticsVO> doCalculate(List<Trade> trades, StatisticsInterval interval) {
-        List<StatisticsVO> stats = new ArrayList<>();
+    private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {
+        List<Statistics> stats = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
             return stats;
@@ -137,7 +138,7 @@ public class StatisticsCalculator {
             profitLoss = winnersProfit + losersLoss;
             cumulProfitLoss += profitLoss;
 
-            StatisticsVO s = new StatisticsVO(
+            Statistics s = new Statistics(
                     statsCount++,
                     periodDateCopy,
                     getNumTradesOpenedForPeriod(trades, periodDate, interval),

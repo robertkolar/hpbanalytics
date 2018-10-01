@@ -1,11 +1,11 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.report.model;
 
 import java.util.Calendar;
 
 /**
  * Created by robertk on 12/28/2017.
  */
-public class ReportInfoVO {
+public class ReportInfo {
 
     private final long numExecutions;
     private final long numTrades;
@@ -15,7 +15,7 @@ public class ReportInfoVO {
     private final Calendar firstExecutionDate;
     private final Calendar lastExecutionDate;
 
-    public ReportInfoVO(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, Calendar firstExecutionDate, Calendar lastExecutionDate) {
+    public ReportInfo(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, Calendar firstExecutionDate, Calendar lastExecutionDate) {
         this.numExecutions = numExecutions;
         this.numTrades = numTrades;
         this.numOpenTrades = numOpenTrades;
@@ -55,7 +55,7 @@ public class ReportInfoVO {
 
     @Override
     public String toString() {
-        return "ReportInfoVO{" +
+        return "ReportInfo{" +
                 "numExecutions=" + numExecutions +
                 ", numTrades=" + numTrades +
                 ", numOpenTrades=" + numOpenTrades +

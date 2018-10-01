@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.MessageSender;
-import com.highpowerbear.hpbanalytics.common.vo.CloseTradeVO;
+import com.highpowerbear.hpbanalytics.common.model.CloseTrade;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -15,7 +15,7 @@ import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
 import com.highpowerbear.hpbanalytics.report.ReportProcessor;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
-import com.highpowerbear.hpbanalytics.report.StatisticsVO;
+import com.highpowerbear.hpbanalytics.report.model.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -186,7 +186,7 @@ public class ReportRestController {
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") int id,
             @PathVariable("tradeid") long tradeId,
-            @RequestBody CloseTradeVO closeTrade) {
+            @RequestBody CloseTrade closeTrade) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -221,9 +221,9 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<StatisticsVO> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
         Collections.reverse(statistics);
-        List<StatisticsVO> statisticsPage = new ArrayList<>();
+        List<Statistics> statisticsPage = new ArrayList<>();
 
         for (int i = 0; i < statistics.size(); i++) {
             if (i >= start && i < (start + limit)) {
@@ -243,7 +243,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        List<StatisticsVO> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
 
         return ResponseEntity.ok(new RestList<>(statistics, (long) statistics.size()));
     }

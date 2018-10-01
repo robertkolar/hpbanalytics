@@ -10,7 +10,7 @@ import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.report.ReportInfoVO;
+import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -94,7 +94,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public ReportInfoVO getReportInfo(int reportId) {
+    public ReportInfo getReportInfo(int reportId) {
         TypedQuery<Long> query = em.createQuery("SELECT COUNT(e) FROM Execution e WHERE e.report.id = :reportId", Long.class);
         query.setParameter("reportId", reportId);
 
@@ -133,7 +133,7 @@ public class ReportDaoImpl implements ReportDao {
 
         Calendar lastExecutionDate = calQuery.getResultList().get(0);
 
-        return new ReportInfoVO(numExecutions, numTrades, numOpenTrades, numUnderlyings, numOpenUnderlyings, firstExecutionDate, lastExecutionDate);
+        return new ReportInfo(numExecutions, numTrades, numOpenTrades, numUnderlyings, numOpenUnderlyings, firstExecutionDate, lastExecutionDate);
     }
 
     @Override

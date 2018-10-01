@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.vo.ExecutionVO;
+import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
@@ -48,8 +48,8 @@ public class ReportMessageReceiver {
     }
 
     @JmsListener(destination = JMS_DEST_EXECUTION_RECEIVED)
-    public void receiveJmsMessage(ExecutionVO executionVO) {
-        handleExecutionReceived(executionVO);
+    public void receiveJmsMessage(ExecutionDto executionDto) {
+        handleExecutionReceived(executionDto);
     }
 
     private void handleOrderFilled(long ibOrderId) {
@@ -78,24 +78,24 @@ public class ReportMessageReceiver {
         processExecution(e);
     }
 
-    private void handleExecutionReceived(ExecutionVO evo) {
+    private void handleExecutionReceived(ExecutionDto edto) {
         Execution e = new Execution();
 
-        String symbol = evo.getLocalSymbol();
+        String symbol = edto.getLocalSymbol();
 
         if (symbol.split(" ").length > 1) {
             symbol = CoreUtil.removeSpace(symbol);
         }
 
-        e.setOrigin("IB:" + evo.getAcctNumber());
-        e.setReferenceId(String.valueOf(evo.getPermId()));
-        e.setAction(Action.getByExecSide(evo.getSide()));
-        e.setQuantity(evo.getCumQty());
-        e.setUnderlying(evo.getSymbol());
-        e.setCurrency(Currency.valueOf(evo.getCurrency()));
+        e.setOrigin("IB:" + edto.getAcctNumber());
+        e.setReferenceId(String.valueOf(edto.getPermId()));
+        e.setAction(Action.getByExecSide(edto.getSide()));
+        e.setQuantity(edto.getCumQty());
+        e.setUnderlying(edto.getSymbol());
+        e.setCurrency(Currency.valueOf(edto.getCurrency()));
         e.setSymbol(symbol);
-        e.setSecType(SecType.valueOf(evo.getSecType()));
-        e.setFillPrice(BigDecimal.valueOf(evo.getPrice()));
+        e.setSecType(SecType.valueOf(edto.getSecType()));
+        e.setFillPrice(BigDecimal.valueOf(edto.getPrice()));
 
         processExecution(e);
     }

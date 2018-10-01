@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.ibclient;
 
-import com.highpowerbear.hpbanalytics.common.vo.ExecutionVO;
+import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -8,9 +8,8 @@ import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
 import com.highpowerbear.hpbanalytics.ordtrack.OpenOrderHandler;
-import com.highpowerbear.hpbanalytics.ordtrack.Position;
+import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
 import com.ib.client.Contract;
-import com.ib.client.Execution;
 import com.ib.client.Order;
 import com.ib.client.OrderState;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -120,7 +119,7 @@ public class IbListener extends GenericIbListener {
     }
 
     @Override
-    public void execDetails(int reqId, Contract c, Execution e) {
+    public void execDetails(int reqId, Contract c, com.ib.client.Execution e) {
         super.execDetails(reqId, c, e);
 
         long permId = (long) e.permId();
@@ -131,8 +130,8 @@ public class IbListener extends GenericIbListener {
 
         if (ibOrder.getSecType().equalsIgnoreCase(SecType.BAG.name()) && !c.getSecType().equalsIgnoreCase(SecType.BAG.name())) {
 
-            ExecutionVO executionVO = new ExecutionVO(e.acctNumber(), permId, e.side(), (int) e.shares(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
-            messageSender.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionVO);
+            ExecutionDto executionDto = new ExecutionDto(e.acctNumber(), permId, e.side(), (int) e.shares(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
+            messageSender.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionDto);
         }
     }
 }

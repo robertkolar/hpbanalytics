@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.ordtrack;
+package com.highpowerbear.hpbanalytics.ordtrack.model;
 
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;

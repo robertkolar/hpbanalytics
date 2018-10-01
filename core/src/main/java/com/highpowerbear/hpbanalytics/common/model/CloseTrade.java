@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.common.vo;
+package com.highpowerbear.hpbanalytics.common.model;
 
 import java.math.BigDecimal;
 import java.util.Calendar;
@@ -6,7 +6,7 @@ import java.util.Calendar;
 /**
  * Created by robertk on 4/9/2018.
  */
-public class CloseTradeVO {
+public class CloseTrade {
     private Calendar closeDate;
     private BigDecimal closePrice;
 
@@ -20,7 +20,7 @@ public class CloseTradeVO {
 
     @Override
     public String toString() {
-        return "CloseTradeVO{" +
+        return "CloseTrade{" +
                 "closeDate=" + closeDate +
                 ", closePrice=" + closePrice +
                 '}';

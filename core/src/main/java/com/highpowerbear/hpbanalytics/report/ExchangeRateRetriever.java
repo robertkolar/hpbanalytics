@@ -4,6 +4,7 @@ import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
+import com.highpowerbear.hpbanalytics.report.model.ExchangeRates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,15 +43,15 @@ public class ExchangeRateRetriever {
             String date = CoreUtil.formatExchangeRateDate(calendar);
 
             exchangeRate.setDate(date);
-            RatesVO ratesVO = retrieveRates(date);
+            ExchangeRates exchangeRates = retrieveRates(date);
 
-            exchangeRate.setEurUsd(ratesVO.getRates().getUsd());
-            exchangeRate.setEurGbp(ratesVO.getRates().getGbp());
-            exchangeRate.setEurChf(ratesVO.getRates().getChf());
-            exchangeRate.setEurAud(ratesVO.getRates().getAud());
-            exchangeRate.setEurJpy(ratesVO.getRates().getJpy());
-            exchangeRate.setEurKrw(ratesVO.getRates().getKrw());
-            exchangeRate.setEurHkd(ratesVO.getRates().getHkd());
+            exchangeRate.setEurUsd(exchangeRates.getRates().getUsd());
+            exchangeRate.setEurGbp(exchangeRates.getRates().getGbp());
+            exchangeRate.setEurChf(exchangeRates.getRates().getChf());
+            exchangeRate.setEurAud(exchangeRates.getRates().getAud());
+            exchangeRate.setEurJpy(exchangeRates.getRates().getJpy());
+            exchangeRate.setEurKrw(exchangeRates.getRates().getKrw());
+            exchangeRate.setEurHkd(exchangeRates.getRates().getHkd());
 
             reportDao.createOrUpdateExchangeRate(exchangeRate);
         }
@@ -58,11 +59,11 @@ public class ExchangeRateRetriever {
         log.info("END ExchangeRateRetriever.retrieve");
     }
 
-    private RatesVO retrieveRates(String date) {
+    private ExchangeRates retrieveRates(String date) {
         String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD";
-        RatesVO ratesVO = restTemplate.getForObject(query, RatesVO.class);
-        log.info(ratesVO.toString());
+        ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
+        log.info(exchangeRates.toString());
 
-        return ratesVO;
+        return exchangeRates;
     }
 }

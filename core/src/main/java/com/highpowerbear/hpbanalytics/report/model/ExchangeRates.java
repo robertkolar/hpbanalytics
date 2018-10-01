@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.report.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Created by robertk on 7/3/2018.
  */
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class RatesVO {
+public class ExchangeRates {
 
     private boolean success;
     private long timestamp;
@@ -38,7 +38,7 @@ public class RatesVO {
 
     @Override
     public String toString() {
-        return "RatesVO{" +
+        return "ExchangeRates{" +
                 "success=" + success +
                 ", timestamp=" + timestamp +
                 ", base='" + base + '\'' +
@@ -94,7 +94,7 @@ public class RatesVO {
 
         @Override
         public String toString() {
-            return "Rates{" +
+            return "ExchangeRates{" +
                     "usd=" + usd +
                     ", gbp=" + gbp +
                     ", chf=" + chf +

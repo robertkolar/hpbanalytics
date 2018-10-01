@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.report.model;
 
 import java.util.Calendar;
 
@@ -6,7 +6,7 @@ import java.util.Calendar;
  *
  * Created by robertk on 4/26/2015.
  */
-public class StatisticsVO {
+public class Statistics {
 
     private final int id;
     private final Calendar periodDate;
@@ -21,7 +21,7 @@ public class StatisticsVO {
     private final double profitLoss;
     private final double cumulProfitLoss;
 
-    public StatisticsVO(
+    public Statistics(
             int id, Calendar periodDate, int numOpened,int numClosed, int numWinners, int numLosers, double bigWinner,
             double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
 
@@ -89,7 +89,7 @@ public class StatisticsVO {
 
     @Override
     public String toString() {
-        return "StatisticsVO{" +
+        return "Statistics{" +
                 "id=" + id +
                 ", periodDate=" + periodDate +
                 ", numOpened=" + numOpened +

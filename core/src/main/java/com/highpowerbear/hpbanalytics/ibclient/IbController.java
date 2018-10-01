@@ -4,7 +4,7 @@ import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
-import com.highpowerbear.hpbanalytics.ordtrack.Position;
+import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
 import com.ib.client.EReaderSignal;

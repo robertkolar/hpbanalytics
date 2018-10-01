@@ -9,7 +9,7 @@ import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.report.ReportInfoVO;
+import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
 
 import java.util.Calendar;
 import java.util.List;
@@ -26,7 +26,7 @@ public interface ReportDao {
     Report updateReport(Report report);
     void deleteReport(int reportId);
     List<Report> getReports();
-    ReportInfoVO getReportInfo(int reportId);
+    ReportInfo getReportInfo(int reportId);
 
     List<Execution> getExecutions(int reportId);
     List<Execution> getExecutionsAfterDate(int reportId, Calendar date, String symbol);
