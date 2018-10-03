@@ -63,6 +63,8 @@ public class ExchangeRates {
         private double krw;
         @JsonProperty("HKD")
         private double hkd;
+        @JsonProperty("SGD")
+        private double sgd;
 
         public double getUsd() {
             return usd;
@@ -92,9 +94,13 @@ public class ExchangeRates {
             return hkd;
         }
 
+        public double getSgd() {
+            return sgd;
+        }
+
         @Override
         public String toString() {
-            return "ExchangeRates{" +
+            return "Rates{" +
                     "usd=" + usd +
                     ", gbp=" + gbp +
                     ", chf=" + chf +
@@ -102,6 +108,7 @@ public class ExchangeRates {
                     ", jpy=" + jpy +
                     ", krw=" + krw +
                     ", hkd=" + hkd +
+                    ", sgd=" + sgd +
                     '}';
         }
     }

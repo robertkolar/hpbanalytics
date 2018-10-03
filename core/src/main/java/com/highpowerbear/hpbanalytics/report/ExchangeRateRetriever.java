@@ -52,6 +52,7 @@ public class ExchangeRateRetriever {
             exchangeRate.setEurJpy(exchangeRates.getRates().getJpy());
             exchangeRate.setEurKrw(exchangeRates.getRates().getKrw());
             exchangeRate.setEurHkd(exchangeRates.getRates().getHkd());
+            exchangeRate.setEurSgd(exchangeRates.getRates().getSgd());
 
             reportDao.createOrUpdateExchangeRate(exchangeRate);
         }
@@ -60,7 +61,7 @@ public class ExchangeRateRetriever {
     }
 
     private ExchangeRates retrieveRates(String date) {
-        String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD";
+        String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD";
         ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
         log.info(exchangeRates.toString());
 
