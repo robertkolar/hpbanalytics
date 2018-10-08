@@ -212,6 +212,9 @@ public class ReportRestController {
     public ResponseEntity<?> getStatistics(
             @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
+            @RequestParam(required = false, value = "tradeType") String tradeType,
+            @RequestParam(required = false, value = "secType") String secType,
+            @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying,
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
@@ -221,7 +224,7 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -237,13 +240,16 @@ public class ReportRestController {
     public ResponseEntity<?> getCharts(
             @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
+            @RequestParam(required = false, value = "tradeType") String tradeType,
+            @RequestParam(required = false, value = "secType") String secType,
+            @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, underlying, 180);
+        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 180);
 
         return ResponseEntity.ok(new RestList<>(statistics, (long) statistics.size()));
     }
@@ -252,13 +258,16 @@ public class ReportRestController {
     public ResponseEntity<?> calculateStatistics(
             @PathVariable("id") int id,
             @PathVariable("interval") StatisticsInterval interval,
+            @RequestParam(required = false, value = "tradeType") String tradeType,
+            @RequestParam(required = false, value = "secType") String secType,
+            @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        statisticsCalculator.calculateStatistics(id, interval, underlying);
+        statisticsCalculator.calculateStatistics(id, interval, tradeType, secType, currency, underlying);
 
         return ResponseEntity.ok().build();
     }

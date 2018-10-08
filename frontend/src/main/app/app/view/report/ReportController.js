@@ -80,14 +80,12 @@ Ext.define('HanGui.view.report.ReportController', {
             success: function(response, opts) {
                 var undls = Ext.decode(response.responseText);
                 var undlsData = [];
-                undlsData.push(['ALLUNDLS', '--All--']);
+                undlsData.push(['ALL', '--All--']);
                 for (var i = 0; i < undls.length; i++) {
                     undlsData.push([undls[i], undls[i]]);
                 }
                 underlyingCombo.getStore().loadData(undlsData);
-                underlyingCombo.setValue('ALLUNDLS');
-                statistics.getProxy().setExtraParam('underlying', underlyingCombo.getValue());
-                charts.getProxy().setExtraParam('underlying', underlyingCombo.getValue());
+                underlyingCombo.setValue('ALL');
             }
         });
 
@@ -114,34 +112,31 @@ Ext.define('HanGui.view.report.ReportController', {
     },
 
     onIntervalChange: function(comboBox, newValue, oldValue, eOpts) {
-        var me = this;
+        var me = this,
+            interval = me.lookupReference('intervalCombo').getValue();
 
-        me.lookupReference('chartsButton').toggle(false);
-        me.getStore('statistics').getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/statistics/' + me.lookupReference('intervalCombo').getValue());
-        me.getStore('charts').getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/charts/' + me.lookupReference('intervalCombo').getValue());
-        me.reloadStatisticsAndCharts();
-    },
-
-    onUnderlyingChange: function(comboBox, newValue, oldValue, eOpts) {
-        var me = this;
-
-        me.lookupReference('chartsButton').toggle(false);
-        me.getStore('statistics').getProxy().setExtraParam('underlying', me.lookupReference('underlyingCombo').getValue());
-        me.getStore('charts').getProxy().setExtraParam('underlying', me.lookupReference('underlyingCombo').getValue());
+        me.getStore('statistics').getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/statistics/' + interval);
+        me.getStore('charts').getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/charts/' + interval);
         me.reloadStatisticsAndCharts();
     },
 
     onCalculateStatistics: function(button, evt) {
         var me = this,
             interval = me.lookupReference('intervalCombo').getValue(),
+            tradeType =  me.lookupReference('tradeTypeCombo').getValue(),
+            secType =  me.lookupReference('secTypeCombo').getValue(),
+            currency =  me.lookupReference('currencyCombo').getValue(),
             underlying =  me.lookupReference('underlyingCombo').getValue();
 
         Ext.Ajax.request({
             method: 'PUT',
             url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/statistics/' + interval,
-            params: {underlying: underlying}
+            params: {tradeType: tradeType, secType: secType, currency: currency, underlying: underlying},
+
+            success: function(response, opts) {
+                me.reloadStatisticsAndCharts();
+            }
         });
-        me.reloadStatisticsAndCharts();
     },
 
     onDownloadIfiReport: function(button, evt) {
@@ -257,7 +252,6 @@ Ext.define('HanGui.view.report.ReportController', {
 
     onDeleteExecution: function(button) {
         var me = this,
-            executions = me.getStore('executions'),
             execution = button.getWidgetRecord().data;
 
         Ext.Msg.show({
@@ -281,17 +275,35 @@ Ext.define('HanGui.view.report.ReportController', {
             statistics = me.getStore('statistics'),
             charts = me.getStore('charts'),
             interval = me.lookupReference('intervalCombo').getValue(),
+            tradeType  = me.lookupReference('tradeTypeCombo').getValue(),
+            secType  = me.lookupReference('secTypeCombo').getValue(),
+            currency  = me.lookupReference('currencyCombo').getValue(),
             underlying =  me.lookupReference('underlyingCombo').getValue(),
             statisticsPaging = me.lookupReference('statisticsPaging');
 
+        me.lookupReference('chartsButton').toggle(false);
+
+        statistics.getProxy().setExtraParam('tradeType', tradeType);
+        charts.getProxy().setExtraParam('tradeType', tradeType);
+
+        statistics.getProxy().setExtraParam('secType', secType);
+        charts.getProxy().setExtraParam('secType', secType);
+
+        statistics.getProxy().setExtraParam('currency', currency);
+        charts.getProxy().setExtraParam('currency', currency);
+
+        statistics.getProxy().setExtraParam('underlying', underlying);
+        charts.getProxy().setExtraParam('underlying', underlying);
+
         if (statisticsPaging.getStore().isLoaded()) {
             statisticsPaging.moveFirst();
+        } else {
+            statistics.load(function(records, operation, success) {
+                if (success) {
+                    console.log('reloaded statistics for report, id=' + me.reportId + ', interval=' + interval + ', underlying=' + underlying);
+                }
+            });
         }
-        statistics.load(function(records, operation, success) {
-            if (success) {
-                console.log('reloaded statistics for report, id=' + me.reportId + ', interval=' + interval + ', underlying=' + underlying);
-            }
-        });
         charts.load(function(records, operation, success) {
             if (success) {
                 console.log('reloaded charts for report, id=' + me.reportId + ', interval=' + interval + ', underlying=' + underlying);

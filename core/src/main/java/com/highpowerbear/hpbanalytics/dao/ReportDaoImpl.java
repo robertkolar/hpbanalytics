@@ -7,6 +7,7 @@ import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
@@ -210,10 +211,25 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Trade> getTradesByUnderlying(int reportId, String underlying) {
-        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId" +  (underlying != null ? " AND t.underlying = :underlying" : "") + " ORDER BY t.openDate ASC", Trade.class);
+    public List<Trade> getTrades(int reportId, String tradeType, String secType, String currency, String underlying) {
+
+        String tradeTypeQuery = (tradeType != null ? " AND t.type = :tradeType" : "");
+        String secTypeQuery = (secType != null ? " AND t.secType = :secType" : "");
+        String currencyQuery = (currency != null ? " AND t.currency = :currency" : "");
+        String underlyingQuery = (underlying != null ? " AND t.underlying = :underlying" : "");
+
+        TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId" + tradeTypeQuery + secTypeQuery + currencyQuery + underlyingQuery + " ORDER BY t.openDate ASC", Trade.class);
         q.setParameter("reportId", reportId);
 
+        if (tradeType != null) {
+            q.setParameter("tradeType", TradeType.valueOf(tradeType));
+        }
+        if (secType != null) {
+            q.setParameter("secType", SecType.valueOf(secType));
+        }
+        if (currency != null) {
+            q.setParameter("currency", Currency.valueOf(currency));
+        }
         if (underlying != null) {
             q.setParameter("underlying", underlying);
         }
@@ -241,7 +257,7 @@ public class ReportDaoImpl implements ReportDao {
     @Transactional
     @Override
     public void deleteAllTrades(int reportId) {
-        for (Trade trade : this.getTradesByUnderlying(reportId, null)) {
+        for (Trade trade : this.getTrades(reportId, null, null, null, null)) {
             // it is managed, since trade is managed
             trade.getSplitExecutions().forEach(em::remove);
             em.remove(trade);

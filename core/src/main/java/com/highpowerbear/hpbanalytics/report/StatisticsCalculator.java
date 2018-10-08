@@ -43,14 +43,14 @@ public class StatisticsCalculator {
         this.tradeCalculator = tradeCalculator;
     }
 
-    public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
 
-        List<Statistics> allStatistics = statisticsMap.get(report.getId() + "_" + interval.name() + "_" + underlyingKey(underlying));
-        if (allStatistics == null) {
+        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(report.getId(), interval, tradeType, secType, currency, underlying));
+        if (statisticsList == null) {
             return new ArrayList<>();
         }
 
-        Integer size = allStatistics.size();
+        Integer size = statisticsList.size();
 
         if (maxPoints == null || size < maxPoints) {
             maxPoints = size;
@@ -59,29 +59,37 @@ public class StatisticsCalculator {
         int firstIndex = size - maxPoints;
         // copy because reverse will be performed on it
 
-        return new ArrayList<>(allStatistics.subList(firstIndex, size));
+        return new ArrayList<>(statisticsList.subList(firstIndex, size));
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(int reportId, StatisticsInterval interval, String underlying) {
-        log.info("BEGIN statistics calculation for report " + reportId + ", undl=" + underlying + ", interval=" + interval);
+    public void calculateStatistics(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+        log.info("BEGIN statistics calculation for report " + reportId + ", interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
-        List<Trade> trades = reportDao.getTradesByUnderlying(reportId, normalizeUnderlying(underlying));
+        List<Trade> trades = reportDao.getTrades(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), normalizeParam(underlying));
 
         List<Statistics> stats = doCalculate(trades, interval);
-        statisticsMap.put(reportId + "_" + interval.name() + "_" + underlyingKey(underlying), stats);
+        statisticsMap.put(statisticsKey(reportId, interval, tradeType, secType, currency, underlying), stats);
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated for report " + reportId);
     }
 
-    private String underlyingKey(String underlying) {
-        return underlying == null ? "ALLUNDLS" : underlying;
+    private String statisticsKey(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+
+        String reportIdKey = String.valueOf(reportId);
+        String intervalKey = interval.name();
+        String tradeTypeKey = tradeType == null ? "ALL" : tradeType;
+        String secTypeKey = secType == null ? "ALL" : secType;
+        String currencyKey = currency == null ? "ALL" : currency;
+        String underlyingKey = underlying == null ? "ALL" : underlying;
+
+        return reportIdKey + "_" + intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
     }
 
-    private String normalizeUnderlying(String underlying) {
-        return "ALLUNDLS".equals(underlying) ? null : underlying;
+    private String normalizeParam(String param) {
+        return "ALL".equals(param) ? null : param;
     }
 
     private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {

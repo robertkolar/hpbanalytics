@@ -130,16 +130,100 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             queryMode: 'local',
             displayField: 'name',
             valueField: 'abbr',
+            reference: 'tradeTypeCombo',
+            fieldLabel: 'TradeType',
+            width: 150,
+            labelWidth: 65,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['abbr', 'name'],
+                data: [
+                    {"abbr": "ALL", "name": "--All--"},
+                    {"abbr": "LONG", "name": "Long"},
+                    {"abbr": "SHORT", "name": "Short"}
+                ]
+            }),
+            value: 'ALL',
+            margin: '0 0 0 10',
+            listeners: {
+                change: 'reloadStatisticsAndCharts'
+            }
+        }, {
+            xtype: 'combobox',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'abbr',
+            reference: 'secTypeCombo',
+            fieldLabel: 'SecType',
+            width: 150,
+            labelWidth: 60,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['abbr', 'name'],
+                data: [
+                    {"abbr": "ALL", "name": "--All--"},
+                    {"abbr": "STK", "name": "STK"},
+                    {"abbr": "OPT", "name": "OPT"},
+                    {"abbr": "FUT", "name": "FUT"},
+                    {"abbr": "CASH", "name": "FX"},
+                    {"abbr": "CFD", "name": "CFD"}
+
+                ]
+            }),
+            value: 'ALL',
+            margin: '0 0 0 10',
+            listeners: {
+                change: 'reloadStatisticsAndCharts'
+            }
+        }, {
+            xtype: 'combobox',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'abbr',
+            reference: 'currencyCombo',
+            fieldLabel: 'Currency',
+            width: 150,
+            labelWidth: 60,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['abbr', 'name'],
+                data: [
+                    {"abbr": "ALL", "name": "--All--"},
+                    {"abbr": "USD", "name": "USD"},
+                    {"abbr": "EUR", "name": "EUR"},
+                    {"abbr": "CHF", "name": "CHF"},
+                    {"abbr": "GBP", "name": "GBP"},
+                    {"abbr": "JPY", "name": "JPY"},
+                    {"abbr": "AUD", "name": "AUD"},
+                    {"abbr": "KRW", "name": "KRW"},
+                    {"abbr": "HKD", "name": "HKD"},
+                    {"abbr": "SGD", "name": "SGD"}
+                ]
+            }),
+            value: 'ALL',
+            margin: '0 0 0 10',
+            listeners: {
+                change: 'reloadStatisticsAndCharts'
+            }
+        }, {
+            xtype: 'combobox',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'name',
+            valueField: 'abbr',
             reference: 'underlyingCombo',
             fieldLabel: 'Underlying',
             width: 170,
             labelWidth: 70,
             store: Ext.create('Ext.data.ArrayStore', {
-                fields: ['abbr', 'name']
+                fields: ['abbr', 'name'],
+                data: [
+                    {"abbr": "ALL", "name": "--All--"}
+                ]
             }),
+            value: 'ALL',
             margin: '0 0 0 10',
             listeners: {
-                change: 'onUnderlyingChange'
+                change: 'reloadStatisticsAndCharts'
             }
         }, {
             xtype: 'button',
@@ -165,7 +249,7 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             }
         }, {
             xtype: 'combobox',
-            margin: '0 0 0 20',
+            margin: '0 0 0 50',
             editable: false,
             queryMode: 'local',
             displayField: 'year',

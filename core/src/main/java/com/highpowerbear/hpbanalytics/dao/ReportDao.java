@@ -38,7 +38,7 @@ public interface ReportDao {
     List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, int start, int limit);
     long getNumFilteredExecutions(int reportId, ExecutionFilter filter);
 
-    List<Trade> getTradesByUnderlying(int reportId, String underlying);
+    List<Trade> getTrades(int reportId, String tradeType, String secType, String currency, String underlying);
     List<Trade> getTradesAffectedByExecution(int reportId, Calendar fillDate, String symbol);
     void createTrades(List<Trade> trades);
     void deleteAllTrades(int reportId);
