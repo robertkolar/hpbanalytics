@@ -82,6 +82,6 @@ public class IbControllerTest {
 
         ibController.positionEnd(ibAccount.getAccountId());
         Assert.assertEquals(0, ibController.getTemporaryPositionMap().get(ibAccount.getAccountId()).size());
-        Assert.assertEquals(2, ibController.getPositionMap().get(ibAccount.getAccountId()).size());
+        Assert.assertEquals(0, ibController.getPositionMap().get(ibAccount.getAccountId()).size());
     }
 }

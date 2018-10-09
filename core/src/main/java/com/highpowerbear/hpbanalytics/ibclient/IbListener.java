@@ -105,7 +105,6 @@ public class IbListener extends GenericIbListener {
     @Override
     public void position(String account, Contract contract, double pos, double avgCost) {
         //super.position(account, contract, pos, avgCost);
-
         if (pos != 0 && !contract.getSecType().equals(SecType.CMDTY.name())) {
             ibController.addPosition(new Position(accountId, contract, pos, avgCost));
         }
@@ -114,7 +113,6 @@ public class IbListener extends GenericIbListener {
     @Override
     public void positionEnd() {
         //super.positionEnd();
-
         ibController.positionEnd(accountId);
     }
 
@@ -129,7 +127,6 @@ public class IbListener extends GenericIbListener {
         }
 
         if (ibOrder.getSecType().equalsIgnoreCase(SecType.BAG.name()) && !c.getSecType().equalsIgnoreCase(SecType.BAG.name())) {
-
             ExecutionDto executionDto = new ExecutionDto(e.acctNumber(), permId, e.side(), (int) e.shares(), c.symbol(), c.localSymbol(), c.currency(), c.getSecType(), e.price());
             messageSender.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionDto);
         }

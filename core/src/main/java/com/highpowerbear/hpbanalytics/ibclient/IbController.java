@@ -121,7 +121,6 @@ public class IbController {
     }
 
     public void addPosition(Position position) {
-        log.debug("adding position " + position);
         temporaryPositionMap.get(position.getAccountId()).add(position);
     }
 
@@ -131,13 +130,10 @@ public class IbController {
         if (c.isConnected()) {
             c.getClientSocket().cancelPositions();
         }
-
         List<Position> temporaryPositions = temporaryPositionMap.get(accountId);
-        if (!temporaryPositions.isEmpty()) {
-            temporaryPositions.sort(Comparator.comparing(Position::getAccountId));
-            temporaryPositions.sort(Comparator.comparing(Position::getSymbol));
-            positionMap.put(accountId, temporaryPositions);
-        }
+        temporaryPositions.sort(Comparator.comparing(Position::getAccountId));
+        temporaryPositions.sort(Comparator.comparing(Position::getSymbol));
+        positionMap.put(accountId, temporaryPositions);
 
         String msg = "positions updated for account: " + accountId;
         log.info(msg);
