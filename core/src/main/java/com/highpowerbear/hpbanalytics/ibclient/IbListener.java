@@ -113,7 +113,7 @@ public class IbListener extends GenericIbListener {
 
     @Override
     public void positionEnd() {
-        super.positionEnd();
+        //super.positionEnd();
 
         ibController.positionEnd(accountId);
     }
