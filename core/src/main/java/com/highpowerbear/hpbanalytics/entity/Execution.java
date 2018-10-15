@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
@@ -35,6 +36,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar receivedDate;
     @ManyToOne
     @JsonIgnore
@@ -52,6 +54,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Enumerated(EnumType.STRING)
     private SecType secType;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar fillDate;
     private BigDecimal fillPrice;
 

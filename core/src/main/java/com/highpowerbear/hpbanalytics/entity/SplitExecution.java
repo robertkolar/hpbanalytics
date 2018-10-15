@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
@@ -31,6 +32,7 @@ public class SplitExecution implements Serializable {
     private Integer splitQuantity;
     private Integer currentPosition;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar fillDate;
     @ManyToOne
     @JsonIgnore

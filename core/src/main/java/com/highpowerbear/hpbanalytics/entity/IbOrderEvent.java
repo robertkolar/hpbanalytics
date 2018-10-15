@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
@@ -31,6 +32,7 @@ public class IbOrderEvent implements Serializable {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_event_generator")
     private Long id;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar eventDate;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

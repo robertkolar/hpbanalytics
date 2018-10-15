@@ -22,9 +22,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
         text: 'Period',
         width: 100,
         dataIndex: 'periodDate',
-        renderer: function(val, metadata, record) {
-            return Ext.util.Format.date(new Date(val), 'm/d/Y');
-        }
+        xtype: 'datecolumn',
+        format: 'm/d/Y'
     }, {
         text: '#Opn',
         width: 80,

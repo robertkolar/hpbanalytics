@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Calendar;
 
 /**
@@ -12,7 +14,9 @@ public class ReportInfo {
     private final long numOpenTrades;
     private final long numUnderlyings;
     private final long numOpenUnderlyings;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private final Calendar firstExecutionDate;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private final Calendar lastExecutionDate;
 
     public ReportInfo(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, Calendar firstExecutionDate, Calendar lastExecutionDate) {

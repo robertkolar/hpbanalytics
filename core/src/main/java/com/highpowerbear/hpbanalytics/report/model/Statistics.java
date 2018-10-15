@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import java.util.Calendar;
 
 /**
@@ -9,6 +11,7 @@ import java.util.Calendar;
 public class Statistics {
 
     private final int id;
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private final Calendar periodDate;
     private final int numOpened;
     private final int numClosed;

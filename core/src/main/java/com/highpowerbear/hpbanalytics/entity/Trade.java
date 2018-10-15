@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
@@ -54,9 +55,11 @@ public class Trade implements Serializable {
     private Integer openPosition;
     private BigDecimal avgOpenPrice;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar openDate;
     private BigDecimal avgClosePrice;
     @Temporal(TemporalType.TIMESTAMP)
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Calendar closeDate;
     private BigDecimal profitLoss;
     @ManyToOne
