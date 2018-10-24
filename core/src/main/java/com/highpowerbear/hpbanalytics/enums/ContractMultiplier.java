@@ -18,7 +18,12 @@ public enum ContractMultiplier {
     N225(1000),
     N225M(100),
     K200(250000),
-    K200M(50000);
+    K200M(50000),
+    HSI(50),
+    MHI(10),
+    HHI_HK(50),
+    MCH_HK(10);
+
 
     private final Integer multiplier;
 
@@ -28,9 +33,10 @@ public enum ContractMultiplier {
 
     public static Integer getByUnderlying(SecType secType, String underlying) {
         int multiplier = secType == SecType.OPT ? 100 : 1;
+        String undl = underlying.replace(".", "_").toUpperCase();
 
         for (ContractMultiplier cm : ContractMultiplier.values()) {
-            if (cm.name().equals(underlying)) {
+            if (cm.name().equals(undl)) {
                 multiplier = cm.multiplier;
                 break;
             }
