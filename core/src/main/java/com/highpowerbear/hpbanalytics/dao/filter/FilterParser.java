@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -41,7 +42,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
-                    Calendar cal = Calendar.getInstance();
+                    Calendar cal = CoreUtil.calNow();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getSubmitDateFilterMap().put(parseOperatorCalendar(array, i), cal);
 
@@ -77,7 +78,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.ExecutionFilterField.FILL_DATE.getVarName().equals(property)) {
-                    Calendar cal = Calendar.getInstance();
+                    Calendar cal = CoreUtil.calNow();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getFillDateFilterMap().put(parseOperatorCalendar(array, i), cal);
                 }
@@ -106,7 +107,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.TradeFilterField.OPEN_DATE.getVarName().equals(property)) {
-                    Calendar cal = Calendar.getInstance();
+                    Calendar cal = CoreUtil.calNow();
                     cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
                     filter.getOpenDateFilterMap().put(parseOperatorCalendar(array, i), cal);
 

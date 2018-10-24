@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao;
 
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
@@ -69,7 +70,7 @@ public class QueryBuilder {
             String varName = FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName();
             if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
                 Calendar from = filter.getSubmitDateFilterMap().get(op);
-                Calendar to = Calendar.getInstance();
+                Calendar to = CoreUtil.calNow();
                 to.setTimeInMillis(from.getTimeInMillis());
                 to.add(Calendar.DATE, 1);
                 q.setParameter("from_" + varName, from);
@@ -131,7 +132,7 @@ public class QueryBuilder {
             String varName = FilterEnums.ExecutionFilterField.FILL_DATE.getVarName();
             if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
                 Calendar from = filter.getFillDateFilterMap().get(op);
-                Calendar to = Calendar.getInstance();
+                Calendar to = CoreUtil.calNow();
                 to.setTimeInMillis(from.getTimeInMillis());
                 to.add(Calendar.DATE, 1);
                 q.setParameter("from_" + varName, from);
@@ -193,7 +194,7 @@ public class QueryBuilder {
             String varName = FilterEnums.TradeFilterField.OPEN_DATE.getVarName();
             if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
                 Calendar from = filter.getOpenDateFilterMap().get(op);
-                Calendar to = Calendar.getInstance();
+                Calendar to = CoreUtil.calNow();
                 to.setTimeInMillis(from.getTimeInMillis());
                 to.add(Calendar.DATE, 1);
                 q.setParameter("from_" + varName, from);

@@ -38,7 +38,7 @@ public class ExchangeRateRetriever {
 
         for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
-            Calendar calendar = Calendar.getInstance();
+            Calendar calendar = CoreUtil.calNow();
             calendar.add(Calendar.DAY_OF_MONTH, i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
             String date = CoreUtil.formatExchangeRateDate(calendar);
 
@@ -63,7 +63,9 @@ public class ExchangeRateRetriever {
     private ExchangeRates retrieveRates(String date) {
         String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD";
         ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
-        log.info(exchangeRates.toString());
+        if (exchangeRates != null) {
+            log.info(exchangeRates.toString());
+        }
 
         return exchangeRates;
     }

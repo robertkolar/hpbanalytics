@@ -132,7 +132,7 @@ public class TradeCalculator {
 
     private Double calculatePLPortfolioBaseSimple(Trade t, boolean current) {
         validateClosed(t);
-        Calendar plCalculationDate = current ? Calendar.getInstance() : t.getCloseDate();
+        Calendar plCalculationDate = current ? CoreUtil.calNow() : t.getCloseDate();
         double exchangeRate = getExchangeRate(plCalculationDate, t.getCurrency());
 
         return t.getProfitLoss().doubleValue() / exchangeRate;

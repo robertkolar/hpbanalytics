@@ -5,12 +5,14 @@ import com.highpowerbear.hpbanalytics.enums.StatisticsPLMethod;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 
 /**
  * Created by robertk on 5/29/2017.
  */
 public class CoreSettings {
 
+    public static final TimeZone SERVER_TIMEZONE = TimeZone.getTimeZone("America/New_York");
     public static final Integer IB_CONNECT_CLIENT_ID = 0;
     public static final Integer MAX_ORDER_HEARTBEAT_FAILS = 5;
     public static final String EXCHANGE_RATE_URL = "http://data.fixer.io/api/";

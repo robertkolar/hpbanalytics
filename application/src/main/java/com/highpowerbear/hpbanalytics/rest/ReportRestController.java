@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.common.model.CloseTrade;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
@@ -26,10 +28,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
 
@@ -139,8 +139,8 @@ public class ReportRestController {
         execution.setId(null);
         execution.setReport(report);
         // fix fill date timezone, JAXB JSON converter sets it to UTC
-        execution.getFillDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
-        execution.setReceivedDate(Calendar.getInstance());
+        execution.getFillDate().setTimeZone(CoreSettings.SERVER_TIMEZONE);
+        execution.setReceivedDate(CoreUtil.calNow());
 
         reportProcessor.newExecution(execution);
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
@@ -200,7 +200,7 @@ public class ReportRestController {
         }
 
         // fix fill date timezone, JAXB JSON converter sets it to UTC
-        closeTrade.getCloseDate().setTimeZone(TimeZone.getTimeZone("America/New_York"));
+        closeTrade.getCloseDate().setTimeZone(CoreSettings.SERVER_TIMEZONE);
 
         reportProcessor.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");

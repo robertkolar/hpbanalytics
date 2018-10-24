@@ -18,7 +18,6 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Calendar;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_EXECUTION_RECEIVED;
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDER_FILLED;
@@ -101,8 +100,7 @@ public class ReportMessageReceiver {
     }
 
     private void processExecution(Execution execution) {
-        Calendar now = Calendar.getInstance();
-        execution.setReceivedDate(now);
+        execution.setReceivedDate(CoreUtil.calNow());
 
         if (execution.getFillDate() == null) {
             execution.setFillDate(execution.getReceivedDate());

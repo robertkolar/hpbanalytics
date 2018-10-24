@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -77,7 +78,7 @@ public class IbOrder implements Serializable {
 
     public void addEvent(OrderStatus status, Double price) {
         this.status = status;
-        this.statusDate = Calendar.getInstance();
+        this.statusDate = CoreUtil.calNow();
         IbOrderEvent e = new IbOrderEvent();
         e.setIbOrder(this);
         e.setEventDate(this.statusDate );

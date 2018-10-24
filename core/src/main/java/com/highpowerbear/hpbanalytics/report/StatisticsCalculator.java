@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
@@ -104,7 +103,7 @@ public class StatisticsCalculator {
 
         Calendar firstPeriodDate = CoreUtil.toBeginOfPeriod(firstDate, interval);
         Calendar lastPeriodDate = CoreUtil.toBeginOfPeriod(lastDate, interval);
-        Calendar periodDate = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
+        Calendar periodDate = CoreUtil.calNow();
         periodDate.setTimeInMillis(firstPeriodDate.getTimeInMillis());
 
         double cumulProfitLoss = 0.0;
@@ -112,7 +111,7 @@ public class StatisticsCalculator {
 
         while (periodDate.getTimeInMillis() <= lastPeriodDate.getTimeInMillis()) {
 
-            Calendar periodDateCopy = Calendar.getInstance(TimeZone.getTimeZone("America/New_York"));
+            Calendar periodDateCopy = CoreUtil.calNow();
             periodDateCopy.setTimeInMillis(periodDate.getTimeInMillis());
             List<Trade> tradesClosedForPeriod = this.getTradesClosedForPeriod(trades, periodDate, interval);
 

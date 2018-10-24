@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.report;
 
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
@@ -134,7 +135,7 @@ public class ReportProcessor {
     public void closeTrade(Trade trade, Calendar closeDate, BigDecimal closePrice) {
         Execution e = new Execution();
 
-        e.setReceivedDate(Calendar.getInstance());
+        e.setReceivedDate(CoreUtil.calNow());
         e.setReport(trade.getReport());
         e.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
         e.setOrigin("INTERNAL");

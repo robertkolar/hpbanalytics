@@ -69,7 +69,7 @@ public class IfiCsvGenerator {
     public String generate(int reportId, Integer year, TradeType tradeType) {
         log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
 
-        Calendar cal = Calendar.getInstance();
+        Calendar cal = CoreUtil.calNow();
         cal.set(Calendar.YEAR, year);
         Calendar beginDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
         cal.set(Calendar.YEAR, year + 1);
