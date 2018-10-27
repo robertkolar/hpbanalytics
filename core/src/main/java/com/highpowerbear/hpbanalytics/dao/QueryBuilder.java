@@ -1,6 +1,5 @@
 package com.highpowerbear.hpbanalytics.dao;
 
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 10/19/2015.
@@ -42,9 +41,9 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             sb.append(" AND io.secType ").append(op.getSql()).append(" :").append(op.name()).append("_").append(FilterEnums.IbOrderFilterField.SEC_TYPE.getVarName());
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getSubmitDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getSubmitDateFilterMap().keySet()) {
             String varName = FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
                 sb.append(" AND io.submitDate > :from_").append(varName).append(" AND io.submitDate < :to_").append(varName);
             } else {
                 sb.append(" AND io.submitDate ").append(op.getSql()).append(" :").append(op.name()).append("_").append(varName);
@@ -66,13 +65,11 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             q.setParameter(op.name() + "_" + FilterEnums.IbOrderFilterField.SEC_TYPE.getVarName(), filter.getSecTypeFilterMap().get(op));
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getSubmitDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getSubmitDateFilterMap().keySet()) {
             String varName = FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
-                Calendar from = filter.getSubmitDateFilterMap().get(op);
-                Calendar to = CoreUtil.calNow();
-                to.setTimeInMillis(from.getTimeInMillis());
-                to.add(Calendar.DATE, 1);
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
+                LocalDateTime from = filter.getSubmitDateFilterMap().get(op);
+                LocalDateTime to = from.plusDays(1);
                 q.setParameter("from_" + varName, from);
                 q.setParameter("to_" + varName, to);
             } else {
@@ -107,9 +104,9 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             sb.append(" AND e.secType ").append(op.getSql()).append(" :").append(op.name()).append("_").append(FilterEnums.ExecutionFilterField.SEC_TYPE.getVarName());
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getFillDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getFillDateFilterMap().keySet()) {
             String varName = FilterEnums.ExecutionFilterField.FILL_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
                 sb.append(" AND e.fillDate > :from_").append(varName).append(" AND e.fillDate < :to_").append(varName);
             } else {
                 sb.append(" AND e.fillDate ").append(op.getSql()).append(" :").append(op.name()).append("_").append(varName);
@@ -128,13 +125,11 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             q.setParameter(op.name() + "_" + FilterEnums.ExecutionFilterField.SEC_TYPE.getVarName(), filter.getSecTypeFilterMap().get(op));
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getFillDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getFillDateFilterMap().keySet()) {
             String varName = FilterEnums.ExecutionFilterField.FILL_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
-                Calendar from = filter.getFillDateFilterMap().get(op);
-                Calendar to = CoreUtil.calNow();
-                to.setTimeInMillis(from.getTimeInMillis());
-                to.add(Calendar.DATE, 1);
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
+                LocalDateTime from = filter.getFillDateFilterMap().get(op);
+                LocalDateTime to = from.plusDays(1);
                 q.setParameter("from_" + varName, from);
                 q.setParameter("to_" + varName, to);
             } else {
@@ -166,9 +161,9 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             sb.append(" AND t.secType ").append(op.getSql()).append(" :").append(op.name()).append("_").append(FilterEnums.TradeFilterField.SEC_TYPE.getVarName());
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getOpenDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getOpenDateFilterMap().keySet()) {
             String varName = FilterEnums.TradeFilterField.OPEN_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
                 sb.append(" AND t.openDate > :from_").append(varName).append(" AND t.openDate < :to_").append(varName);
             } else {
                 sb.append(" AND t.openDate ").append(op.getSql()).append(" :").append(op.name()).append("_").append(varName);
@@ -190,13 +185,11 @@ public class QueryBuilder {
         for (FilterEnums.FilterOperatorEnum op : filter.getSecTypeFilterMap().keySet()) {
             q.setParameter(op.name() + "_" + FilterEnums.TradeFilterField.SEC_TYPE.getVarName(), filter.getSecTypeFilterMap().get(op));
         }
-        for (FilterEnums.FilterOperatorCalendar op : filter.getOpenDateFilterMap().keySet()) {
+        for (FilterEnums.FilterOperatorDate op : filter.getOpenDateFilterMap().keySet()) {
             String varName = FilterEnums.TradeFilterField.OPEN_DATE.getVarName();
-            if (FilterEnums.FilterOperatorCalendar.EQ.equals(op)) {
-                Calendar from = filter.getOpenDateFilterMap().get(op);
-                Calendar to = CoreUtil.calNow();
-                to.setTimeInMillis(from.getTimeInMillis());
-                to.add(Calendar.DATE, 1);
+            if (FilterEnums.FilterOperatorDate.EQ.equals(op)) {
+                LocalDateTime from = filter.getOpenDateFilterMap().get(op);
+                LocalDateTime to = from.plusDays(1);
                 q.setParameter("from_" + varName, from);
                 q.setParameter("to_" + varName, to);
             } else {

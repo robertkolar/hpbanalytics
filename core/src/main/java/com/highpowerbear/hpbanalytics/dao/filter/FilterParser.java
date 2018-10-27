@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -12,7 +12,7 @@ import javax.json.JsonArray;
 import javax.json.JsonReader;
 import javax.json.JsonString;
 import java.io.StringReader;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,9 +42,8 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
-                    Calendar cal = CoreUtil.calNow();
-                    cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
-                    filter.getSubmitDateFilterMap().put(parseOperatorCalendar(array, i), cal);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    filter.getSubmitDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
 
                 } else if (FilterEnums.IbOrderFilterField.STATUS.getVarName().equals(property)) {
                     FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
@@ -61,6 +60,7 @@ public class FilterParser {
 
     public ExecutionFilter parseExecutionFilter(String jsonFilter) {
         ExecutionFilter filter = new ExecutionFilter();
+
         if (jsonFilter != null) {
             JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
             JsonArray array = jsonReader.readArray();
@@ -78,9 +78,8 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.ExecutionFilterField.FILL_DATE.getVarName().equals(property)) {
-                    Calendar cal = CoreUtil.calNow();
-                    cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
-                    filter.getFillDateFilterMap().put(parseOperatorCalendar(array, i), cal);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    filter.getFillDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
                 }
             }
             jsonReader.close();
@@ -90,6 +89,7 @@ public class FilterParser {
 
     public TradeFilter parseTradeFilter(String jsonFilter) {
         TradeFilter filter = new TradeFilter();
+
         if (jsonFilter != null) {
             JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
             JsonArray array = jsonReader.readArray();
@@ -107,9 +107,8 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.TradeFilterField.OPEN_DATE.getVarName().equals(property)) {
-                    Calendar cal = CoreUtil.calNow();
-                    cal.setTimeInMillis(Long.valueOf(parseString(array, i)));
-                    filter.getOpenDateFilterMap().put(parseOperatorCalendar(array, i), cal);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    filter.getOpenDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
 
                 }  else if (FilterEnums.TradeFilterField.STATUS.getVarName().equals(property)) {
                     FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
@@ -163,13 +162,13 @@ public class FilterParser {
         return operator;
     }
 
-    private FilterEnums.FilterOperatorCalendar parseOperatorCalendar(JsonArray array, int i) {
+    private FilterEnums.FilterOperatorDate parseOperatorDate(JsonArray array, int i) {
         JsonString json = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.OPERATOR.toString());
-        FilterEnums.FilterOperatorCalendar operator;
+        FilterEnums.FilterOperatorDate operator;
         try {
-            operator = (json != null ? FilterEnums.FilterOperatorCalendar.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorCalendar.EQ);
+            operator = (json != null ? FilterEnums.FilterOperatorDate.valueOf(json.getString().toUpperCase()) : FilterEnums.FilterOperatorDate.EQ);
         } catch (Exception e) {
-            operator = FilterEnums.FilterOperatorCalendar.EQ;
+            operator = FilterEnums.FilterOperatorDate.EQ;
         }
         return operator;
     }

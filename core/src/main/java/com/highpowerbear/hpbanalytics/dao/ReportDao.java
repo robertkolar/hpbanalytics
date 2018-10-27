@@ -11,7 +11,7 @@ import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -29,8 +29,8 @@ public interface ReportDao {
     ReportInfo getReportInfo(int reportId);
 
     List<Execution> getExecutions(int reportId);
-    List<Execution> getExecutionsAfterDate(int reportId, Calendar date, String symbol);
-    List<Execution> getExecutionsAfterDateInclusive(int reportId, Calendar date, String symbol);
+    List<Execution> getExecutionsAfterDate(int reportId, LocalDateTime date, String symbol);
+    List<Execution> getExecutionsAfterDateInclusive(int reportId, LocalDateTime date, String symbol);
     boolean existsExecution(long executionId);
     Execution findExecution(long executionId);
     void createExecution(Execution execution);
@@ -39,14 +39,14 @@ public interface ReportDao {
     long getNumFilteredExecutions(int reportId, ExecutionFilter filter);
 
     List<Trade> getTrades(int reportId, String tradeType, String secType, String currency, String underlying);
-    List<Trade> getTradesAffectedByExecution(int reportId, Calendar fillDate, String symbol);
+    List<Trade> getTradesAffectedByExecution(int reportId, LocalDateTime fillDate, String symbol);
     void createTrades(List<Trade> trades);
     void deleteAllTrades(int reportId);
     void deleteTrades(List<Trade> trades);
     Trade findTrade(long tradeId);
     List<Trade> getFilteredTrades(int reportId, TradeFilter filter, int start, int limit);
     long getNumFilteredTrades(int reportId, TradeFilter filter);
-    List<Trade> getTradesBetweenDates(int reportId, Calendar beginDate, Calendar endDate, TradeType tradeType);
+    List<Trade> getTradesBetweenDates(int reportId, LocalDateTime beginDate, LocalDateTime endDate, TradeType tradeType);
 
     List<String> getUnderlyings(int reportId);
 

@@ -9,7 +9,6 @@ import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,10 +16,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -43,7 +42,7 @@ public class IfiCsvGenerator {
     private final Map<SecType, String> secTypeMap = new HashMap<>();
     private final Map<TradeType, String> tradeTypeMap = new HashMap<>();
 
-    private final DateFormat df = new SimpleDateFormat("MM/dd/yyyy");
+    private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
     @Autowired
@@ -69,14 +68,11 @@ public class IfiCsvGenerator {
     public String generate(int reportId, Integer year, TradeType tradeType) {
         log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
 
-        Calendar cal = CoreUtil.calNow();
-        cal.set(Calendar.YEAR, year);
-        Calendar beginDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
-        cal.set(Calendar.YEAR, year + 1);
-        Calendar endDate = CoreUtil.toBeginOfPeriod(cal, StatisticsInterval.YEAR);
+        LocalDateTime beginDate = LocalDate.now().withDayOfYear(1).atStartOfDay();
+        LocalDateTime endDate = beginDate.plusYears(1);
         List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
 
-        log.info("beginDate=" + df.format(beginDate.getTime()) + ", endDate=" + df.format(endDate.getTime()) + ", trades=" + trades.size());
+        log.info("beginDate=" + beginDate + ", endDate=" + endDate + ", trades=" + trades.size());
         StringBuilder sb = new StringBuilder();
 
         if (TradeType.SHORT.equals(tradeType)) {
@@ -184,7 +180,7 @@ public class IfiCsvGenerator {
         double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
-        sb.append(df.format(se.getFillDate().getTime())).append(DL);
+        sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
         double fillPrice = se.getExecution().getFillPrice().doubleValue();
@@ -210,7 +206,7 @@ public class IfiCsvGenerator {
         }
 
         sb.append(DL);
-        sb.append(df.format(se.getFillDate().getTime())).append(DL);
+        sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
@@ -237,7 +233,7 @@ public class IfiCsvGenerator {
         double exchangeRate = getExchangeRate(se);
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
-        sb.append(df.format(se.getFillDate().getTime())).append(DL);
+        sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
@@ -263,7 +259,7 @@ public class IfiCsvGenerator {
             sb.append(DL);
         }
         sb.append(DL);
-        sb.append(df.format(se.getFillDate().getTime())).append(DL);
+        sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
         double fillPrice = se.getExecution().getFillPrice().doubleValue();
@@ -290,7 +286,7 @@ public class IfiCsvGenerator {
         ExchangeRate exchangeRate = reportDao.getExchangeRate(date);
 
         if (exchangeRate == null) {
-            String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(se.getFillDate()));
+            String previousDate = CoreUtil.formatExchangeRateDate(se.getFillDate().plusDays(-1));
             exchangeRate = reportDao.getExchangeRate(previousDate);
         }
         Currency currency = se.getExecution().getCurrency();

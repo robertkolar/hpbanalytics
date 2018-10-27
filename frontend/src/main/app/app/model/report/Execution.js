@@ -5,7 +5,7 @@ Ext.define('HanGui.model.report.Execution', {
     extend: 'HanGui.model.report.Base',
 
     fields: [
-        {name: 'receivedDate', type: 'date', dateFormat: 'time'},
+        {name: 'receivedDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'comment',
         'origin',
         'referenceId',
@@ -15,7 +15,7 @@ Ext.define('HanGui.model.report.Execution', {
         'underlying',
         'currency',
         'secType',
-        {name: 'fillDate', type: 'date', dateFormat: 'time'},
+        {name: 'fillDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'fillPrice',
         'reportId'
     ]

@@ -14,9 +14,9 @@ Ext.define('HanGui.model.report.Trade', {
         'status',
         'openPosition',
         'avgOpenPrice',
-        {name: 'openDate', type: 'date', dateFormat: 'time'},
+        {name: 'openDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'avgClosePrice',
-        {name: 'closeDate', type: 'date', dateFormat: 'time'},
+        {name: 'closeDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'duration',
         'profitLoss',
         'reportId'

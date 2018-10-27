@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -17,11 +18,9 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -35,9 +34,8 @@ public class Execution implements Serializable, Comparable<Execution> {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar receivedDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime receivedDate;
     @ManyToOne
     @JsonIgnore
     private Report report;
@@ -53,9 +51,8 @@ public class Execution implements Serializable, Comparable<Execution> {
     private Currency currency;
     @Enumerated(EnumType.STRING)
     private SecType secType;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar fillDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime fillDate;
     private BigDecimal fillPrice;
 
     @JsonProperty
@@ -81,7 +78,7 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     @Override
     public int compareTo(Execution other) {
-        return (this.fillDate.before(other.fillDate) ? -1 : (this.fillDate.after(other.fillDate) ? 1 : 0));
+        return fillDate.compareTo(other.fillDate);
     }
 
     public String print() {
@@ -96,11 +93,11 @@ public class Execution implements Serializable, Comparable<Execution> {
         this.id = id;
     }
 
-    public Calendar getReceivedDate() {
+    public LocalDateTime getReceivedDate() {
         return receivedDate;
     }
 
-    public void setReceivedDate(Calendar receivedDate) {
+    public void setReceivedDate(LocalDateTime receivedDate) {
         this.receivedDate = receivedDate;
     }
 
@@ -184,11 +181,11 @@ public class Execution implements Serializable, Comparable<Execution> {
         this.currency = currency;
     }
 
-    public Calendar getFillDate() {
+    public LocalDateTime getFillDate() {
         return fillDate;
     }
     
-    public void setFillDate(Calendar fillDate) {
+    public void setFillDate(LocalDateTime fillDate) {
         this.fillDate = fillDate;
     }
 

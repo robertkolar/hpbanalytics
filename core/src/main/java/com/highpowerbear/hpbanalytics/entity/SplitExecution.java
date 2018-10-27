@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 
 import javax.persistence.Entity;
@@ -12,10 +13,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.io.Serializable;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -31,9 +30,8 @@ public class SplitExecution implements Serializable {
     private Long id;
     private Integer splitQuantity;
     private Integer currentPosition;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar fillDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime fillDate;
     @ManyToOne
     @JsonIgnore
     private Execution execution;
@@ -114,11 +112,11 @@ public class SplitExecution implements Serializable {
         this.currentPosition = currentPosition;
     }
 
-    public Calendar getFillDate() {
+    public LocalDateTime getFillDate() {
         return fillDate;
     }
 
-    public void setFillDate(Calendar fillDate) {
+    public void setFillDate(LocalDateTime fillDate) {
         this.fillDate = fillDate;
     }
 }

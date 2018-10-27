@@ -28,7 +28,7 @@ Ext.define('HanGui.view.report.grid.ExecutionsGrid', {
         format: 'm/d/Y H:i:s.u',
         filter: {
             type: 'date',
-            dateFormat: 'time'
+            dateFormat: 'Y-m-d H:i:s.u'
         }
     }, {
         text: 'Origin',

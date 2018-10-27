@@ -4,7 +4,7 @@ import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -16,7 +16,7 @@ public class TradeFilter {
 
     private final Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
     private final Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
-    private final Map<FilterEnums.FilterOperatorCalendar, Calendar> openDateFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorDate, LocalDateTime> openDateFilterMap = new HashMap<>();
     private final Map<FilterEnums.FilterOperatorEnum, Set<TradeStatus>> statusFilterMap = new HashMap<>();
 
     public Map<FilterEnums.FilterOperatorString, String> getSymbolFilterMap() {
@@ -27,7 +27,7 @@ public class TradeFilter {
         return secTypeFilterMap;
     }
 
-    public Map<FilterEnums.FilterOperatorCalendar, Calendar> getOpenDateFilterMap() {
+    public Map<FilterEnums.FilterOperatorDate, LocalDateTime> getOpenDateFilterMap() {
         return openDateFilterMap;
     }
 

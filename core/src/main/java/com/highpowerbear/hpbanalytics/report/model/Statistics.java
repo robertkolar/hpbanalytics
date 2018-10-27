@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  *
@@ -11,8 +12,8 @@ import java.util.Calendar;
 public class Statistics {
 
     private final int id;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private final Calendar periodDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private final LocalDateTime periodDate;
     private final int numOpened;
     private final int numClosed;
     private final int numWinners;
@@ -24,9 +25,8 @@ public class Statistics {
     private final double profitLoss;
     private final double cumulProfitLoss;
 
-    public Statistics(
-            int id, Calendar periodDate, int numOpened,int numClosed, int numWinners, int numLosers, double bigWinner,
-            double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
+    public Statistics(int id, LocalDateTime periodDate, int numOpened,int numClosed, int numWinners, int numLosers,
+                      double bigWinner, double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
 
         this.id = id;
         this.periodDate = periodDate;
@@ -46,7 +46,7 @@ public class Statistics {
         return id;
     }
 
-    public Calendar getPeriodDate() {
+    public LocalDateTime getPeriodDate() {
         return periodDate;
     }
 

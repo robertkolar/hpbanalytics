@@ -18,7 +18,7 @@ Ext.define('HanGui.model.report.Report', {
         {name: 'numOpenTrades', mapping: 'reportInfo.numOpenTrades', persist: false},
         {name: 'numUnderlyings', mapping: 'reportInfo.numUnderlyings', persist: false},
         {name: 'numOpenUnderlyings', mapping: 'reportInfo.numOpenUnderlyings', persist: false},
-        {name: 'firstExecutionDate', mapping: 'reportInfo.firstExecutionDate', type: 'date', dateFormat: 'time', persist: false},
-        {name: 'lastExecutionDate', mapping: 'reportInfo.lastExecutionDate', type: 'date', dateFormat: 'time', persist: false}
+        {name: 'firstExecutionDate', mapping: 'reportInfo.firstExecutionDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u', persist: false},
+        {name: 'lastExecutionDate', mapping: 'reportInfo.lastExecutionDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u', persist: false}
     ]
 });

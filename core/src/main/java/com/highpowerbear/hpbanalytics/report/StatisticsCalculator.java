@@ -13,8 +13,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -98,22 +99,18 @@ public class StatisticsCalculator {
             return stats;
         }
 
-        Calendar firstDate = getFirstDate(trades);
-        Calendar lastDate = getLastDate(trades);
+        LocalDateTime firstDate = getFirstDate(trades);
+        LocalDateTime lastDate = getLastDate(trades);
 
-        Calendar firstPeriodDate = CoreUtil.toBeginOfPeriod(firstDate, interval);
-        Calendar lastPeriodDate = CoreUtil.toBeginOfPeriod(lastDate, interval);
-        Calendar periodDate = CoreUtil.calNow();
-        periodDate.setTimeInMillis(firstPeriodDate.getTimeInMillis());
+        LocalDateTime firstPeriodDate = toBeginOfPeriod(firstDate, interval);
+        LocalDateTime lastPeriodDate = toBeginOfPeriod(lastDate, interval);
+        LocalDateTime periodDate = firstPeriodDate;
 
         double cumulProfitLoss = 0.0;
         int statsCount = 1;
 
-        while (periodDate.getTimeInMillis() <= lastPeriodDate.getTimeInMillis()) {
-
-            Calendar periodDateCopy = CoreUtil.calNow();
-            periodDateCopy.setTimeInMillis(periodDate.getTimeInMillis());
-            List<Trade> tradesClosedForPeriod = this.getTradesClosedForPeriod(trades, periodDate, interval);
+        while (!periodDate.isAfter(lastPeriodDate)) {
+            List<Trade> tradesClosedForPeriod = getTradesClosedForPeriod(trades, periodDate, interval);
 
             int numWinners = 0;
             int numLosers = 0;
@@ -147,7 +144,7 @@ public class StatisticsCalculator {
 
             Statistics s = new Statistics(
                     statsCount++,
-                    periodDateCopy,
+                    periodDate,
                     getNumTradesOpenedForPeriod(trades, periodDate, interval),
                     tradesClosedForPeriod.size(),
                     numWinners,
@@ -162,61 +159,74 @@ public class StatisticsCalculator {
             stats.add(s);
 
             if (StatisticsInterval.DAY.equals(interval)) {
-                periodDate.add(Calendar.DAY_OF_MONTH, 1);
+                periodDate = periodDate.plusDays(1);
 
             } else if (StatisticsInterval.MONTH.equals(interval)) {
-                periodDate.add(Calendar.MONTH, 1);
+                periodDate = periodDate.plusMonths(1);
 
             } else if (StatisticsInterval.YEAR.equals(interval)) {
-                periodDate.add(Calendar.YEAR, 1);
+                periodDate = periodDate.plusYears(1);
             }
         }
         return stats;
     }
 
-    private Calendar getFirstDate(List<Trade> trades) {
-        Calendar firstDateOpened = trades.get(0).getOpenDate();
+    private LocalDateTime getFirstDate(List<Trade> trades) {
+        LocalDateTime firstDateOpened = trades.get(0).getOpenDate();
         for (Trade t: trades) {
-            if (t.getOpenDate().before(firstDateOpened)) {
+            if (t.getOpenDate().isBefore(firstDateOpened)) {
                 firstDateOpened = t.getOpenDate();
             }
         }
         return firstDateOpened;
     }
 
-    private Calendar getLastDate(List<Trade> trades) {
-        Calendar lastDate;
-        Calendar lastDateOpened = trades.get(0).getOpenDate();
-        Calendar lastDateClosed = trades.get(0).getCloseDate();
+    private LocalDateTime getLastDate(List<Trade> trades) {
+        LocalDateTime lastDate;
+        LocalDateTime lastDateOpened = trades.get(0).getOpenDate();
+        LocalDateTime lastDateClosed = trades.get(0).getCloseDate();
 
         for (Trade t: trades) {
-            if (t.getOpenDate().after(lastDateOpened)) {
+            if (t.getOpenDate().isAfter(lastDateOpened)) {
                 lastDateOpened = t.getOpenDate();
             }
         }
         for (Trade t: trades) {
-            if (t.getCloseDate() != null && (lastDateClosed == null || t.getCloseDate().after(lastDateClosed))) {
+            if (t.getCloseDate() != null && (lastDateClosed == null || t.getCloseDate().isAfter(lastDateClosed))) {
                 lastDateClosed = t.getCloseDate();
             }
         }
-        lastDate = (lastDateClosed == null || lastDateOpened.after(lastDateClosed) ? lastDateOpened : lastDateClosed);
+        lastDate = (lastDateClosed == null || lastDateOpened.isAfter(lastDateClosed) ? lastDateOpened : lastDateClosed);
         return lastDate;
     }
 
-    private int getNumTradesOpenedForPeriod(List<Trade> trades, Calendar periodDate, StatisticsInterval interval) {
+    private int getNumTradesOpenedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
         int count = 0;
         for (Trade t: trades) {
-            if (CoreUtil.toBeginOfPeriod(t.getOpenDate(), interval).getTimeInMillis() == periodDate.getTimeInMillis()) {
+            if (toBeginOfPeriod(t.getOpenDate(), interval).isEqual(periodDate)) {
                 count++;
             }
         }
         return count;
     }
 
-    private List<Trade> getTradesClosedForPeriod(List<Trade> trades, Calendar periodDate, StatisticsInterval interval) {
+    private List<Trade> getTradesClosedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
         return trades.stream()
                 .filter(t -> t.getCloseDate() != null)
-                .filter(t -> CoreUtil.toBeginOfPeriod(t.getCloseDate(), interval).getTimeInMillis() == periodDate.getTimeInMillis())
+                .filter(t -> toBeginOfPeriod(t.getCloseDate(), interval).isEqual(periodDate))
                 .collect(Collectors.toList());
+    }
+
+    private LocalDateTime toBeginOfPeriod(LocalDateTime localDateTime, StatisticsInterval interval) {
+        LocalDate localDate = localDateTime.toLocalDate();
+
+        if (StatisticsInterval.YEAR.equals(interval)) {
+            localDate = localDate.withDayOfYear(1);
+
+        } else if (StatisticsInterval.MONTH.equals(interval)) {
+            localDate = localDate.withDayOfMonth(1);
+        }
+
+        return localDate.atStartOfDay();
     }
 }

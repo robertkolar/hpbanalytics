@@ -31,13 +31,13 @@ public class FilterEnums {
         }
     }
 
-    public enum FilterOperatorCalendar {
+    public enum FilterOperatorDate {
         EQ("="),
         GT(">"),
         LT("<");
 
         private final String sql;
-        FilterOperatorCalendar(String sql) {
+        FilterOperatorDate(String sql) {
             this.sql = sql;
         }
         public String getSql() {

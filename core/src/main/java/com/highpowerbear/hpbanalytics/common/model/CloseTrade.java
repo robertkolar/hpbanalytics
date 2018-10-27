@@ -1,16 +1,20 @@
 package com.highpowerbear.hpbanalytics.common.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
+
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 4/9/2018.
  */
 public class CloseTrade {
-    private Calendar closeDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime closeDate;
     private BigDecimal closePrice;
 
-    public Calendar getCloseDate() {
+    public LocalDateTime getCloseDate() {
         return closeDate;
     }
 

@@ -16,8 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -113,8 +113,8 @@ public class ReportProcessor {
             SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
             log.info("firstSe=" + firstSe.print());
 
-            boolean isNewAfterFirst = execution.getFillDate().after(firstSe.getExecution().getFillDate());
-            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + execution.getFillDate().getTime() + ", " + firstSe.getExecution().getFillDate().getTime());
+            boolean isNewAfterFirst = execution.getFillDate().isAfter(firstSe.getExecution().getFillDate());
+            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + CoreUtil.formatLogDate(execution.getFillDate()) + ", " + CoreUtil.formatLogDate(firstSe.getExecution().getFillDate()));
 
             if (isNewAfterFirst) {
                 executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
@@ -132,10 +132,10 @@ public class ReportProcessor {
         reportDao.createTrades(trades);
     }
 
-    public void closeTrade(Trade trade, Calendar closeDate, BigDecimal closePrice) {
+    public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
         Execution e = new Execution();
 
-        e.setReceivedDate(CoreUtil.calNow());
+        e.setReceivedDate(LocalDateTime.now());
         e.setReport(trade.getReport());
         e.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
         e.setOrigin("INTERNAL");

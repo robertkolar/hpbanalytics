@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.dao.filter;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -15,7 +15,7 @@ public class ExecutionFilter {
 
     private final Map<FilterEnums.FilterOperatorString, String> symbolFilterMap = new HashMap<>();
     private final Map<FilterEnums.FilterOperatorEnum, Set<SecType>> secTypeFilterMap = new HashMap<>();
-    private final Map<FilterEnums.FilterOperatorCalendar, Calendar> fillDateFilterMap = new HashMap<>();
+    private final Map<FilterEnums.FilterOperatorDate, LocalDateTime> fillDateFilterMap = new HashMap<>();
 
     public Map<FilterEnums.FilterOperatorString, String> getSymbolFilterMap() {
         return symbolFilterMap;
@@ -25,7 +25,7 @@ public class ExecutionFilter {
         return secTypeFilterMap;
     }
 
-    public Map<FilterEnums.FilterOperatorCalendar, Calendar> getFillDateFilterMap() {
+    public Map<FilterEnums.FilterOperatorDate, LocalDateTime> getFillDateFilterMap() {
         return fillDateFilterMap;
     }
 }

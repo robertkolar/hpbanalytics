@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -124,15 +124,15 @@ public class ReportDaoImpl implements ReportDao {
 
         long numOpenUnderlyings = query.getSingleResult();
 
-        TypedQuery<Calendar> calQuery = em.createQuery("SELECT MIN(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", Calendar.class);
-        calQuery.setParameter("reportId", reportId);
+        TypedQuery<LocalDateTime> dateQuery = em.createQuery("SELECT MIN(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", LocalDateTime.class);
+        dateQuery.setParameter("reportId", reportId);
 
-        Calendar firstExecutionDate = calQuery.getResultList().get(0);
+        LocalDateTime firstExecutionDate = dateQuery.getResultList().get(0);
 
-        calQuery = em.createQuery("SELECT MAX(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", Calendar.class);
-        calQuery.setParameter("reportId", reportId);
+        dateQuery = em.createQuery("SELECT MAX(e.fillDate) FROM Execution e WHERE e.report.id = :reportId", LocalDateTime.class);
+        dateQuery.setParameter("reportId", reportId);
 
-        Calendar lastExecutionDate = calQuery.getResultList().get(0);
+        LocalDateTime lastExecutionDate = dateQuery.getResultList().get(0);
 
         return new ReportInfo(numExecutions, numTrades, numOpenTrades, numUnderlyings, numOpenUnderlyings, firstExecutionDate, lastExecutionDate);
     }
@@ -146,7 +146,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Execution> getExecutionsAfterDate(int reportId, Calendar date, String symbol) {
+    public List<Execution> getExecutionsAfterDate(int reportId, LocalDateTime date, String symbol) {
         TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report.id = :reportId AND e.fillDate > :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
 
         q.setParameter("reportId", reportId);
@@ -157,7 +157,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Execution> getExecutionsAfterDateInclusive(int reportId, Calendar date, String symbol) {
+    public List<Execution> getExecutionsAfterDateInclusive(int reportId, LocalDateTime date, String symbol) {
         TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.report.id = :reportId AND e.fillDate >= :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
 
         q.setParameter("reportId", reportId);
@@ -237,7 +237,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Trade> getTradesAffectedByExecution(int reportId, Calendar fillDate, String symbol) {
+    public List<Trade> getTradesAffectedByExecution(int reportId, LocalDateTime fillDate, String symbol) {
         TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId AND (t.closeDate >= :fillDate OR t.status = :tradeStatus) AND t.symbol = :symbol ORDER BY t.openDate ASC", Trade.class);
 
         q.setParameter("tradeStatus", TradeStatus.OPEN);
@@ -303,7 +303,7 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Trade> getTradesBetweenDates(int reportId, Calendar beginDate, Calendar endDate, TradeType tradeType) {
+    public List<Trade> getTradesBetweenDates(int reportId, LocalDateTime beginDate, LocalDateTime endDate, TradeType tradeType) {
         TypedQuery<Trade> q = em.createQuery("SELECT t FROM Trade t WHERE t.report.id = :reportId AND t.closeDate >= :beginDate AND t.closeDate < :endDate AND t.type = :tradeType ORDER BY t.openDate ASC", Trade.class);
 
         q.setParameter("reportId", reportId);

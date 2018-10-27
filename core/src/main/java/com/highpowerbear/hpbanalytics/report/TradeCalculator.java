@@ -18,7 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
-import java.util.Calendar;
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +132,7 @@ public class TradeCalculator {
 
     private Double calculatePLPortfolioBaseSimple(Trade t, boolean current) {
         validateClosed(t);
-        Calendar plCalculationDate = current ? CoreUtil.calNow() : t.getCloseDate();
+        LocalDateTime plCalculationDate = current ? LocalDateTime.now() : t.getCloseDate();
         double exchangeRate = getExchangeRate(plCalculationDate, t.getCurrency());
 
         return t.getProfitLoss().doubleValue() / exchangeRate;
@@ -146,13 +146,13 @@ public class TradeCalculator {
         }
     }
 
-    private Double getExchangeRate(Calendar calendar, Currency currency) {
+    private Double getExchangeRate(LocalDateTime localDateTime, Currency currency) {
         if (exchangeRateMap.isEmpty()) {
             List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
             exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
         }
 
-        String date = CoreUtil.formatExchangeRateDate(calendar);
+        String date = CoreUtil.formatExchangeRateDate(localDateTime);
         ExchangeRate exchangeRate = exchangeRateMap.get(date);
 
         if (exchangeRate == null) {
@@ -161,7 +161,7 @@ public class TradeCalculator {
             if (exchangeRate != null) {
                 exchangeRateMap.put(date, exchangeRate);
             } else {
-                String previousDate = CoreUtil.formatExchangeRateDate(CoreUtil.previousDay(calendar));
+                String previousDate = CoreUtil.formatExchangeRateDate(localDateTime.plusDays(-1));
                 exchangeRate = exchangeRateMap.get(previousDate);
 
                 if (exchangeRate == null) {

@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.report;
 
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
+import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -18,10 +19,7 @@ import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_EXECUTION_RECEIVED;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDER_FILLED;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 12/21/2017.
@@ -41,12 +39,12 @@ public class ReportMessageReceiver {
         this.messageSender = messageSender;
     }
 
-    @JmsListener(destination = JMS_DEST_ORDER_FILLED)
+    @JmsListener(destination = CoreSettings.JMS_DEST_ORDER_FILLED)
     public void receiveJmsMessage(String ibOrderId) {
         handleOrderFilled(Long.valueOf(ibOrderId));
     }
 
-    @JmsListener(destination = JMS_DEST_EXECUTION_RECEIVED)
+    @JmsListener(destination = CoreSettings.JMS_DEST_EXECUTION_RECEIVED)
     public void receiveJmsMessage(ExecutionDto executionDto) {
         handleExecutionReceived(executionDto);
     }
@@ -100,7 +98,7 @@ public class ReportMessageReceiver {
     }
 
     private void processExecution(Execution execution) {
-        execution.setReceivedDate(CoreUtil.calNow());
+        execution.setReceivedDate(LocalDateTime.now());
 
         if (execution.getFillDate() == null) {
             execution.setFillDate(execution.getReceivedDate());
@@ -115,6 +113,6 @@ public class ReportMessageReceiver {
         execution.setReport(report);
 
         reportProcessor.newExecution(execution);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT,  "new execution processed");
+        messageSender.sendWsMessage(CoreSettings.WS_TOPIC_REPORT,  "new execution processed");
     }
 }

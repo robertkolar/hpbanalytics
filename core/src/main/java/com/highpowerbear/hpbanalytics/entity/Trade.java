@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -22,11 +23,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import java.io.Serializable;
 import java.math.BigDecimal;
-import java.util.Calendar;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -54,13 +54,11 @@ public class Trade implements Serializable {
     private TradeStatus status;
     private Integer openPosition;
     private BigDecimal avgOpenPrice;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar openDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime openDate;
     private BigDecimal avgClosePrice;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar closeDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime closeDate;
     private BigDecimal profitLoss;
     @ManyToOne
     @JsonIgnore
@@ -76,7 +74,7 @@ public class Trade implements Serializable {
 
     @JsonProperty
     public String getDuration() {
-        return (closeDate != null ? CoreUtil.toDurationString(closeDate.getTimeInMillis() - openDate.getTimeInMillis()) : "");
+        return closeDate != null ? CoreUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
     }
 
     public String print() {
@@ -171,19 +169,19 @@ public class Trade implements Serializable {
         this.status = status;
     }
 
-    public Calendar getOpenDate() {
+    public LocalDateTime getOpenDate() {
         return openDate;
     }
 
-    public void setOpenDate(Calendar openDate) {
+    public void setOpenDate(LocalDateTime openDate) {
         this.openDate = openDate;
     }
 
-    public Calendar getCloseDate() {
+    public LocalDateTime getCloseDate() {
         return closeDate;
     }
 
-    public void setCloseDate(Calendar closeDate) {
+    public void setCloseDate(LocalDateTime closeDate) {
         this.closeDate = closeDate;
     }
 
@@ -251,9 +249,9 @@ public class Trade implements Serializable {
                 ", status=" + status +
                 ", openPosition=" + openPosition +
                 ", avgOpenPrice=" + avgOpenPrice +
-                ", openDate=" + openDate.getTime() +
+                ", openDate=" + openDate +
                 ", avgClosePrice=" + avgClosePrice +
-                ", closeDate=" + closeDate.getTime() +
+                ", closeDate=" + closeDate +
                 ", profitLoss=" + profitLoss +
                 '}';
     }

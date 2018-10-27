@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 10/10/2016.
@@ -38,9 +38,8 @@ public class ExchangeRateRetriever {
 
         for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
-            Calendar calendar = CoreUtil.calNow();
-            calendar.add(Calendar.DAY_OF_MONTH, i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
-            String date = CoreUtil.formatExchangeRateDate(calendar);
+            LocalDateTime localDateTime = LocalDateTime.now().plusDays(i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
+            String date = CoreUtil.formatExchangeRateDate(localDateTime);
 
             exchangeRate.setDate(date);
             ExchangeRates exchangeRates = retrieveRates(date);

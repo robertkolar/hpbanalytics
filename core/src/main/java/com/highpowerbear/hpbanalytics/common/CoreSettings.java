@@ -3,22 +3,20 @@ package com.highpowerbear.hpbanalytics.common;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.StatisticsPLMethod;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.TimeZone;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Created by robertk on 5/29/2017.
  */
 public class CoreSettings {
-
-    public static final TimeZone SERVER_TIMEZONE = TimeZone.getTimeZone("America/New_York");
     public static final Integer IB_CONNECT_CLIENT_ID = 0;
     public static final Integer MAX_ORDER_HEARTBEAT_FAILS = 5;
     public static final String EXCHANGE_RATE_URL = "http://data.fixer.io/api/";
     public static final Integer EXCHANGE_RATE_DAYS_BACK = 5;
-    public static final DateFormat LOG_DATE_FORMAT = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss.SSS");
-    public static final DateFormat EXCHANGE_RATE_DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    public static final String JSON_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    public static final DateTimeFormatter JSON_DATE_FORMATTER = DateTimeFormatter.ofPattern(JSON_DATE_FORMAT);
+    public static final DateTimeFormatter LOG_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss.SSS");
+    public static final DateTimeFormatter EXCHANGE_RATE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     public static final Currency PORTFOLIO_BASE = Currency.EUR;
     public static final StatisticsPLMethod STATISTICS_PL_METHOD = StatisticsPLMethod.PORTFOLIO_BASE_CLOSE_ONLY;
     public static final String EMAIL_FROM = "hpb@highpowerbear.com";

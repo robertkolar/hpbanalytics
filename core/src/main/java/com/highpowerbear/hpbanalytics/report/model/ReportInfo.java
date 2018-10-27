@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 
-import java.util.Calendar;
+import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 12/28/2017.
@@ -14,12 +15,12 @@ public class ReportInfo {
     private final long numOpenTrades;
     private final long numUnderlyings;
     private final long numOpenUnderlyings;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private final Calendar firstExecutionDate;
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private final Calendar lastExecutionDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private final LocalDateTime firstExecutionDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private final LocalDateTime lastExecutionDate;
 
-    public ReportInfo(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, Calendar firstExecutionDate, Calendar lastExecutionDate) {
+    public ReportInfo(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, LocalDateTime firstExecutionDate, LocalDateTime lastExecutionDate) {
         this.numExecutions = numExecutions;
         this.numTrades = numTrades;
         this.numOpenTrades = numOpenTrades;
@@ -49,11 +50,11 @@ public class ReportInfo {
         return numOpenUnderlyings;
     }
 
-    public Calendar getFirstExecutionDate() {
+    public LocalDateTime getFirstExecutionDate() {
         return firstExecutionDate;
     }
 
-    public Calendar getLastExecutionDate() {
+    public LocalDateTime getLastExecutionDate() {
         return lastExecutionDate;
     }
 

@@ -1,7 +1,5 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.common.model.CloseTrade;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
@@ -135,12 +133,8 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-
         execution.setId(null);
         execution.setReport(report);
-        // fix fill date timezone, JAXB JSON converter sets it to UTC
-        execution.getFillDate().setTimeZone(CoreSettings.SERVER_TIMEZONE);
-        execution.setReceivedDate(CoreUtil.calNow());
 
         reportProcessor.newExecution(execution);
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
@@ -198,9 +192,6 @@ public class ReportRestController {
         if (!TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-
-        // fix fill date timezone, JAXB JSON converter sets it to UTC
-        closeTrade.getCloseDate().setTimeZone(CoreSettings.SERVER_TIMEZONE);
 
         reportProcessor.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
         messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");

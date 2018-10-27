@@ -6,7 +6,7 @@ Ext.define('HanGui.model.ordtrack.IbOrderEvent', {
 
     fields: [
         {name: 'id', type: 'string'},
-        {name: 'eventDate', type: 'date', dateFormat: 'time'},
+        {name: 'eventDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'status',
         'price',
         {name: 'ibOrderDbId', type: 'string', reference: {type: 'IbOrder', inverse: 'ibOrderEvents'}}

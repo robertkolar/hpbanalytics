@@ -7,7 +7,7 @@ Ext.define('HanGui.model.report.SplitExecution', {
     fields: [
         'splitQuantity',
         'currentPosition',
-        {name: 'fillDate', type: 'date', dateFormat: 'time'},
+        {name: 'fillDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         {name: 'tradeId', type: 'string', reference: {type: 'Trade', inverse: 'splitExecutions'}},
         'executionDisplay'
     ]

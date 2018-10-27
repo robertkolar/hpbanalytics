@@ -236,7 +236,7 @@ Ext.define('HanGui.view.report.ReportController', {
                     symbol: form.getForm().findField('symbol').lastValue,
                     secType: form.getForm().findField('secType').lastValue,
                     fillPrice: form.getForm().findField('fillPrice').lastValue,
-                    fillDate: new Date(form.getForm().findField('fillDate').lastValue).getTime(),
+                    fillDate: Ext.Date.format(new Date(form.getForm().findField('fillDate').lastValue), 'Y-m-d H:i:s.u'),
                     comment: form.getForm().findField('comment').lastValue
                 },
                 success: function(response, opts) {

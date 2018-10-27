@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -19,12 +19,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -52,16 +50,14 @@ public class IbOrder implements Serializable {
     private String symbol;
     private String secType;
     private String orderType;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar submitDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime submitDate;
     private Double orderPrice;
     private String tif;
     private Integer parentId;
     private String ocaGroup;
-    @Temporal(TemporalType.TIMESTAMP)
-    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
-    private Calendar statusDate;
+    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    private LocalDateTime statusDate;
     private Double fillPrice;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -78,7 +74,7 @@ public class IbOrder implements Serializable {
 
     public void addEvent(OrderStatus status, Double price) {
         this.status = status;
-        this.statusDate = CoreUtil.calNow();
+        this.statusDate = LocalDateTime.now();
         IbOrderEvent e = new IbOrderEvent();
         e.setIbOrder(this);
         e.setEventDate(this.statusDate );
@@ -208,11 +204,11 @@ public class IbOrder implements Serializable {
         this.orderType = orderType;
     }
 
-    public Calendar getSubmitDate() {
+    public LocalDateTime getSubmitDate() {
         return submitDate;
     }
 
-    public void setSubmitDate(Calendar submitDate) {
+    public void setSubmitDate(LocalDateTime submitDate) {
         this.submitDate = submitDate;
     }
 
@@ -248,11 +244,11 @@ public class IbOrder implements Serializable {
         this.ocaGroup = ocaGroup;
     }
 
-    public Calendar getStatusDate() {
+    public LocalDateTime getStatusDate() {
         return statusDate;
     }
 
-    public void setStatusDate(Calendar fillDate) {
+    public void setStatusDate(LocalDateTime fillDate) {
         this.statusDate = fillDate;
     }
 
