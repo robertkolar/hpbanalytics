@@ -240,7 +240,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 180);
+        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
 
         return ResponseEntity.ok(new RestList<>(statistics, (long) statistics.size()));
     }

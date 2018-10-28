@@ -18,6 +18,7 @@ public class Statistics {
     private final int numClosed;
     private final int numWinners;
     private final int numLosers;
+    private final double pctWinners;
     private final double bigWinner;
     private final double bigLoser;
     private final double winnersProfit;
@@ -25,7 +26,7 @@ public class Statistics {
     private final double profitLoss;
     private final double cumulProfitLoss;
 
-    public Statistics(int id, LocalDateTime periodDate, int numOpened,int numClosed, int numWinners, int numLosers,
+    public Statistics(int id, LocalDateTime periodDate, int numOpened,int numClosed, int numWinners, int numLosers, double pctWinners,
                       double bigWinner, double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
 
         this.id = id;
@@ -34,6 +35,7 @@ public class Statistics {
         this.numClosed = numClosed;
         this.numWinners = numWinners;
         this.numLosers = numLosers;
+        this.pctWinners = pctWinners;
         this.bigWinner = bigWinner;
         this.bigLoser = bigLoser;
         this.winnersProfit = winnersProfit;
@@ -64,6 +66,10 @@ public class Statistics {
 
     public int getNumLosers() {
         return numLosers;
+    }
+
+    public double getPctWinners() {
+        return pctWinners;
     }
 
     public double getBigWinner() {
@@ -99,6 +105,7 @@ public class Statistics {
                 ", numClosed=" + numClosed +
                 ", numWinners=" + numWinners +
                 ", numLosers=" + numLosers +
+                ", pctWinners=" + pctWinners +
                 ", bigWinner=" + bigWinner +
                 ", bigLoser=" + bigLoser +
                 ", winnersProfit=" + winnersProfit +

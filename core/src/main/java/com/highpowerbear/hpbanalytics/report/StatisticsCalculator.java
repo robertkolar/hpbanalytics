@@ -112,8 +112,11 @@ public class StatisticsCalculator {
         while (!periodDate.isAfter(lastPeriodDate)) {
             List<Trade> tradesClosedForPeriod = getTradesClosedForPeriod(trades, periodDate, interval);
 
+            int numOpened = getNumTradesOpenedForPeriod(trades, periodDate, interval);
+            int numClosed = tradesClosedForPeriod.size();
             int numWinners = 0;
             int numLosers = 0;
+            double pctWinners;
             double winnersProfit = 0.0;
             double losersLoss = 0.0;
             double bigWinner = 0.0;
@@ -139,16 +142,18 @@ public class StatisticsCalculator {
                     }
                 }
             }
+            pctWinners = numClosed != 0 ? ((double) numWinners / (double) numClosed) * 100.0 : 0.0;
             profitLoss = winnersProfit + losersLoss;
             cumulProfitLoss += profitLoss;
 
             Statistics s = new Statistics(
                     statsCount++,
                     periodDate,
-                    getNumTradesOpenedForPeriod(trades, periodDate, interval),
-                    tradesClosedForPeriod.size(),
+                    numOpened,
+                    numClosed,
                     numWinners,
                     numLosers,
+                    CoreUtil.round2(pctWinners),
                     CoreUtil.round2(bigWinner),
                     CoreUtil.round2(bigLoser),
                     CoreUtil.round2(winnersProfit),

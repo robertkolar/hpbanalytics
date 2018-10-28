@@ -10,6 +10,7 @@ Ext.define('HanGui.model.report.Statistics', {
         'numClosed',
         'numWinners',
         'numLosers',
+        'pctWinners',
         'bigWinner',
         'bigLoser',
         'winnersProfit',

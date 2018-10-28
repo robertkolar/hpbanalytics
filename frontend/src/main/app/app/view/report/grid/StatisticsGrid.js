@@ -46,6 +46,13 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
         align: 'right'
     }, {
         xtype: 'numbercolumn',
+        format: '0.00%',
+        text: 'Win%',
+        width: 100,
+        dataIndex: 'pctWinners',
+        align: 'right'
+    }, {
+        xtype: 'numbercolumn',
         format: '0.00',
         text: 'Big W',
         width: 100,
