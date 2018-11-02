@@ -14,6 +14,7 @@ public class Statistics {
     private final int id;
     @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
     private final LocalDateTime periodDate;
+    private final int numExecs;
     private final int numOpened;
     private final int numClosed;
     private final int numWinners;
@@ -26,11 +27,12 @@ public class Statistics {
     private final double profitLoss;
     private final double cumulProfitLoss;
 
-    public Statistics(int id, LocalDateTime periodDate, int numOpened,int numClosed, int numWinners, int numLosers, double pctWinners,
+    public Statistics(int id, LocalDateTime periodDate, int numExecs, int numOpened,int numClosed, int numWinners, int numLosers, double pctWinners,
                       double bigWinner, double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
 
         this.id = id;
         this.periodDate = periodDate;
+        this.numExecs = numExecs;
         this.numOpened = numOpened;
         this.numClosed = numClosed;
         this.numWinners = numWinners;
@@ -50,6 +52,10 @@ public class Statistics {
 
     public LocalDateTime getPeriodDate() {
         return periodDate;
+    }
+
+    public int getNumExecs() {
+        return numExecs;
     }
 
     public int getNumOpened() {
@@ -101,6 +107,7 @@ public class Statistics {
         return "Statistics{" +
                 "id=" + id +
                 ", periodDate=" + periodDate +
+                ", numExecs=" + numExecs +
                 ", numOpened=" + numOpened +
                 ", numClosed=" + numClosed +
                 ", numWinners=" + numWinners +

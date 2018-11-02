@@ -75,7 +75,9 @@ Ext.define('HanGui.view.report.Report', {
                 }, {
                     html: '<div id="hpb_c6"></div>'
                 }, {
-                    html: '<div id="hpb_c7"></div>',
+                    html: '<div id="hpb_c7"></div>'
+                }, {
+                    html: '<div id="hpb_c8"></div>',
                     margin: '0 0 50 0'
                 }]
             }]

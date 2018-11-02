@@ -3,7 +3,9 @@ package com.highpowerbear.hpbanalytics.report;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
+import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
+import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.report.model.Statistics;
@@ -110,9 +112,11 @@ public class StatisticsCalculator {
         int statsCount = 1;
 
         while (!periodDate.isAfter(lastPeriodDate)) {
+            List<Trade> tradesOpenedForPeriod = getTradesOpenedForPeriod(trades, periodDate, interval);
             List<Trade> tradesClosedForPeriod = getTradesClosedForPeriod(trades, periodDate, interval);
 
-            int numOpened = getNumTradesOpenedForPeriod(trades, periodDate, interval);
+            int numExecs = getNumberExecutionsForPeriod(trades, periodDate, interval);
+            int numOpened = tradesOpenedForPeriod.size();
             int numClosed = tradesClosedForPeriod.size();
             int numWinners = 0;
             int numLosers = 0;
@@ -149,6 +153,7 @@ public class StatisticsCalculator {
             Statistics s = new Statistics(
                     statsCount++,
                     periodDate,
+                    numExecs,
                     numOpened,
                     numClosed,
                     numWinners,
@@ -205,14 +210,10 @@ public class StatisticsCalculator {
         return lastDate;
     }
 
-    private int getNumTradesOpenedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
-        int count = 0;
-        for (Trade t: trades) {
-            if (toBeginOfPeriod(t.getOpenDate(), interval).isEqual(periodDate)) {
-                count++;
-            }
-        }
-        return count;
+    private List<Trade> getTradesOpenedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
+        return trades.stream()
+                .filter(t -> toBeginOfPeriod(t.getOpenDate(), interval).isEqual(periodDate))
+                .collect(Collectors.toList());
     }
 
     private List<Trade> getTradesClosedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
@@ -220,6 +221,16 @@ public class StatisticsCalculator {
                 .filter(t -> t.getCloseDate() != null)
                 .filter(t -> toBeginOfPeriod(t.getCloseDate(), interval).isEqual(periodDate))
                 .collect(Collectors.toList());
+    }
+
+    private int getNumberExecutionsForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
+        return (int) trades.stream()
+                .flatMap(t -> t.getSplitExecutions().stream())
+                .map(SplitExecution::getExecution)
+                .filter(e -> toBeginOfPeriod(e.getFillDate(), interval).isEqual(periodDate))
+                .map(Execution::getId)
+                .distinct()
+                .count();
     }
 
     private LocalDateTime toBeginOfPeriod(LocalDateTime localDateTime, StatisticsInterval interval) {

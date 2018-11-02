@@ -25,6 +25,11 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
         xtype: 'datecolumn',
         format: 'm/d/Y'
     }, {
+        text: '#Execs',
+        width: 80,
+        dataIndex: 'numExecs',
+        align: 'right'
+    }, {
         text: '#Opn',
         width: 80,
         dataIndex: 'numOpened',
