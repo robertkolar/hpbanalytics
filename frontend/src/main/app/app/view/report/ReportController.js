@@ -64,7 +64,6 @@ Ext.define('HanGui.view.report.ReportController', {
             statistics = me.getStore('statistics'),
             charts = me.getStore('charts'),
             interval = me.lookupReference('intervalCombo').getValue(),
-            underlyingCombo =  me.lookupReference('underlyingCombo'),
             executionsPaging = me.lookupReference('executionsPaging'),
             tradesPaging = me.lookupReference('tradesPanel').lookupReference('tradesPaging');
 
@@ -75,19 +74,7 @@ Ext.define('HanGui.view.report.ReportController', {
         statistics.getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/statistics/' + interval);
         charts.getProxy().setUrl(HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId + '/charts/' + interval);
 
-        Ext.Ajax.request({
-            url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/underlyings',
-            success: function(response, opts) {
-                var undls = Ext.decode(response.responseText);
-                var undlsData = [];
-                undlsData.push(['ALL', '--All--']);
-                for (var i = 0; i < undls.length; i++) {
-                    undlsData.push([undls[i], undls[i]]);
-                }
-                underlyingCombo.getStore().loadData(undlsData);
-                underlyingCombo.setValue('ALL');
-            }
-        });
+        me.prepareUnderlyingCombo();
 
         me.lookupReference('chartsButton').toggle(false);
         if (executionsPaging.getStore().isLoaded()) {
@@ -109,6 +96,29 @@ Ext.define('HanGui.view.report.ReportController', {
             });
         }
         me.reloadStatisticsAndCharts();
+    },
+
+    prepareUnderlyingCombo: function() {
+        var me = this,
+            underlyingCombo =  me.lookupReference('underlyingCombo'),
+            openOnlyCheckbox = me.lookupReference('openOnlyCheckbox');
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/underlyings',
+            params: {'openOnly': openOnlyCheckbox.getValue()},
+
+            success: function(response, opts) {
+                var undls = Ext.decode(response.responseText);
+                var undlsData = [];
+                undlsData.push(['ALL', '--All--']);
+                for (var i = 0; i < undls.length; i++) {
+                    undlsData.push([undls[i], undls[i]]);
+                }
+                underlyingCombo.getStore().loadData(undlsData);
+                underlyingCombo.setValue('ALL');
+            }
+        });
     },
 
     onIntervalChange: function(comboBox, newValue, oldValue, eOpts) {

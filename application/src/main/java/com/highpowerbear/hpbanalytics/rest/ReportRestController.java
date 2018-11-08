@@ -265,13 +265,14 @@ public class ReportRestController {
 
     @RequestMapping("/reports/{id}/underlyings")
     public ResponseEntity<?> getUnderlyings(
-            @PathVariable("id") int id) {
+            @PathVariable("id") int reportId,
+            @RequestParam(required = false, value = "openOnly") String openOnly) {
 
-        Report report = reportDao.findReport(id);
+        Report report = reportDao.findReport(reportId);
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(reportDao.getUnderlyings(id));
+        return ResponseEntity.ok(reportDao.getUnderlyings(reportId, Boolean.parseBoolean(openOnly)));
     }
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{tradetype}")

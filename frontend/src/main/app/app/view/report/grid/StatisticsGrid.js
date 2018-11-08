@@ -8,7 +8,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
         'Ext.grid.column.Date',
         'Ext.toolbar.Paging',
         'HanGui.view.report.ReportController',
-        'Ext.form.field.ComboBox'
+        'Ext.form.field.ComboBox',
+        'Ext.form.field.Checkbox'
     ],
     bind: '{statistics}',
     viewConfig: {
@@ -235,6 +236,17 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             margin: '0 0 0 10',
             listeners: {
                 change: 'reloadStatisticsAndCharts'
+            }
+        }, {
+            xtype: 'checkbox',
+            reference: 'openOnlyCheckbox',
+            fieldLabel: 'O',
+            width: 30,
+            labelWidth: 10,
+            checked : false,
+            margin: '0 0 0 10',
+            listeners: {
+                change: 'prepareUnderlyingCombo'
             }
         }, {
             xtype: 'button',

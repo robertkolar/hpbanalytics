@@ -315,9 +315,13 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<String> getUnderlyings(int reportId) {
-        TypedQuery<String> query = em.createQuery("SELECT DISTINCT e.underlying AS u FROM Execution e WHERE e.report.id = :reportId ORDER BY u", String.class);
+    public List<String> getUnderlyings(int reportId, boolean openOnly) {
+        TypedQuery<String> query = em.createQuery("SELECT DISTINCT se.execution.underlying AS u FROM SplitExecution se WHERE se.execution.report.id = :reportId" + (openOnly ? " AND se.trade.status = :tradeStatus" : "") + " ORDER BY u", String.class);
+
         query.setParameter("reportId", reportId);
+        if (openOnly) {
+            query.setParameter("tradeStatus", TradeStatus.OPEN);
+        }
 
         return query.getResultList();
     }

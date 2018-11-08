@@ -48,7 +48,7 @@ public interface ReportDao {
     long getNumFilteredTrades(int reportId, TradeFilter filter);
     List<Trade> getTradesBetweenDates(int reportId, LocalDateTime beginDate, LocalDateTime endDate, TradeType tradeType);
 
-    List<String> getUnderlyings(int reportId);
+    List<String> getUnderlyings(int reportId, boolean openOnly);
 
     ExchangeRate getExchangeRate(String date);
     List<ExchangeRate> getAllExchangeRates();
