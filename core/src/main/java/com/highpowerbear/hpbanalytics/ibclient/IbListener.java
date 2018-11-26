@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.ibclient;
 
-import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.common.MessageSender;
+import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
@@ -16,12 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_EXECUTION_RECEIVED;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.JMS_DEST_ORDER_FILLED;
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRACK;
+import static com.highpowerbear.hpbanalytics.common.CoreSettings.*;
 
 /**
  *
@@ -36,8 +31,6 @@ public class IbListener extends GenericIbListener {
     private final IbController ibController;
     private final HeartbeatControl heartbeatControl;
     private final MessageSender messageSender;
-
-    private final Map<Integer, Double> lastPriceMap = new ConcurrentHashMap<>();
 
     private String accountId;
 
