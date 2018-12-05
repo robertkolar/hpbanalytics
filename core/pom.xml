@@ -53,9 +53,9 @@
             <version>1</version>
         </dependency>
         <dependency>
-            <groupId>com.interactivebrokers</groupId>
-            <artifactId>tws-api</artifactId>
-            <version>9.72.17-SNAPSHOT</version>
+            <groupId>com.highpowerbear</groupId>
+            <artifactId>ibapiclient</artifactId>
+            <version>9.72.18</version>
         </dependency>
     </dependencies>
 
