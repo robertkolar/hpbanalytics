@@ -19,6 +19,11 @@ Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
         width: 120,
         dataIndex: 'accountId'
     }, {
+        text: 'Conid',
+        width: 120,
+        dataIndex: 'conid',
+        align: 'right'
+    }, {
         text: 'Sec',
         width: 100,
         dataIndex: 'secType'
