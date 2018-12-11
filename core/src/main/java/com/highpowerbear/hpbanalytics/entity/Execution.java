@@ -21,6 +21,7 @@ import javax.persistence.Table;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -67,7 +68,7 @@ public class Execution implements Serializable, Comparable<Execution> {
 
         Execution execution = (Execution) o;
 
-        return !(id != null ? !id.equals(execution.id) : execution.id != null);
+        return Objects.equals(id, execution.id);
 
     }
 

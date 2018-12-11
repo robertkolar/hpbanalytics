@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -88,7 +89,7 @@ public class Trade implements Serializable {
 
         Trade trade = (Trade) o;
 
-        return !(id != null ? !id.equals(trade.id) : trade.id != null);
+        return Objects.equals(id, trade.id);
 
     }
 

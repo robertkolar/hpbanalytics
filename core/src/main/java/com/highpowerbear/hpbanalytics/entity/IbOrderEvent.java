@@ -17,6 +17,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -51,7 +52,7 @@ public class IbOrderEvent implements Serializable {
 
         IbOrderEvent that = (IbOrderEvent) o;
 
-        return !(id != null ? !id.equals(that.id) : that.id != null);
+        return Objects.equals(id, that.id);
 
     }
 

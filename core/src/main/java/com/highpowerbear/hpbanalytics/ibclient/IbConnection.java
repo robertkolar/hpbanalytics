@@ -18,7 +18,6 @@ public class IbConnection {
     private final String host;
     private final Integer port;
     private final Integer clientId;
-    private String accounts; // csv, filled upon connection to IB, main account + FA subaccounts if any
     private boolean markConnected = false;
     @JsonIgnore
     private final EClientSocket eClientSocket; // null means not connected yet or manually disconnected
@@ -33,10 +32,6 @@ public class IbConnection {
         this.eReaderSignal = eReaderSignal;
     }
 
-    private String print() {
-        return "host=" + host + ", port=" + port + ", clientId=" + clientId;
-    }
-
     public void connect() {
         if (eClientSocket == null) {
             return;
@@ -44,12 +39,12 @@ public class IbConnection {
         this.markConnected = true;
 
         if (!isConnected()) {
-            log.info("connecting " + print());
+            log.info("connecting " + getInfo());
             eClientSocket.eConnect(host, port, clientId);
             CoreUtil.waitMilliseconds(1000);
 
             if (isConnected()) {
-                log.info("successfully connected " + print());
+                log.info("successfully connected " + getInfo());
 
                 final EReader eReader = new EReader(eClientSocket, eReaderSignal);
 
@@ -75,26 +70,22 @@ public class IbConnection {
         }
         this.markConnected = false;
         if (isConnected()) {
-            log.info("disconnecting " + print());
+            log.info("disconnecting " + getInfo());
             eClientSocket.eDisconnect();
             CoreUtil.waitMilliseconds(1000);
             if (!isConnected()) {
-                log.info("successfully disconnected " + print());
-                this.accounts = null;
+                log.info("successfully disconnected " + getInfo());
             }
         }
     }
+
+    public String getInfo() {
+        return "host=" + host + ", port=" + port + ", clientId=" + clientId;
+    }
+
     @JsonProperty
     public Boolean isConnected() {
         return eClientSocket != null && eClientSocket.isConnected();
-    }
-
-    public void setAccounts(String accounts) {
-        this.accounts = accounts;
-    }
-
-    public String getAccounts() {
-        return accounts;
     }
 
     public String getHost() {

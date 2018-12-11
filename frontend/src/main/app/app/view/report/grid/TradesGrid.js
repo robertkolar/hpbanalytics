@@ -65,14 +65,14 @@ Ext.define('HanGui.view.report.grid.TradesGrid', {
         width: 80,
         dataIndex: 'underlying'
     }, {
-        text: 'Cur',
-        width: 80,
-        dataIndex: 'currency'
-    }, {
         text: 'Symbol',
         width: 180,
         dataIndex: 'symbol',
         filter: 'string'
+    }, {
+        text: 'Cur',
+        width: 80,
+        dataIndex: 'currency'
     }, {
         text: 'Open',
         width: 100,

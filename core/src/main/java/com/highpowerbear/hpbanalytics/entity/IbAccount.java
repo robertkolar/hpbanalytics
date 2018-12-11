@@ -1,12 +1,11 @@
 package com.highpowerbear.hpbanalytics.entity;
 
-import com.highpowerbear.hpbanalytics.ibclient.IbConnection;
-
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -30,7 +29,7 @@ public class IbAccount implements Serializable {
     private String permittedClients; // csv, null means all
     private String permittedAccounts; // csv, null means all - applicable to FA subaccounts
     @Transient
-    private IbConnection ibConnection;
+    private Boolean connected;
 
     public boolean mayProcessClient(Integer clientId) {
         if (permittedClients == null || permittedClients.trim().isEmpty()) {
@@ -69,7 +68,7 @@ public class IbAccount implements Serializable {
 
         IbAccount ibAccount = (IbAccount) o;
 
-        return !(accountId != null ? !accountId.equals(ibAccount.accountId) : ibAccount.accountId != null);
+        return Objects.equals(accountId, ibAccount.accountId);
 
     }
 
@@ -174,11 +173,11 @@ public class IbAccount implements Serializable {
         this.permittedAccounts = permittedAccounts;
     }
 
-    public IbConnection getIbConnection() {
-        return ibConnection;
+    public Boolean getConnected() {
+        return connected;
     }
 
-    public void setIbConnection(IbConnection ibConnection) {
-        this.ibConnection = ibConnection;
+    public void setConnected(Boolean connected) {
+        this.connected = connected;
     }
 }

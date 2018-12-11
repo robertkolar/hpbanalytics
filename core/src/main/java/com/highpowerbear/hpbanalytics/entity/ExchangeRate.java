@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -52,7 +53,7 @@ public class ExchangeRate implements Serializable {
 
         ExchangeRate that = (ExchangeRate) o;
 
-        return date != null ? date.equals(that.date) : that.date == null;
+        return Objects.equals(date, that.date);
 
     }
 

@@ -7,6 +7,7 @@ Ext.define('HanGui.model.ordtrack.IbAccount', {
 
     fields: [
         'accountId',
+        'connected',
         'host',
         'port',
         'listen',
@@ -17,9 +18,6 @@ Ext.define('HanGui.model.ordtrack.IbAccount', {
         'fx',
         'cfd',
         'permittedClients',
-        'permittedAccounts',
-        {name: 'ibConnection', persist: false},
-        {name: 'accounts', mapping: 'ibConnection.accounts', persist: false},
-        {name: 'connected', mapping: 'ibConnection.connected', persist: false}
+        'permittedAccounts'
     ]
 });

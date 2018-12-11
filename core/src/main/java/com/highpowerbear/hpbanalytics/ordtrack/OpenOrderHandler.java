@@ -129,7 +129,7 @@ public class OpenOrderHandler {
 
     private void createNewOrder(IbAccount ibAccount, int orderId, Contract contract, Order order, String underlying, String symbol) {
         IbOrder ibOrder = new IbOrder();
-        ibOrder.setPermId(order.permId());
+        ibOrder.setPermId((long) order.permId());
         ibOrder.setOrderId(orderId);
         ibOrder.setClientId(order.clientId());
         ibOrder.setIbAccount(ibAccount);

@@ -51,6 +51,14 @@ Ext.define('HanGui.view.ordtrack.grid.OrdersGrid', {
         dataIndex: 'permId',
         align: 'right'
     }, {
+        text: 'Sec',
+        width: 60,
+        dataIndex: 'secType',
+        filter: {
+            type: 'list',
+            options: ['STK', 'OPT', 'FUT', 'CASH', 'CFD']
+        }
+    }, {
         text: 'Undl',
         width: 80,
         dataIndex: 'underlying'
@@ -72,14 +80,6 @@ Ext.define('HanGui.view.ordtrack.grid.OrdersGrid', {
         width: 180,
         dataIndex: 'symbol',
         filter: 'string'
-    }, {
-        text: 'Sec',
-        width: 60,
-        dataIndex: 'secType',
-        filter: {
-            type: 'list',
-            options: ['STK', 'OPT', 'FUT', 'CASH', 'CFD']
-        }
     }, {
         text: 'Ord',
         width: 60,

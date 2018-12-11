@@ -39,7 +39,7 @@ Ext.define('HanGui.view.ordtrack.OrdTrackController', {
 
                 if (message.body.startsWith('order')) {
                     ibOrders.reload();
-                } else if (message.body.startsWith('positions')) {
+                } else if (message.body.startsWith('position')) {
                     positions.reload();
                 }
             });

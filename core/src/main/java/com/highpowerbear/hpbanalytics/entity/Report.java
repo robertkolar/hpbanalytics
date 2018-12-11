@@ -7,6 +7,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.persistence.Transient;
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -107,7 +108,7 @@ public class Report implements Serializable {
 
         Report report = (Report) o;
 
-        return !(id != null ? !id.equals(report.id) : report.id != null);
+        return Objects.equals(id, report.id);
 
     }
 

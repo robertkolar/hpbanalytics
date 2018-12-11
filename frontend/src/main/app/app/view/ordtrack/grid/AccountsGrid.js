@@ -46,10 +46,6 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         dataIndex: 'connected',
         renderer: 'connectStatusRenderer'
     }, {
-        text: 'Accounts',
-        width: 200,
-        dataIndex: 'accounts'
-    }, {
         text: 'Host',
         width: 150,
         dataIndex: 'host',

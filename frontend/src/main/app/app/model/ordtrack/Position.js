@@ -8,11 +8,10 @@ Ext.define('HanGui.model.ordtrack.Position', {
     fields: [
         'accountId',
         'symbol',
-        'underlying',
+        'underlyingSymbol',
         'currency',
         'exchange',
         'secType',
-        'position',
-        'avgCost'
+        'size'
     ]
 });

@@ -19,13 +19,17 @@ Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
         width: 120,
         dataIndex: 'accountId'
     }, {
-        text: 'Symbol',
-        width: 180,
-        dataIndex: 'symbol'
+        text: 'Sec',
+        width: 100,
+        dataIndex: 'secType'
     }, {
         text: 'Undl',
         width: 80,
-        dataIndex: 'underlying'
+        dataIndex: 'underlyingSymbol'
+    }, {
+        text: 'Symbol',
+        width: 180,
+        dataIndex: 'symbol'
     }, {
         text: 'Cur',
         width: 60,
@@ -35,13 +39,9 @@ Ext.define('HanGui.view.ordtrack.grid.PositionsGrid', {
         width: 100,
         dataIndex: 'exchange'
     }, {
-        text: 'Sec',
-        width: 100,
-        dataIndex: 'secType'
-    }, {
         text: 'Pos',
         width: 80,
-        dataIndex: 'position',
+        dataIndex: 'size',
         align: 'right'
     }, {
         flex: 1

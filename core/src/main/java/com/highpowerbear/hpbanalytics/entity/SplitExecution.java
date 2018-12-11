@@ -15,6 +15,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -60,7 +61,7 @@ public class SplitExecution implements Serializable {
 
         SplitExecution that = (SplitExecution) o;
 
-        return (id != null ? id.equals(that.id) : that.id == null) && (currentPosition != null ? currentPosition.equals(that.currentPosition) : that.currentPosition == null) && !(execution != null ? !execution.equals(that.execution) : that.execution != null);
+        return (Objects.equals(id, that.id)) && (Objects.equals(currentPosition, that.currentPosition)) && Objects.equals(execution, that.execution);
 
     }
 

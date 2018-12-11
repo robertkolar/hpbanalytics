@@ -6,16 +6,11 @@ import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.ordtrack.HeartbeatControl;
-import com.highpowerbear.hpbanalytics.ibclient.IbController;
+import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
 import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,14 +24,14 @@ import java.util.Map;
 public class OrdTrackRestController {
 
     private final OrdTrackDao ordTrackDao;
-    private final IbController ibController;
+    private final OrdTrackService ordTrackService;
     private final FilterParser filterParser;
     private final HeartbeatControl heartbeatControl;
 
     @Autowired
-    public OrdTrackRestController(OrdTrackDao ordTrackDao, IbController ibController, FilterParser filterParser, HeartbeatControl heartbeatControl) {
+    public OrdTrackRestController(OrdTrackDao ordTrackDao, OrdTrackService ordTrackService, FilterParser filterParser, HeartbeatControl heartbeatControl) {
         this.ordTrackDao = ordTrackDao;
-        this.ibController = ibController;
+        this.ordTrackService = ordTrackService;
         this.filterParser = filterParser;
         this.heartbeatControl = heartbeatControl;
     }
@@ -44,7 +39,7 @@ public class OrdTrackRestController {
     @RequestMapping("/ibaccounts")
     public RestList<IbAccount> getIbAccount() {
         List<IbAccount> ibAccounts = ordTrackDao.getIbAccounts();
-        ibAccounts.forEach(ibAccount -> ibAccount.setIbConnection(ibController.getIbConnection(ibAccount.getAccountId())));
+        ibAccounts.forEach(ibAccount -> ibAccount.setConnected(ordTrackService.isConnected(ibAccount.getAccountId())));
 
         return new RestList<>(ibAccounts, (long) ibAccounts.size());
     }
@@ -72,10 +67,10 @@ public class OrdTrackRestController {
             return ResponseEntity.notFound().build();
         }
 
-        if (connect) {
-            ibController.connect(accountId);
-        } else {
-            ibController.disconnect(accountId);
+        if (connect && !ordTrackService.isConnected(accountId)) {
+            ordTrackService.connect(accountId);
+        } else if (!connect && ordTrackService.isConnected(accountId)){
+            ordTrackService.disconnect(accountId);
         }
 
         try {
@@ -83,7 +78,7 @@ public class OrdTrackRestController {
         } catch (InterruptedException ie) {
             // Ignore
         }
-        ibAccount.setIbConnection(ibController.getIbConnection(accountId));
+        ibAccount.setConnected(ordTrackService.isConnected(accountId));
 
         return ResponseEntity.ok(ibAccount);
     }
@@ -124,7 +119,7 @@ public class OrdTrackRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Position> positions = ibController.getPositions(accountId);
+        List<Position> positions = ordTrackService.getPositions(accountId);
         if (positions == null) {
             positions = new ArrayList<>();
         }

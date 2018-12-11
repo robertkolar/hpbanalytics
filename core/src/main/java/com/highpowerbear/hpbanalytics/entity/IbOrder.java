@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -99,7 +100,7 @@ public class IbOrder implements Serializable {
 
         IbOrder ibOrder = (IbOrder) o;
 
-        return !(id != null ? !id.equals(ibOrder.id) : ibOrder.id != null);
+        return Objects.equals(id, ibOrder.id);
 
     }
 
