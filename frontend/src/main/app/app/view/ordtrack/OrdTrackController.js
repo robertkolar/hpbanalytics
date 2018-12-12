@@ -37,7 +37,9 @@ Ext.define('HanGui.view.ordtrack.OrdTrackController', {
 
             stompClient.subscribe('/topic/ordtrack', function(message) {
 
-                if (message.body.startsWith('order')) {
+                if (message.body.startsWith('ibConnection')) {
+                    ibAccounts.reload();
+                } else if (message.body.startsWith('order')) {
                     ibOrders.reload();
                 } else if (message.body.startsWith('position')) {
                     positions.reload();

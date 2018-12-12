@@ -24,7 +24,7 @@ Ext.define('HanGui.model.ordtrack.IbOrder', {
         {name: 'statusDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
         'fillPrice',
         'status',
-        'heartbeatCount',
-        'ibAccountId'
+        'accountId',
+        'heartbeatCount'
     ]
 });

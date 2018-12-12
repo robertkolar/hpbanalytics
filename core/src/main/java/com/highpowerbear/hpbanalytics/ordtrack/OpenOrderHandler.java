@@ -38,14 +38,6 @@ public class OpenOrderHandler {
             log.info("IB listening disabled, order will be ignored");
             return;
         }
-        if (!(ibAccount.mayProcessAccount(order.account()))) {
-            log.info("account filter active, account=" + order.account() + ", permitted=" + ibAccount.getPermittedAccounts() + ", order will be ignored");
-            return;
-        }
-        if (!(ibAccount.mayProcessClient(order.clientId()))) {
-            log.info("account filter active, clientId=" + order.clientId() + ", permitted=" + ibAccount.getPermittedClients() + ", order will be ignored");
-            return;
-        }
         if (!checkOrderType(order.getOrderType())) {
             log.info("unsupported order type=" + order.getOrderType() + ", order will be ignored");
             return;
@@ -132,7 +124,7 @@ public class OpenOrderHandler {
         ibOrder.setPermId((long) order.permId());
         ibOrder.setOrderId(orderId);
         ibOrder.setClientId(order.clientId());
-        ibOrder.setIbAccount(ibAccount);
+        ibOrder.setAccountId(ibAccount.getAccountId());
         ibOrder.setAction(order.getAction());
         ibOrder.setQuantity((int) order.totalQuantity());
         ibOrder.setUnderlying(underlying);

@@ -65,21 +65,18 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
             allowDecimals: false
         }
     }, {
-        text: 'Permit Clients',
-        width: 140,
-        dataIndex: 'permittedClients',
+        text: 'Cli Id',
+        width: 80,
+        dataIndex: 'clientId',
+        align: 'right',
         editor: {
-            xtype: 'textfield',
-            allowBlank: true
+            xtype: 'numberfield',
+            minValue: 0,
+            maxValue: 65535,
+            allowDecimals: false
         }
     }, {
-        text: 'Permit Accounts',
-        flex: 1,
-        dataIndex: 'permittedAccounts',
-        editor: {
-            xtype: 'textfield',
-            allowBlank: true
-        }
+        flex: 1
     }, {
         text: 'Lst',
         width: 60,

@@ -18,9 +18,9 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
@@ -36,7 +36,7 @@ public class StatisticsCalculator {
     private final MessageSender messageSender;
     private final TradeCalculator tradeCalculator;
 
-    private final Map<String, List<Statistics>> statisticsMap = new ConcurrentHashMap<>(); // caching statistics to prevent excessive recalculation
+    private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
     public StatisticsCalculator(ReportDao reportDao, MessageSender messageSender, TradeCalculator tradeCalculator) {

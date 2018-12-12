@@ -71,7 +71,7 @@ public class OrdTrackDaoImpl implements OrdTrackDao {
 
     @Override
     public List<IbOrder> getOpenIbOrders(String accountId) {
-        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount.accountId = :accountId AND io.status IN :statuses", IbOrder.class);
+        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.accountId = :accountId AND io.status IN :statuses", IbOrder.class);
 
         q.setParameter("accountId", accountId);
         Set<OrderStatus> statuses = new HashSet<>();
@@ -96,7 +96,7 @@ public class OrdTrackDaoImpl implements OrdTrackDao {
 
     @Override
     public IbOrder getIbOrderByPermId(String accountId, long permId) {
-        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.ibAccount.accountId = :accountId AND io.permId = :permId", IbOrder.class);
+        TypedQuery<IbOrder> q = em.createQuery("SELECT io FROM IbOrder io WHERE io.accountId = :accountId AND io.permId = :permId", IbOrder.class);
 
         q.setParameter("accountId", accountId);
         q.setParameter("permId", permId);

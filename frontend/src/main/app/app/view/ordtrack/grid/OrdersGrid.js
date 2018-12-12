@@ -44,7 +44,7 @@ Ext.define('HanGui.view.ordtrack.grid.OrdersGrid', {
     }, {
         text: 'IB Account',
         width: 100,
-        dataIndex: 'ibAccountId'
+        dataIndex: 'accountId'
     }, {
         text: 'PermId',
         width: 100,

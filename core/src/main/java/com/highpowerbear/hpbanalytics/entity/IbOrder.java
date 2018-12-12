@@ -1,7 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
@@ -14,7 +13,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.SequenceGenerator;
@@ -42,8 +40,7 @@ public class IbOrder implements Serializable {
     private Integer orderId;
     private Integer clientId;
     @JsonIgnore
-    @ManyToOne
-    private IbAccount ibAccount;
+    private String accountId;
     private String action;
     private Integer quantity;
     private String underlying;
@@ -67,11 +64,6 @@ public class IbOrder implements Serializable {
     private List<IbOrderEvent> ibOrderEvents;
     @Transient
     private Integer heartbeatCount;
-
-    @JsonProperty
-    public String getIbAccountId() {
-        return ibAccount.getAccountId();
-    }
 
     public void addEvent(OrderStatus status, Double price) {
         this.status = status;
@@ -141,12 +133,12 @@ public class IbOrder implements Serializable {
         this.clientId = clientId;
     }
 
-    public IbAccount getIbAccount() {
-        return ibAccount;
+    public String getAccountId() {
+        return accountId;
     }
 
-    public void setIbAccount(IbAccount ibAccount) {
-        this.ibAccount = ibAccount;
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     public String getAction() {

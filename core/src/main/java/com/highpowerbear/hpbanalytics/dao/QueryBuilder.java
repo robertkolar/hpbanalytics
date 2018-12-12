@@ -33,7 +33,7 @@ public class QueryBuilder {
         boolean isCount = clazz.isAssignableFrom(Long.class);
 
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ").append(isCount ? "COUNT(io)" : "io").append(" FROM IbOrder io WHERE io.ibAccount = :ibAccount");
+        sb.append("SELECT ").append(isCount ? "COUNT(io)" : "io").append(" FROM IbOrder io WHERE io.accountId = :accountId");
 
         for (FilterEnums.FilterOperatorString op : filter.getSymbolFilterMap().keySet()) {
             sb.append(" AND io.symbol ").append(op.getSql()).append(" :").append(op.name()).append("_").append(FilterEnums.IbOrderFilterField.SYMBOL.getVarName());
@@ -56,7 +56,7 @@ public class QueryBuilder {
         sb.append(isCount ? "" : " ORDER BY io.submitDate DESC");
         TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
-        q.setParameter("ibAccount", ibAccount);
+        q.setParameter("accountId", ibAccount.getAccountId());
 
         for (FilterEnums.FilterOperatorString op : filter.getSymbolFilterMap().keySet()) {
             boolean isLike = FilterEnums.FilterOperatorString.LIKE.equals(op);

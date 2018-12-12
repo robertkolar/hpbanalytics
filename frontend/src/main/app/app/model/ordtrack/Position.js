@@ -3,7 +3,7 @@
  */
 Ext.define('HanGui.model.ordtrack.Position', {
     extend: 'HanGui.model.ordtrack.Base',
-    idProperty: 'symbol',
+    idProperty: 'conid',
 
     fields: [
         'accountId',

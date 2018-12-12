@@ -105,7 +105,7 @@ public class IbListener extends GenericIbListener {
     public void error(Exception e) {
         super.error(e);
         if (e instanceof SocketException && e.getMessage().equals("Socket closed")) {
-            // TODO send WS message
+            messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
         }
     }
 
@@ -114,20 +114,20 @@ public class IbListener extends GenericIbListener {
         super.error(id, errorCode, errorMsg);
         if (errorCode == 507) {
             ibController.connectionBroken(accountId);
-            // TODO send WS message
+            messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
         }
     }
 
     @Override
     public void connectionClosed() {
         super.connectionClosed();
-        // TODO send WS message
+        messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
     }
 
     @Override
     public void connectAck() {
         super.connectAck();
-        // TODO send WS message
+        messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection connected");
     }
 
     @Override

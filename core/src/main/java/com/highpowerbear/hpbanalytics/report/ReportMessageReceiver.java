@@ -61,7 +61,7 @@ public class ReportMessageReceiver {
 
         Execution e = new Execution();
 
-        e.setOrigin("IB:" + ibOrder.getIbAccountId());
+        e.setOrigin("IB:" + ibOrder.getAccountId());
         e.setReferenceId(String.valueOf(ibOrder.getPermId()));
         e.setAction(Action.valueOf(ibOrder.getAction()));
         e.setQuantity(ibOrder.getQuantity());

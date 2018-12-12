@@ -19,6 +19,7 @@ public class IbAccount implements Serializable {
     private String accountId;
     private String host;
     private Integer port;
+    private Integer clientId;
     private boolean listen;
     private boolean allowUpd;
     private boolean stk;
@@ -26,40 +27,8 @@ public class IbAccount implements Serializable {
     private boolean opt;
     private boolean fx;
     private boolean cfd;
-    private String permittedClients; // csv, null means all
-    private String permittedAccounts; // csv, null means all - applicable to FA subaccounts
     @Transient
     private Boolean connected;
-
-    public boolean mayProcessClient(Integer clientId) {
-        if (permittedClients == null || permittedClients.trim().isEmpty()) {
-            return true;
-        }
-        boolean mayProcess = false;
-        String[] cs = permittedClients.split(",");
-        for(String c : cs) {
-            if (Integer.parseInt(c.trim()) == clientId) {
-                mayProcess = true;
-                break;
-            }
-        }
-        return mayProcess;
-    }
-
-    public boolean mayProcessAccount(String faSubaccount) {
-        if (permittedAccounts == null || permittedAccounts.trim().isEmpty()) {
-            return true;
-        }
-        boolean mayProcess = false;
-        String[] as = permittedAccounts.split(",");
-        for(String a : as) {
-            if (a.trim().equalsIgnoreCase(faSubaccount)) {
-                mayProcess = true;
-                break;
-            }
-        }
-        return mayProcess;
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -69,7 +38,6 @@ public class IbAccount implements Serializable {
         IbAccount ibAccount = (IbAccount) o;
 
         return Objects.equals(accountId, ibAccount.accountId);
-
     }
 
     @Override
@@ -99,6 +67,14 @@ public class IbAccount implements Serializable {
 
     public void setPort(Integer port) {
         this.port = port;
+    }
+
+    public Integer getClientId() {
+        return clientId;
+    }
+
+    public void setClientId(Integer clientId) {
+        this.clientId = clientId;
     }
 
     public boolean isListen() {
@@ -155,22 +131,6 @@ public class IbAccount implements Serializable {
 
     public void setCfd(boolean cfd) {
         this.cfd = cfd;
-    }
-
-    public String getPermittedClients() {
-        return permittedClients;
-    }
-
-    public void setPermittedClients(String permittedClients) {
-        this.permittedClients = permittedClients;
-    }
-
-    public String getPermittedAccounts() {
-        return permittedAccounts;
-    }
-
-    public void setPermittedAccounts(String permittedAccounts) {
-        this.permittedAccounts = permittedAccounts;
     }
 
     public Boolean getConnected() {

@@ -1,19 +1,22 @@
 package com.highpowerbear.hpbanalytics.ibclient;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
+import com.ib.client.EReader;
 import com.ib.client.EReaderSignal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Provider;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -27,7 +30,8 @@ public class IbController {
     private final OrdTrackService ordTrackService;
     private final Provider<IbListener> ibListeners;
 
-    private final Map<String, IbConnection> ibConnectionMap = new ConcurrentHashMap<>(); // accountId --> ibConnection
+    private final Map<String, IbAccount> ibAccountMap = new HashMap<>(); // accountId -> ibAccount
+    private final Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
 
     @Autowired
     public IbController(OrdTrackDao ordTrackDao, OrdTrackService ordTrackService, Provider<IbListener> ibListeners) {
@@ -36,11 +40,24 @@ public class IbController {
         this.ibListeners = ibListeners;
     }
 
+    private class IbConnection {
+        private boolean markConnected = false;
+        private final EClientSocket eClientSocket;
+        private final EReaderSignal eReaderSignal;
+
+        private IbConnection(EClientSocket eClientSocket, EReaderSignal eReaderSignal) {
+            this.eClientSocket = eClientSocket;
+            this.eReaderSignal = eReaderSignal;
+        }
+    }
+
     @PostConstruct
     private void init() {
         ordTrackService.setIbController(this);
 
-        ordTrackDao.getIbAccounts().forEach(ibAccount -> {
+        for (IbAccount ibAccount : ordTrackDao.getIbAccounts()) {
+            ibAccountMap.put(ibAccount.getAccountId(), ibAccount);
+
             IbListener ibListener = ibListeners.get().configure(ibAccount.getAccountId());
             ibListener.setIbController(this);
             ibListener.setOrdTrackService(ordTrackService);
@@ -48,25 +65,65 @@ public class IbController {
             EReaderSignal eReaderSignal = new EJavaSignal();
             EClientSocket eClientSocket = new EClientSocket(ibListener, eReaderSignal);
 
-            IbConnection ibConnection = new IbConnection(ibAccount.getHost(), ibAccount.getPort(), CoreSettings.IB_CONNECT_CLIENT_ID, eClientSocket, eReaderSignal);
+            IbConnection ibConnection = new IbConnection(eClientSocket, eReaderSignal);
             ibConnectionMap.put(ibAccount.getAccountId(), ibConnection);
-        });
+        }
     }
 
     public void connect(String accountId) {
-        ibConnectionMap.get(accountId).connect();
+        IbAccount a = ibAccountMap.get(accountId);
+        IbConnection c = ibConnectionMap.get(accountId);
+
+        c.markConnected = true;
+
+        if (!isConnected(accountId)) {
+            log.info("connecting " + getInfo(accountId));
+            c.eClientSocket.eConnect(a.getHost(), a.getPort(), a.getClientId());
+            CoreUtil.waitMilliseconds(1000);
+
+            if (isConnected(accountId)) {
+                log.info("successfully connected " + getInfo(accountId));
+
+                final EReader eReader = new EReader(c.eClientSocket, c.eReaderSignal);
+
+                eReader.start();
+                // an additional thread is created in this program design to empty the messaging queue
+                new Thread(() -> {
+                    while (c.eClientSocket.isConnected()) {
+                        c.eReaderSignal.waitForSignal();
+                        try {
+                            eReader.processMsgs();
+                        } catch (Exception e) {
+                            log.error("error", e);
+                        }
+                    }
+                }).start();
+            }
+        }
     }
 
     public void disconnect(String accountId) {
-        ibConnectionMap.get(accountId).disconnect();
+        IbConnection c = ibConnectionMap.get(accountId);
+        c.markConnected = false;
+
+        if (isConnected(accountId)) {
+            log.info("disconnecting " + getInfo(accountId));
+            c.eClientSocket.eDisconnect();
+            CoreUtil.waitMilliseconds(1000);
+
+            if (!isConnected(accountId)) {
+                log.info("successfully disconnected " + getInfo(accountId));
+            }
+        }
     }
 
     public boolean isConnected(String accountId) {
-        return ibConnectionMap.get(accountId).isConnected();
+        IbConnection c = ibConnectionMap.get(accountId);
+        return c.eClientSocket != null && c.eClientSocket.isConnected();
     }
 
     public boolean isMarkConnected(String accountId) {
-        return ibConnectionMap.get(accountId).isMarkConnected();
+        return ibConnectionMap.get(accountId).markConnected;
     }
 
     public void requestOpenOrders(String accountId) {
@@ -75,9 +132,9 @@ public class IbController {
         if (checkConnected(accountId)) {
             IbConnection c = ibConnectionMap.get(accountId);
 
-            c.getClientSocket().reqOpenOrders();
-            c.getClientSocket().reqAllOpenOrders();
-            c.getClientSocket().reqAutoOpenOrders(true);
+            c.eClientSocket.reqOpenOrders();
+            c.eClientSocket.reqAllOpenOrders();
+            c.eClientSocket.reqAutoOpenOrders(true);
         }
     }
 
@@ -85,7 +142,7 @@ public class IbController {
         log.info("requesting positions");
 
         if (checkConnected(accountId)) {
-            ibConnectionMap.get(accountId).getClientSocket().reqPositions();
+            ibConnectionMap.get(accountId).eClientSocket.reqPositions();
         }
     }
 
@@ -93,19 +150,24 @@ public class IbController {
         log.info("cancelling positions");
 
         if (checkConnected(accountId)) {
-            ibConnectionMap.get(accountId).getClientSocket().cancelPositions();
+            ibConnectionMap.get(accountId).eClientSocket.cancelPositions();
         }
     }
 
     void connectionBroken(String accountId) {
-        ibConnectionMap.get(accountId).getClientSocket().eDisconnect();
+        ibConnectionMap.get(accountId).eClientSocket.eDisconnect();
     }
 
     private boolean checkConnected(String accountId) {
         if (!isConnected(accountId)) {
-            log.info("not connected " + ibConnectionMap.get(accountId).getInfo());
+            log.info("not connected " + getInfo(accountId));
             return false;
         }
         return true;
+    }
+
+    private String getInfo(String accountId) {
+        IbAccount a = ibAccountMap.get(accountId);
+        return a.getHost() + ":" + a.getPort() + ":" + a.getClientId() + "," + isConnected(accountId);
     }
 }

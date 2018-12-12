@@ -10,14 +10,13 @@ Ext.define('HanGui.model.ordtrack.IbAccount', {
         'connected',
         'host',
         'port',
+        'clientId',
         'listen',
         'allowUpd',
         'stk',
         'fut',
         'opt',
         'fx',
-        'cfd',
-        'permittedClients',
-        'permittedAccounts'
+        'cfd'
     ]
 });
