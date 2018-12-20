@@ -21,10 +21,6 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         stripeRows: true
     },
     columns: [{
-        text: 'Account ID',
-        width: 120,
-        dataIndex: 'accountId'
-    }, {
         xtype: 'widgetcolumn',
         width : 50,
         widget: {
@@ -52,6 +48,10 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
                 }
             }
         }
+    }, {
+        text: 'Account ID',
+        width: 120,
+        dataIndex: 'accountId'
     }, {
         text: 'Host',
         width: 150,
