@@ -6,6 +6,8 @@ Ext.define('HanGui.common.Glyphs', {
 
     config: {
         webFont: 'FontAwesome',
+        playcircle: 'xf144',
+        times: 'xf00d',
         add: 'xf067',
         edit: 'xf040',
         delete: 'xf1f8',

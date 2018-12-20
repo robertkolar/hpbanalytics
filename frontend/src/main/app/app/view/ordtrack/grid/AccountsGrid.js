@@ -7,7 +7,6 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         'Ext.form.field.Checkbox',
         'Ext.form.field.Number',
         'Ext.form.field.Text',
-        'Ext.grid.column.Action',
         'Ext.grid.column.Check',
         'Ext.grid.plugin.RowEditing',
         'HanGui.view.ordtrack.OrdTrackController'
@@ -26,25 +25,33 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         width: 120,
         dataIndex: 'accountId'
     }, {
-        text: 'Connect',
-        xtype: 'actioncolumn',
-        width: 140,
-        align: 'center',
-        items: [{
-            icon: 'resources/images/play-circle.png',
+        xtype: 'widgetcolumn',
+        width : 50,
+        widget: {
+            xtype: 'button',
+            width: 30,
             tooltip: 'Connect',
-            handler: 'connectIb'
-        }, {
-            icon: 'resources/images/pause.png',
-            tooltip: 'Disconnect',
-            handler: 'disconnectIb'
-        }]
+            handler: 'connectIb',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('playcircle'));
+                }
+            }
+        }
     }, {
-        text: 'Status',
-        width: 80,
-        align: 'center',
-        dataIndex: 'connected',
-        renderer: 'connectStatusRenderer'
+        xtype: 'widgetcolumn',
+        width : 50,
+        widget: {
+            xtype: 'button',
+            width: 30,
+            tooltip: 'Disconnect',
+            handler: 'disconnectIb',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('times'));
+                }
+            }
+        }
     }, {
         text: 'Host',
         width: 150,
@@ -65,7 +72,7 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
             allowDecimals: false
         }
     }, {
-        text: 'Cli Id',
+        text: 'Client',
         width: 80,
         dataIndex: 'clientId',
         align: 'right',
@@ -75,6 +82,12 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
             maxValue: 65535,
             allowDecimals: false
         }
+    }, {
+        text: 'Status',
+        width: 80,
+        align: 'center',
+        dataIndex: 'connected',
+        renderer: 'connectStatusRenderer'
     }, {
         flex: 1
     }, {

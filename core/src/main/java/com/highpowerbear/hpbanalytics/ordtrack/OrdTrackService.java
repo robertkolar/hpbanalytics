@@ -84,15 +84,20 @@ public class OrdTrackService {
     public void positionChanged(String accountId, int conid, SecType secType, String underlyingSymbol, String symbol, Currency currency, String exchange, double size) {
         positionMap.computeIfAbsent(accountId, k -> new HashMap<>());
         Position position = positionMap.get(accountId).get(conid);
+        boolean send = true;
 
         if (position == null && size != 0) {
             positionMap.get(accountId).put(conid, new Position(accountId, conid, secType, underlyingSymbol, symbol, currency, exchange, size));
         } else if (size != 0){
             position.setSize(size);
-        } else {
+        } else if (positionMap.get(accountId).containsKey(conid)) {
             positionMap.get(accountId).remove(conid);
+        } else {
+            send = false;
         }
-        messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
+        if (send) {
+            messageSender.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
+        }
     }
 
     public List<Position> getPositions(String accountId) {

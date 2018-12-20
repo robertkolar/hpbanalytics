@@ -112,18 +112,17 @@ Ext.define('HanGui.view.ordtrack.OrdTrackController', {
         return (val ? 'conn' : 'disconn');
     },
 
-    connectIb: function(grid, rowIndex, colIndex) {
-        this.connect(grid, rowIndex, colIndex, true);
+    connectIb: function(button) {
+        this.connect(button.getWidgetRecord().data.accountId, true);
     },
 
-    disconnectIb: function(grid, rowIndex, colIndex) {
-        this.connect(grid, rowIndex, colIndex, false);
+    disconnectIb: function(button) {
+        this.connect(button.getWidgetRecord().data.accountId, false);
     },
 
-    connect: function(grid, rowIndex, colIndex, con) {
+    connect: function(accountId, con) {
         var me = this,
             ibAccounts = me.getStore('ibAccounts'),
-            accountId = grid.getStore().getAt(rowIndex).get('accountId'),
             box = Ext.MessageBox.wait(((con ? 'Connecting' : 'Disconnecting') + ' IB account ' + accountId), 'Action in progress');
 
         Ext.Ajax.request({
@@ -131,7 +130,7 @@ Ext.define('HanGui.view.ordtrack.OrdTrackController', {
             url: HanGui.common.Definitions.urlPrefixOrdTrack + '/ibaccounts/' + accountId + '/connect/' + (con ? 'true' : 'false'),
             success: function(response) {
                 box.hide();
-                grid.getStore().reload();
+                ibAccounts.reload();
             },
             failure: function() {
                 box.hide();
