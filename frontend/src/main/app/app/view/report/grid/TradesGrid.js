@@ -128,9 +128,13 @@ Ext.define('HanGui.view.report.grid.TradesGrid', {
         widget: {
             xtype: 'button',
             width: 30,
-            text: 'C',
             tooltip: 'Close Trade',
-            handler: 'onCloseTrade'
+            handler: 'onCloseTrade',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('thumbsup'));
+                }
+            }
         },
         onWidgetAttach: function(col, widget, rec) {
             widget.show();
