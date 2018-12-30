@@ -21,34 +21,6 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         stripeRows: true
     },
     columns: [{
-        xtype: 'widgetcolumn',
-        width : 50,
-        widget: {
-            xtype: 'button',
-            width: 30,
-            tooltip: 'Connect',
-            handler: 'connectIb',
-            listeners: {
-                beforerender: function(c, eOpts) {
-                    c.setGlyph(HanGui.common.Glyphs.getGlyph('playcircle'));
-                }
-            }
-        }
-    }, {
-        xtype: 'widgetcolumn',
-        width : 50,
-        widget: {
-            xtype: 'button',
-            width: 30,
-            tooltip: 'Disconnect',
-            handler: 'disconnectIb',
-            listeners: {
-                beforerender: function(c, eOpts) {
-                    c.setGlyph(HanGui.common.Glyphs.getGlyph('times'));
-                }
-            }
-        }
-    }, {
         text: 'Account ID',
         width: 120,
         dataIndex: 'accountId'
@@ -145,6 +117,34 @@ Ext.define('HanGui.view.ordtrack.grid.AccountsGrid', {
         xtype: 'checkcolumn',
         editor: {
             xtype: 'checkboxfield'
+        }
+    }, {
+        xtype: 'widgetcolumn',
+        width : 50,
+        widget: {
+            xtype: 'button',
+            width: 30,
+            tooltip: 'Connect',
+            handler: 'connectIb',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('playcircle'));
+                }
+            }
+        }
+    }, {
+        xtype: 'widgetcolumn',
+        width: 50,
+        widget: {
+            xtype: 'button',
+            width: 30,
+            tooltip: 'Disconnect',
+            handler: 'disconnectIb',
+            listeners: {
+                beforerender: function (c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('times'));
+                }
+            }
         }
     }],
     dockedItems: [{
