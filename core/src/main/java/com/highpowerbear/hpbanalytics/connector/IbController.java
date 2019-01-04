@@ -1,9 +1,8 @@
-package com.highpowerbear.hpbanalytics.ibclient;
+package com.highpowerbear.hpbanalytics.connector;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
-import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;
 import com.ib.client.EReader;
@@ -11,12 +10,14 @@ import com.ib.client.EReaderSignal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.inject.Provider;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  *
@@ -26,18 +27,29 @@ import java.util.Map;
 public class IbController {
     private static final Logger log = LoggerFactory.getLogger(IbController.class);
 
-    private final OrdTrackDao ordTrackDao;
-    private final OrdTrackService ordTrackService;
-    private final Provider<IbListener> ibListeners;
-
     private final Map<String, IbAccount> ibAccountMap = new HashMap<>(); // accountId -> ibAccount
     private final Map<String, IbConnection> ibConnectionMap = new HashMap<>(); // accountId --> ibConnection
+    private final List<ConnectionListener> connectionListeners = new ArrayList<>();
+
+    private AtomicBoolean initialized = new AtomicBoolean(false);
 
     @Autowired
-    public IbController(OrdTrackDao ordTrackDao, OrdTrackService ordTrackService, Provider<IbListener> ibListeners) {
-        this.ordTrackDao = ordTrackDao;
-        this.ordTrackService = ordTrackService;
-        this.ibListeners = ibListeners;
+    public IbController(OrdTrackDao ordTrackDao) {
+        ordTrackDao.getIbAccounts().forEach(ibAccount -> ibAccountMap.put(ibAccount.getAccountId(), ibAccount));
+    }
+
+    void initialize(List<IbListener> ibListeners) {
+        if (!initialized.get()) {
+            initialized.set(true);
+
+            for (IbListener ibListener : ibListeners) {
+                EReaderSignal eReaderSignal = new EJavaSignal();
+                EClientSocket eClientSocket = new EClientSocket(ibListener, eReaderSignal);
+
+                IbConnection ibConnection = new IbConnection(eClientSocket, eReaderSignal);
+                ibConnectionMap.put(ibListener.getAccountId(), ibConnection);
+            }
+        }
     }
 
     private class IbConnection {
@@ -51,29 +63,15 @@ public class IbController {
         }
     }
 
-    @PostConstruct
-    private void init() {
-        ordTrackService.setIbController(this);
-
-        for (IbAccount ibAccount : ordTrackDao.getIbAccounts()) {
-            ibAccountMap.put(ibAccount.getAccountId(), ibAccount);
-
-            IbListener ibListener = ibListeners.get().configure(ibAccount.getAccountId());
-            ibListener.setIbController(this);
-            ibListener.setOrdTrackService(ordTrackService);
-
-            EReaderSignal eReaderSignal = new EJavaSignal();
-            EClientSocket eClientSocket = new EClientSocket(ibListener, eReaderSignal);
-
-            IbConnection ibConnection = new IbConnection(eClientSocket, eReaderSignal);
-            ibConnectionMap.put(ibAccount.getAccountId(), ibConnection);
-        }
+    public void addConnectionListener(ConnectionListener connectionListener) {
+        connectionListeners.add(connectionListener);
     }
 
     public void connect(String accountId) {
+        connectionListeners.forEach(connectionListener -> connectionListener.preConnect(accountId));
+
         IbAccount a = ibAccountMap.get(accountId);
         IbConnection c = ibConnectionMap.get(accountId);
-
         c.markConnected = true;
 
         if (!isConnected(accountId)) {
@@ -98,11 +96,14 @@ public class IbController {
                         }
                     }
                 }).start();
+                connectionListeners.forEach(connectionListener -> connectionListener.postConnect(accountId));
             }
         }
     }
 
     public void disconnect(String accountId) {
+        connectionListeners.forEach(connectionListener -> connectionListener.preDisconnect(accountId));
+
         IbConnection c = ibConnectionMap.get(accountId);
         c.markConnected = false;
 
@@ -113,17 +114,23 @@ public class IbController {
 
             if (!isConnected(accountId)) {
                 log.info("successfully disconnected " + getInfo(accountId));
+                connectionListeners.forEach(connectionListener -> connectionListener.postDisconnect(accountId));
             }
         }
+    }
+
+    @Scheduled(fixedRate = 5000)
+    private void reconnect() {
+        ibConnectionMap.keySet().forEach(accountId -> {
+            if (!isConnected(accountId) && ibConnectionMap.get(accountId).markConnected) {
+                connect(accountId);
+            }
+        });
     }
 
     public boolean isConnected(String accountId) {
         IbConnection c = ibConnectionMap.get(accountId);
         return c.eClientSocket != null && c.eClientSocket.isConnected();
-    }
-
-    public boolean isMarkConnected(String accountId) {
-        return ibConnectionMap.get(accountId).markConnected;
     }
 
     public void requestOpenOrders(String accountId) {

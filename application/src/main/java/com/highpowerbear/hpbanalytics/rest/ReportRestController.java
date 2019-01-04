@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.common.MessageSender;
+import com.highpowerbear.hpbanalytics.common.MessageService;
 import com.highpowerbear.hpbanalytics.common.model.CloseTrade;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
@@ -13,7 +13,7 @@ import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
-import com.highpowerbear.hpbanalytics.report.ReportProcessor;
+import com.highpowerbear.hpbanalytics.report.ReportService;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
 import com.highpowerbear.hpbanalytics.report.model.Statistics;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,19 +40,19 @@ public class ReportRestController {
 
     private final ReportDao reportDao;
     private final StatisticsCalculator statisticsCalculator;
-    private final ReportProcessor reportProcessor;
+    private final ReportService reportService;
     private final FilterParser filterParser;
     private final IfiCsvGenerator ifiCsvGenerator;
-    private final MessageSender messageSender;
+    private final MessageService messageService;
 
     @Autowired
-    public ReportRestController(ReportDao reportDao, StatisticsCalculator statisticsCalculator, ReportProcessor reportProcessor, FilterParser filterParser, IfiCsvGenerator ifiCsvGenerator, MessageSender messageSender) {
+    public ReportRestController(ReportDao reportDao, StatisticsCalculator statisticsCalculator, ReportService reportService, FilterParser filterParser, IfiCsvGenerator ifiCsvGenerator, MessageService messageService) {
         this.reportDao = reportDao;
         this.statisticsCalculator = statisticsCalculator;
-        this.reportProcessor = reportProcessor;
+        this.reportService = reportService;
         this.filterParser = filterParser;
         this.ifiCsvGenerator = ifiCsvGenerator;
-        this.messageSender = messageSender;
+        this.messageService = messageService;
     }
 
     @RequestMapping("/reports")
@@ -84,8 +84,8 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        reportProcessor.analyzeAll(id);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " analyzed");
+        reportService.analyzeAll(id);
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " analyzed");
 
         return ResponseEntity.ok().build();
     }
@@ -99,8 +99,8 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        reportProcessor.deleteReport(id);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " deleted");
+        reportService.deleteReport(id);
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -136,8 +136,8 @@ public class ReportRestController {
         execution.setId(null);
         execution.setReport(report);
 
-        reportProcessor.newExecution(execution);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
+        reportService.newExecution(execution);
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
 
         return ResponseEntity.ok().build();
     }
@@ -151,8 +151,8 @@ public class ReportRestController {
         if (execution == null || reportId != execution.getReportId()) {
             return ResponseEntity.notFound().build();
         }
-        reportProcessor.deleteExecution(executionId);
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "execution " + executionId + " deleted");
+        reportService.deleteExecution(executionId);
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "execution " + executionId + " deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -193,8 +193,8 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
 
-        reportProcessor.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
+        reportService.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
     }

@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
-import com.highpowerbear.hpbanalytics.common.MessageSender;
+import com.highpowerbear.hpbanalytics.common.MessageService;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -28,20 +28,20 @@ import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT
 /**
  * Created by robertk on 4/26/2015.
  */
-@Service
+@Component
 public class StatisticsCalculator {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculator.class);
 
     private final ReportDao reportDao;
-    private final MessageSender messageSender;
+    private final MessageService messageService;
     private final TradeCalculator tradeCalculator;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
-    public StatisticsCalculator(ReportDao reportDao, MessageSender messageSender, TradeCalculator tradeCalculator) {
+    public StatisticsCalculator(ReportDao reportDao, MessageService messageService, TradeCalculator tradeCalculator) {
         this.reportDao = reportDao;
-        this.messageSender = messageSender;
+        this.messageService = messageService;
         this.tradeCalculator = tradeCalculator;
     }
 
@@ -75,7 +75,7 @@ public class StatisticsCalculator {
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
-        messageSender.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated for report " + reportId);
+        messageService.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated for report " + reportId);
     }
 
     private String statisticsKey(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {

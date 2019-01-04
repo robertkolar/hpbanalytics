@@ -1,17 +1,16 @@
 package com.highpowerbear.hpbanalytics.report;
 
+import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.SplitExecution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
-import com.highpowerbear.hpbanalytics.enums.Action;
-import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.enums.TradeStatus;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.entity.*;
+import com.highpowerbear.hpbanalytics.enums.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,16 +29,84 @@ import java.util.stream.Collectors;
  * Created by robertk on 4/26/2015.
  */
 @Service
-public class ReportProcessor {
-    private static final Logger log = LoggerFactory.getLogger(ReportProcessor.class);
+public class ReportService {
+    private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
     private final ReportDao reportDao;
     private final TradeCalculator tradeCalculator;
+    private final MessageService messageService;
 
     @Autowired
-    public ReportProcessor(ReportDao reportDao, TradeCalculator tradeCalculator) {
+    public ReportService(ReportDao reportDao, TradeCalculator tradeCalculator, MessageService messageService) {
         this.reportDao = reportDao;
         this.tradeCalculator = tradeCalculator;
+        this.messageService = messageService;
+    }
+
+    @JmsListener(destination = CoreSettings.JMS_DEST_ORDER_FILLED)
+    public void orderFilled(String ibOrderId) {
+        log.info("handling execution for order " + ibOrderId);
+
+        IbOrder ibOrder = reportDao.findIbOrder(Long.valueOf(ibOrderId));
+
+        if (ibOrder.getStatus() != OrderStatus.FILLED) {
+            log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
+            return;
+        }
+        Execution e = new Execution();
+
+        e.setOrigin("IB:" + ibOrder.getAccountId());
+        e.setReferenceId(String.valueOf(ibOrder.getPermId()));
+        e.setAction(Action.valueOf(ibOrder.getAction()));
+        e.setQuantity(ibOrder.getQuantity());
+        e.setUnderlying(ibOrder.getUnderlying());
+        e.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
+        e.setSymbol(ibOrder.getSymbol());
+        e.setSecType(SecType.valueOf(ibOrder.getSecType()));
+        e.setFillDate(ibOrder.getStatusDate());
+        e.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
+
+        processExecution(e);
+    }
+
+    @JmsListener(destination = CoreSettings.JMS_DEST_EXECUTION_RECEIVED)
+    public void executionReceived (ExecutionDto executionDto) {
+        Execution e = new Execution();
+
+        String symbol = executionDto.getLocalSymbol();
+
+        if (symbol.split(" ").length > 1) {
+            symbol = CoreUtil.removeSpace(symbol);
+        }
+        e.setOrigin("IB:" + executionDto.getAcctNumber());
+        e.setReferenceId(String.valueOf(executionDto.getPermId()));
+        e.setAction(Action.getByExecSide(executionDto.getSide()));
+        e.setQuantity(executionDto.getCumQty());
+        e.setUnderlying(executionDto.getSymbol());
+        e.setCurrency(Currency.valueOf(executionDto.getCurrency()));
+        e.setSymbol(symbol);
+        e.setSecType(SecType.valueOf(executionDto.getSecType()));
+        e.setFillPrice(BigDecimal.valueOf(executionDto.getPrice()));
+
+        processExecution(e);
+    }
+
+    private void processExecution(Execution execution) {
+        execution.setReceivedDate(LocalDateTime.now());
+
+        if (execution.getFillDate() == null) {
+            execution.setFillDate(execution.getReceivedDate());
+        }
+        Report report = reportDao.getReportByOriginAndSecType(execution.getOrigin(), execution.getSecType());
+
+        if (report == null) {
+            log.warn("no report for origin=" + execution.getOrigin() + " and secType=" + execution.getSecType() + ", skipping");
+            return;
+        }
+        execution.setReport(report);
+
+        newExecution(execution);
+        messageService.sendWsMessage(CoreSettings.WS_TOPIC_REPORT,  "new execution processed");
     }
 
     @Transactional

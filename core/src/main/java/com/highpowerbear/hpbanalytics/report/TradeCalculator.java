@@ -14,7 +14,7 @@ import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -26,7 +26,7 @@ import java.util.Map;
 /**
  * Created by robertk on 12/25/2017.
  */
-@Service
+@Component
 public class TradeCalculator {
 
     private final ReportDao reportDao;

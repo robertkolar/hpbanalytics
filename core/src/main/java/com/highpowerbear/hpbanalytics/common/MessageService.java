@@ -13,15 +13,15 @@ import org.springframework.stereotype.Service;
  * Created by robertk on 12/27/2017.
  */
 @Service
-public class MessageSender {
-    private static final Logger log = LoggerFactory.getLogger(MessageSender.class);
+public class MessageService {
+    private static final Logger log = LoggerFactory.getLogger(MessageService.class);
 
     private final JavaMailSender emailSender;
     private final JmsTemplate jmsTemplate;
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     @Autowired
-    public MessageSender(JavaMailSender emailSender, JmsTemplate jmsTemplate, SimpMessagingTemplate simpMessagingTemplate) {
+    public MessageService(JavaMailSender emailSender, JmsTemplate jmsTemplate, SimpMessagingTemplate simpMessagingTemplate) {
         this.emailSender = emailSender;
         this.jmsTemplate = jmsTemplate;
         this.simpMessagingTemplate = simpMessagingTemplate;

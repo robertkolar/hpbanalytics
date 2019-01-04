@@ -13,7 +13,7 @@ import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import java.text.NumberFormat;
@@ -28,7 +28,7 @@ import java.util.Map;
 /**
  * Created by robertk on 10/10/2016.
  */
-@Service
+@Component
 public class IfiCsvGenerator {
     private static final Logger log = LoggerFactory.getLogger(IfiCsvGenerator.class);
 

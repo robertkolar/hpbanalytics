@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.ibclient;
+package com.highpowerbear.hpbanalytics.connector;
 
 import com.ib.client.*;
 import org.slf4j.Logger;

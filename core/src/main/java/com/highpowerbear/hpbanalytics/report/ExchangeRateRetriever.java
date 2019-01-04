@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -17,7 +18,7 @@ import java.time.LocalDateTime;
 /**
  * Created by robertk on 10/10/2016.
  */
-@Service
+@Component
 public class ExchangeRateRetriever {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetriever.class);
 
@@ -33,7 +34,8 @@ public class ExchangeRateRetriever {
         this.reportDao = reportDao;
     }
 
-    public void retrieve() {
+    @Scheduled(cron="0 0 6 * * *")
+    private void retrieveExchangeRates() {
         log.info("BEGIN ExchangeRateRetriever.retrieve");
 
         for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
@@ -42,7 +44,7 @@ public class ExchangeRateRetriever {
             String date = CoreUtil.formatExchangeRateDate(localDateTime);
 
             exchangeRate.setDate(date);
-            ExchangeRates exchangeRates = retrieveRates(date);
+            ExchangeRates exchangeRates = retrieve(date);
 
             exchangeRate.setEurUsd(exchangeRates.getRates().getUsd());
             exchangeRate.setEurGbp(exchangeRates.getRates().getGbp());
@@ -59,7 +61,7 @@ public class ExchangeRateRetriever {
         log.info("END ExchangeRateRetriever.retrieve");
     }
 
-    private ExchangeRates retrieveRates(String date) {
+    private ExchangeRates retrieve(String date) {
         String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD";
         ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
         if (exchangeRates != null) {
