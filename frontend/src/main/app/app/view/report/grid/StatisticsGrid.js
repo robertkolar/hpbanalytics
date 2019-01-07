@@ -283,9 +283,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             labelWidth: 65,
             store: Ext.create('Ext.data.Store', {
                 fields: ['year'],
-                data: [{"year": "2016"}, {"year": "2017"}, {"year": "2018"}, {"year": "2019"}]
-            }),
-            value: '2018'
+                data: [{"year": 2016}]
+            })
         }, {
             xtype: 'combobox',
             margin: '0 0 0 10',

@@ -55,6 +55,11 @@ public class ReportRestController {
         this.messageService = messageService;
     }
 
+    @RequestMapping("/ifiyears")
+    public ResponseEntity<?> getIfiYears() {
+        return ResponseEntity.ok(ifiCsvGenerator.getIfiYears());
+    }
+
     @RequestMapping("/reports")
     public ResponseEntity<?> getReports() {
         List<Report> reports = reportDao.getReports();
@@ -119,9 +124,9 @@ public class ReportRestController {
 
         ExecutionFilter filter = filterParser.parseExecutionFilter(jsonFilter);
         List<Execution> executions = reportDao.getFilteredExecutions(id, filter, start, limit);
-        Long numExecutions = reportDao.getNumFilteredExecutions(id, filter);
+        long numExecutions = reportDao.getNumFilteredExecutions(id, filter);
 
-        return ResponseEntity.ok(new RestList<>(executions, numExecutions));
+        return ResponseEntity.ok(new RestList<>(executions, (int) numExecutions));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reports/{id}/executions")
@@ -171,9 +176,9 @@ public class ReportRestController {
 
         TradeFilter filter = filterParser.parseTradeFilter(jsonFilter);
         List<Trade> trades = reportDao.getFilteredTrades(id, filter, start, limit);
-        Long numTrades = reportDao.getNumFilteredTrades(id, filter);
+        long numTrades = reportDao.getNumFilteredTrades(id, filter);
 
-        return ResponseEntity.ok(new RestList<>(trades, numTrades));
+        return ResponseEntity.ok(new RestList<>(trades, (int) numTrades));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/close")
@@ -224,7 +229,7 @@ public class ReportRestController {
                 statisticsPage.add(statistics.get(i));
             }
         }
-        return ResponseEntity.ok(new RestList<>(statisticsPage, (long) statistics.size()));
+        return ResponseEntity.ok(new RestList<>(statisticsPage, statistics.size()));
     }
 
     @RequestMapping("reports/{id}/charts/{interval}")
@@ -242,7 +247,7 @@ public class ReportRestController {
         }
         List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
 
-        return ResponseEntity.ok(new RestList<>(statistics, (long) statistics.size()));
+        return ResponseEntity.ok(new RestList<>(statistics, statistics.size()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")

@@ -40,7 +40,7 @@ public class OrdTrackRestController {
         List<IbAccount> ibAccounts = ordTrackDao.getIbAccounts();
         ibAccounts.forEach(ibAccount -> ibAccount.setConnected(ibController.isConnected(ibAccount.getAccountId())));
 
-        return new RestList<>(ibAccounts, (long) ibAccounts.size());
+        return new RestList<>(ibAccounts, ibAccounts.size());
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/ibaccounts")
@@ -103,7 +103,7 @@ public class OrdTrackRestController {
             ibOrders.add(ibOrder);
         }
 
-        return ResponseEntity.ok(new RestList<>(ibOrders, ordTrackDao.getNumFilteredIbOrders(accountId, filter)));
+        return ResponseEntity.ok(new RestList<>(ibOrders, (int) ordTrackDao.getNumFilteredIbOrders(accountId, filter)));
     }
 
     @RequestMapping("/ibaccounts/{accountId}/positions")
@@ -128,9 +128,9 @@ public class OrdTrackRestController {
             int toIndex = Math.min(fromIndex + limit, total);
             List<Position> positionsPaged = positions.subList(fromIndex, toIndex);
 
-            return ResponseEntity.ok(new RestList<>(positionsPaged, (long) total));
+            return ResponseEntity.ok(new RestList<>(positionsPaged, total));
         } else {
-            return ResponseEntity.ok(new RestList<>(positions, (long) total));
+            return ResponseEntity.ok(new RestList<>(positions, total));
         }
     }
 }

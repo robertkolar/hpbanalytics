@@ -24,6 +24,7 @@ Ext.define('HanGui.view.report.ReportController', {
                 }
             });
         }
+        me.prepareIfiYearCombo();
 
         var socket  = new SockJS('/websocket');
         var stompClient = Stomp.over(socket);
@@ -121,6 +122,28 @@ Ext.define('HanGui.view.report.ReportController', {
         });
     },
 
+    prepareIfiYearCombo: function() {
+        var me = this,
+            ifiYearCombo =  me.lookupReference('ifiYearCombo');
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefixReport + '/ifiyears',
+
+            success: function(response, opts) {
+                var ifiYears = Ext.decode(response.responseText);
+                var ifiYearsData = [];
+                for (var i = 0; i < ifiYears.length; i++) {
+                    ifiYearsData.push([ifiYears[i]]);
+                }
+                var comboStore = ifiYearCombo.getStore();
+                comboStore.loadData(ifiYearsData);
+
+                ifiYearCombo.setValue(comboStore.getAt(ifiYearsData.length - 1));
+            }
+        });
+    },
+
     onIntervalChange: function(comboBox, newValue, oldValue, eOpts) {
         var me = this,
             interval = me.lookupReference('intervalCombo').getValue();
@@ -160,7 +183,7 @@ Ext.define('HanGui.view.report.ReportController', {
 
             success: function(response, opts) {
                 var content = response.responseText;
-                var filename = 'IFI_' + year + '_' + tradeType + '.csv';
+                var filename = 'IFI_' + year + '_' + tradeType.toLowerCase() + '.csv';
 
                 console.log(content);
                 var blob = new Blob([content], {

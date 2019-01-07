@@ -20,10 +20,9 @@ import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 /**
  * Created by robertk on 10/10/2016.
@@ -45,10 +44,14 @@ public class IfiCsvGenerator {
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
+    private final List<Integer> ifiYears;
+
     @Autowired
     public IfiCsvGenerator(ReportDao reportDao, TradeCalculator tradeCalculator) {
         this.reportDao = reportDao;
         this.tradeCalculator = tradeCalculator;
+
+        ifiYears = IntStream.rangeClosed(CoreSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
     }
 
     @PostConstruct
@@ -68,7 +71,7 @@ public class IfiCsvGenerator {
     public String generate(int reportId, Integer year, TradeType tradeType) {
         log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
 
-        LocalDateTime beginDate = LocalDate.now().withDayOfYear(1).atStartOfDay();
+        LocalDateTime beginDate = LocalDate.ofYearDay(year, 1).atStartOfDay();
         LocalDateTime endDate = beginDate.plusYears(1);
         List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
 
@@ -292,5 +295,9 @@ public class IfiCsvGenerator {
         Currency currency = se.getExecution().getCurrency();
 
         return exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency);
+    }
+
+    public List<Integer> getIfiYears() {
+        return ifiYears;
     }
 }

@@ -1,24 +1,24 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by robertk on 1/14/2015.
  */
 public class RestList<T> {
-    private final List<T> items;
-    private final Long total;
+    private final Collection<T> items;
+    private final int total;
 
-    public RestList(List<T> items, Long total) {
+    public RestList(Collection<T> items, int total) {
         this.items = items;
         this.total = total;
     }
 
-    public Long getTotal() {
+    public int getTotal() {
         return total;
     }
 
-    public List<T> getItems() {
+    public Collection<T> getItems() {
         return items;
     }
 }

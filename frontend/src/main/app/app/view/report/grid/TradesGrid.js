@@ -132,7 +132,7 @@ Ext.define('HanGui.view.report.grid.TradesGrid', {
             handler: 'onCloseTrade',
             listeners: {
                 beforerender: function(c, eOpts) {
-                    c.setGlyph(HanGui.common.Glyphs.getGlyph('thumbsup'));
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('times'));
                 }
             }
         },
