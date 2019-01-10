@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.common.model;
+package com.highpowerbear.hpbanalytics.report.model;
 
 import java.io.Serializable;
 

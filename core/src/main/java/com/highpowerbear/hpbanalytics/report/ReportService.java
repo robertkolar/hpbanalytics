@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.report;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
+import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.*;
 import com.highpowerbear.hpbanalytics.enums.*;

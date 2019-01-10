@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.ordtrack;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;
 import com.highpowerbear.hpbanalytics.common.CoreUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.common.model.ExecutionDto;
+import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.connector.ConnectionListener;
 import com.highpowerbear.hpbanalytics.connector.IbController;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;

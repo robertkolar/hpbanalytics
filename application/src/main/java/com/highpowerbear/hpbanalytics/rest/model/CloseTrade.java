@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.common.model;
+package com.highpowerbear.hpbanalytics.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.highpowerbear.hpbanalytics.common.CoreSettings;

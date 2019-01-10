@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.common.model.CloseTrade;
+import com.highpowerbear.hpbanalytics.rest.model.CloseTrade;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -16,6 +16,7 @@ import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
 import com.highpowerbear.hpbanalytics.report.ReportService;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
 import com.highpowerbear.hpbanalytics.report.model.Statistics;
+import com.highpowerbear.hpbanalytics.rest.model.RestList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;

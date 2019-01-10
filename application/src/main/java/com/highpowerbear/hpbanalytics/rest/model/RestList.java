@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.rest;
+package com.highpowerbear.hpbanalytics.rest.model;
 
 import java.util.Collection;
 
