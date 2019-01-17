@@ -8,9 +8,9 @@ import java.time.format.DateTimeFormatter;
 /**
  * Created by robertk on 5/29/2017.
  */
-public class CoreSettings {
+public class HanSettings {
     public static final int MAX_ORDER_HEARTBEAT_FAILS = 5;
-    public static final String EXCHANGE_RATE_URL = "http://data.fixer.io/api/";
+    public static final String EXCHANGE_RATE_URL = "http://data.fixer.io/api";
     public static final int EXCHANGE_RATE_DAYS_BACK = 5;
     public static final int IFI_START_YEAR = 2016;
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -25,4 +25,5 @@ public class CoreSettings {
     public static final String JMS_DEST_EXECUTION_RECEIVED = "executionReceived";
     public static final String WS_TOPIC_ORDTRACK = "/topic/ordtrack";
     public static final String WS_TOPIC_REPORT = "/topic/report";
+    public static final String EXCHANGE_RATES_SYMBOLS = "EUR,USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD";
 }

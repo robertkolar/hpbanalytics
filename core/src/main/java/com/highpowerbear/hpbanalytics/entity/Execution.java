@@ -3,8 +3,8 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -35,7 +35,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime receivedDate;
     @ManyToOne
     @JsonIgnore
@@ -52,7 +52,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     private Currency currency;
     @Enumerated(EnumType.STRING)
     private SecType secType;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
 
@@ -83,7 +83,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     }
 
     public String print() {
-        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + CoreUtil.formatLogDate(fillDate) + ", " + fillPrice);
+        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + HanUtil.formatLogDate(fillDate) + ", " + fillPrice);
     }
 
     public Long getId() {

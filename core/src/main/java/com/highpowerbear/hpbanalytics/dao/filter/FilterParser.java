@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -42,7 +42,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), HanSettings.JSON_DATE_FORMATTER);
                     filter.getSubmitDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
 
                 } else if (FilterEnums.IbOrderFilterField.STATUS.getVarName().equals(property)) {
@@ -78,7 +78,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.ExecutionFilterField.FILL_DATE.getVarName().equals(property)) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), HanSettings.JSON_DATE_FORMATTER);
                     filter.getFillDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
                 }
             }
@@ -107,7 +107,7 @@ public class FilterParser {
                     }
 
                 } else if (FilterEnums.TradeFilterField.OPEN_DATE.getVarName().equals(property)) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), CoreSettings.JSON_DATE_FORMATTER);
+                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), HanSettings.JSON_DATE_FORMATTER);
                     filter.getOpenDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
 
                 }  else if (FilterEnums.TradeFilterField.STATUS.getVarName().equals(property)) {

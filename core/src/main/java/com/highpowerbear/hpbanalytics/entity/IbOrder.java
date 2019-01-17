@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -48,13 +48,13 @@ public class IbOrder implements Serializable {
     private String symbol;
     private String secType;
     private String orderType;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime submitDate;
     private Double orderPrice;
     private String tif;
     private Integer parentId;
     private String ocaGroup;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime statusDate;
     private Double fillPrice;
     @Enumerated(EnumType.STRING)

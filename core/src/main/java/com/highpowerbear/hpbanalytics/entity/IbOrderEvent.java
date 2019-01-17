@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 
 import javax.persistence.Entity;
@@ -31,7 +31,7 @@ public class IbOrderEvent implements Serializable {
     @SequenceGenerator(name="ib_order_event_generator", sequenceName = "ib_order_event_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ib_order_event_generator")
     private Long id;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime eventDate;
     @Enumerated(EnumType.STRING)
     private OrderStatus status;

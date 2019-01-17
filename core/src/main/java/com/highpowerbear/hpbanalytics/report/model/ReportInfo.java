@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +15,9 @@ public class ReportInfo {
     private final long numOpenTrades;
     private final long numUnderlyings;
     private final long numOpenUnderlyings;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private final LocalDateTime firstExecutionDate;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private final LocalDateTime lastExecutionDate;
 
     public ReportInfo(long numExecutions, long numTrades, long numOpenTrades, long numUnderlyings, long numOpenUnderlyings, LocalDateTime firstExecutionDate, LocalDateTime lastExecutionDate) {

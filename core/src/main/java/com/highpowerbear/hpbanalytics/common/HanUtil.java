@@ -1,11 +1,12 @@
 package com.highpowerbear.hpbanalytics.common;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
  * Created by robertk on 5/29/2017.
  */
-public class CoreUtil {
+public class HanUtil {
 
     public static void waitMilliseconds(int milliseconds) {
         try {
@@ -44,10 +45,10 @@ public class CoreUtil {
     }
 
     public static String formatLogDate(final LocalDateTime localDateTime) {
-        return localDateTime.format(CoreSettings.LOG_DATE_FORMATTER);
+        return localDateTime.format(HanSettings.LOG_DATE_FORMATTER);
     }
 
-    public static String formatExchangeRateDate(final LocalDateTime localDateTime) {
-        return localDateTime.format(CoreSettings.EXCHANGE_RATE_DATE_FORMATTER);
+    public static String formatExchangeRateDate(final LocalDate localDate) {
+        return localDate.format(HanSettings.EXCHANGE_RATE_DATE_FORMATTER);
     }
 }

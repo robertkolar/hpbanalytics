@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.ordtrack;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
 import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.connector.ConnectionListener;
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.*;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.*;
+import static com.highpowerbear.hpbanalytics.common.HanSettings.*;
 
 /**
  * Created by robertk on 12/11/2018.
@@ -97,7 +97,7 @@ public class OrdTrackService implements ConnectionListener {
     }
 
     private void initHeartbeat(IbOrder ibOrder) {
-        openOrderHeartbeatMap.get(ibOrder.getAccountId()).put(ibOrder, CoreSettings.MAX_ORDER_HEARTBEAT_FAILS);
+        openOrderHeartbeatMap.get(ibOrder.getAccountId()).put(ibOrder, HanSettings.MAX_ORDER_HEARTBEAT_FAILS);
     }
 
     private void removeHeartbeat(IbOrder ibOrder) {
@@ -132,7 +132,7 @@ public class OrdTrackService implements ConnectionListener {
         String symbol = contract.localSymbol();
 
         if (symbol.split(" ").length > 1) {
-            symbol = CoreUtil.removeSpace(symbol);
+            symbol = HanUtil.removeSpace(symbol);
         }
 
         IbOrder ibOrderDb = ordTrackDao.getIbOrderByPermId(accountId, order.permId());

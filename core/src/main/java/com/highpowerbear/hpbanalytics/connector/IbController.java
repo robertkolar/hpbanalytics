@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.connector;
 
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.ib.client.EClientSocket;
@@ -77,7 +77,7 @@ public class IbController {
         if (!isConnected(accountId)) {
             log.info("connecting " + getInfo(accountId));
             c.eClientSocket.eConnect(a.getHost(), a.getPort(), a.getClientId());
-            CoreUtil.waitMilliseconds(1000);
+            HanUtil.waitMilliseconds(1000);
 
             if (isConnected(accountId)) {
                 log.info("successfully connected " + getInfo(accountId));
@@ -110,7 +110,7 @@ public class IbController {
         if (isConnected(accountId)) {
             log.info("disconnecting " + getInfo(accountId));
             c.eClientSocket.eDisconnect();
-            CoreUtil.waitMilliseconds(1000);
+            HanUtil.waitMilliseconds(1000);
 
             if (!isConnected(accountId)) {
                 log.info("successfully disconnected " + getInfo(accountId));

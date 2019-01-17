@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -87,7 +88,7 @@ public class TradeCalculator {
 
     public Double calculatePLPortfolioBase(Trade t) {
 
-        switch (CoreSettings.STATISTICS_PL_METHOD) {
+        switch (HanSettings.STATISTICS_PL_METHOD) {
             case PORTFOLIO_BASE_OPEN_CLOSE: return calculatePLPortfolioBaseOpenClose(t);
             case PORTFOLIO_BASE_CLOSE_ONLY: return calculatePLPortfolioBaseCloseOnly(t);
             case PORTFOLIO_BASE_CURRENT: return calculatePLPortfolioBaseCurrent(t);
@@ -105,7 +106,7 @@ public class TradeCalculator {
         for (SplitExecution se : t.getSplitExecutions()) {
             Execution e = se.getExecution();
 
-            double exchangeRate = getExchangeRate(se.getFillDate(), e.getCurrency());
+            double exchangeRate = getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency());
             double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate;
 
             if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
@@ -133,7 +134,7 @@ public class TradeCalculator {
     private Double calculatePLPortfolioBaseSimple(Trade t, boolean current) {
         validateClosed(t);
         LocalDateTime plCalculationDate = current ? LocalDateTime.now() : t.getCloseDate();
-        double exchangeRate = getExchangeRate(plCalculationDate, t.getCurrency());
+        double exchangeRate = getExchangeRate(plCalculationDate.toLocalDate(), t.getCurrency());
 
         return t.getProfitLoss().doubleValue() / exchangeRate;
     }
@@ -146,13 +147,13 @@ public class TradeCalculator {
         }
     }
 
-    private Double getExchangeRate(LocalDateTime localDateTime, Currency currency) {
+    private Double getExchangeRate(LocalDate localDate, Currency currency) {
         if (exchangeRateMap.isEmpty()) {
             List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
             exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
         }
 
-        String date = CoreUtil.formatExchangeRateDate(localDateTime);
+        String date = HanUtil.formatExchangeRateDate(localDate);
         ExchangeRate exchangeRate = exchangeRateMap.get(date);
 
         if (exchangeRate == null) {
@@ -161,7 +162,7 @@ public class TradeCalculator {
             if (exchangeRate != null) {
                 exchangeRateMap.put(date, exchangeRate);
             } else {
-                String previousDate = CoreUtil.formatExchangeRateDate(localDateTime.plusDays(-1));
+                String previousDate = HanUtil.formatExchangeRateDate(localDate.plusDays(-1));
                 exchangeRate = exchangeRateMap.get(previousDate);
 
                 if (exchangeRate == null) {
@@ -171,7 +172,7 @@ public class TradeCalculator {
             }
         }
 
-        return exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency);
+        return exchangeRate.getRate(HanSettings.PORTFOLIO_BASE, currency);
     }
 
     private void validateClosed(Trade t) {

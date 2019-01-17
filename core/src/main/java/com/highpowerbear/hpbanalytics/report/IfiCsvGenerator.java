@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
@@ -51,7 +51,7 @@ public class IfiCsvGenerator {
         this.reportDao = reportDao;
         this.tradeCalculator = tradeCalculator;
 
-        ifiYears = IntStream.rangeClosed(CoreSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
+        ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
     }
 
     @PostConstruct
@@ -285,16 +285,16 @@ public class IfiCsvGenerator {
     }
 
     private double getExchangeRate(SplitExecution se) {
-        String date = CoreUtil.formatExchangeRateDate(se.getFillDate());
+        String date = HanUtil.formatExchangeRateDate(se.getFillDate().toLocalDate());
         ExchangeRate exchangeRate = reportDao.getExchangeRate(date);
 
         if (exchangeRate == null) {
-            String previousDate = CoreUtil.formatExchangeRateDate(se.getFillDate().plusDays(-1));
+            String previousDate = HanUtil.formatExchangeRateDate(se.getFillDate().plusDays(-1).toLocalDate());
             exchangeRate = reportDao.getExchangeRate(previousDate);
         }
         Currency currency = se.getExecution().getCurrency();
 
-        return exchangeRate.getRate(CoreSettings.PORTFOLIO_BASE, currency);
+        return exchangeRate.getRate(HanSettings.PORTFOLIO_BASE, currency);
     }
 
     public List<Integer> getIfiYears() {

@@ -32,8 +32,8 @@ public class MessageService {
 
         SimpleMailMessage message = new SimpleMailMessage();
 
-        message.setFrom(CoreSettings.EMAIL_FROM);
-        message.setTo(CoreSettings.EMAIL_TO);
+        message.setFrom(HanSettings.EMAIL_FROM);
+        message.setTo(HanSettings.EMAIL_TO);
         message.setSubject(subject);
         message.setText(text);
 

@@ -3,8 +3,8 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
@@ -55,10 +55,10 @@ public class Trade implements Serializable {
     private TradeStatus status;
     private Integer openPosition;
     private BigDecimal avgOpenPrice;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime openDate;
     private BigDecimal avgClosePrice;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
     @ManyToOne
@@ -75,11 +75,11 @@ public class Trade implements Serializable {
 
     @JsonProperty
     public String getDuration() {
-        return closeDate != null ? CoreUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
+        return closeDate != null ? HanUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
     }
 
     public String print() {
-        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? CoreUtil.formatLogDate(openDate) : "-") + ", " + (closeDate != null ? CoreUtil.formatLogDate(closeDate) : "-") + ", " + profitLoss);
+        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? HanUtil.formatLogDate(openDate) : "-") + ", " + (closeDate != null ? HanUtil.formatLogDate(closeDate) : "-") + ", " + profitLoss);
     }
 
     @Override

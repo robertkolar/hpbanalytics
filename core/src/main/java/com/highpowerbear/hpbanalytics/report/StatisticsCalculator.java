@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
+import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_REPORT;
 
 /**
  * Created by robertk on 4/26/2015.
@@ -158,13 +158,13 @@ public class StatisticsCalculator {
                     numClosed,
                     numWinners,
                     numLosers,
-                    CoreUtil.round2(pctWinners),
-                    CoreUtil.round2(bigWinner),
-                    CoreUtil.round2(bigLoser),
-                    CoreUtil.round2(winnersProfit),
-                    CoreUtil.round2(losersLoss),
-                    CoreUtil.round2(profitLoss),
-                    CoreUtil.round2(cumulProfitLoss)
+                    HanUtil.round2(pctWinners),
+                    HanUtil.round2(bigWinner),
+                    HanUtil.round2(bigLoser),
+                    HanUtil.round2(winnersProfit),
+                    HanUtil.round2(losersLoss),
+                    HanUtil.round2(profitLoss),
+                    HanUtil.round2(cumulProfitLoss)
             );
             stats.add(s);
 

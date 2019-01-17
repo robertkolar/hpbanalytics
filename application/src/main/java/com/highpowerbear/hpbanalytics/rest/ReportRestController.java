@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_REPORT;
+import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_REPORT;
 
 /**
  * Created by robertk on 12/21/2017.

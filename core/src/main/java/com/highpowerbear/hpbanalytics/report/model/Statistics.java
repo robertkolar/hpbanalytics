@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
 
 import java.time.LocalDateTime;
 
@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 public class Statistics {
 
     private final int id;
-    @JsonFormat(pattern = CoreSettings.JSON_DATE_FORMAT)
+    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private final LocalDateTime periodDate;
     private final int numExecs;
     private final int numOpened;

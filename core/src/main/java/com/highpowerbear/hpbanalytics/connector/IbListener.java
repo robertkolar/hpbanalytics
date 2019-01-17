@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.net.SocketException;
 
-import static com.highpowerbear.hpbanalytics.common.CoreSettings.WS_TOPIC_ORDTRACK;
+import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_ORDTRACK;
 
 /**
  *

@@ -1,9 +1,10 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.report.model.ExchangeRates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 /**
  * Created by robertk on 10/10/2016.
@@ -38,22 +39,22 @@ public class ExchangeRateRetriever {
     private void retrieveExchangeRates() {
         log.info("BEGIN ExchangeRateRetriever.retrieve");
 
-        for (int i = 0; i < CoreSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
+        for (int i = 0; i < HanSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
-            LocalDateTime localDateTime = LocalDateTime.now().plusDays(i - CoreSettings.EXCHANGE_RATE_DAYS_BACK);
-            String date = CoreUtil.formatExchangeRateDate(localDateTime);
+            LocalDate localDate = LocalDate.now().plusDays(i - HanSettings.EXCHANGE_RATE_DAYS_BACK);
+            String date = HanUtil.formatExchangeRateDate(localDate);
 
             exchangeRate.setDate(date);
             ExchangeRates exchangeRates = retrieve(date);
 
-            exchangeRate.setEurUsd(exchangeRates.getRates().getUsd());
-            exchangeRate.setEurGbp(exchangeRates.getRates().getGbp());
-            exchangeRate.setEurChf(exchangeRates.getRates().getChf());
-            exchangeRate.setEurAud(exchangeRates.getRates().getAud());
-            exchangeRate.setEurJpy(exchangeRates.getRates().getJpy());
-            exchangeRate.setEurKrw(exchangeRates.getRates().getKrw());
-            exchangeRate.setEurHkd(exchangeRates.getRates().getHkd());
-            exchangeRate.setEurSgd(exchangeRates.getRates().getSgd());
+            exchangeRate.setEurUsd(exchangeRates.getRate(Currency.USD));
+            exchangeRate.setEurGbp(exchangeRates.getRate(Currency.GBP));
+            exchangeRate.setEurChf(exchangeRates.getRate(Currency.CHF));
+            exchangeRate.setEurAud(exchangeRates.getRate(Currency.AUD));
+            exchangeRate.setEurJpy(exchangeRates.getRate(Currency.JPY));
+            exchangeRate.setEurKrw(exchangeRates.getRate(Currency.KRW));
+            exchangeRate.setEurHkd(exchangeRates.getRate(Currency.HKD));
+            exchangeRate.setEurSgd(exchangeRates.getRate(Currency.SGD));
 
             reportDao.createOrUpdateExchangeRate(exchangeRate);
         }
@@ -62,12 +63,10 @@ public class ExchangeRateRetriever {
     }
 
     private ExchangeRates retrieve(String date) {
-        String query = CoreSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD";
+        String query = HanSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=" + HanSettings.EXCHANGE_RATES_SYMBOLS;
         ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
-        if (exchangeRates != null) {
-            log.info(exchangeRates.toString());
-        }
 
+        log.info("retrieved exchange rates " + exchangeRates);
         return exchangeRates;
     }
 }

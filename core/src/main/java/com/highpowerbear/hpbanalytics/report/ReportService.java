@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.CoreSettings;
-import com.highpowerbear.hpbanalytics.common.CoreUtil;
+import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
 import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
@@ -43,7 +43,7 @@ public class ReportService {
         this.messageService = messageService;
     }
 
-    @JmsListener(destination = CoreSettings.JMS_DEST_ORDER_FILLED)
+    @JmsListener(destination = HanSettings.JMS_DEST_ORDER_FILLED)
     public void orderFilled(String ibOrderId) {
         log.info("handling execution for order " + ibOrderId);
 
@@ -69,14 +69,14 @@ public class ReportService {
         processExecution(e);
     }
 
-    @JmsListener(destination = CoreSettings.JMS_DEST_EXECUTION_RECEIVED)
+    @JmsListener(destination = HanSettings.JMS_DEST_EXECUTION_RECEIVED)
     public void executionReceived (ExecutionDto executionDto) {
         Execution e = new Execution();
 
         String symbol = executionDto.getLocalSymbol();
 
         if (symbol.split(" ").length > 1) {
-            symbol = CoreUtil.removeSpace(symbol);
+            symbol = HanUtil.removeSpace(symbol);
         }
         e.setOrigin("IB:" + executionDto.getAcctNumber());
         e.setReferenceId(String.valueOf(executionDto.getPermId()));
@@ -106,7 +106,7 @@ public class ReportService {
         execution.setReport(report);
 
         newExecution(execution);
-        messageService.sendWsMessage(CoreSettings.WS_TOPIC_REPORT,  "new execution processed");
+        messageService.sendWsMessage(HanSettings.WS_TOPIC_REPORT,  "new execution processed");
     }
 
     @Transactional
@@ -181,7 +181,7 @@ public class ReportService {
             log.info("firstSe=" + firstSe.print());
 
             boolean isNewAfterFirst = execution.getFillDate().isAfter(firstSe.getExecution().getFillDate());
-            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + CoreUtil.formatLogDate(execution.getFillDate()) + ", " + CoreUtil.formatLogDate(firstSe.getExecution().getFillDate()));
+            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + HanUtil.formatLogDate(execution.getFillDate()) + ", " + HanUtil.formatLogDate(firstSe.getExecution().getFillDate()));
 
             if (isNewAfterFirst) {
                 executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
