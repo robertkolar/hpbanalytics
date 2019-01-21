@@ -23,6 +23,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.highpowerbear.hpbanalytics.common.HanSettings.*;
@@ -75,6 +77,13 @@ public class OrdTrackService implements ConnectionListener {
             updateHeartbeats(accountId);
             ibController.requestOpenOrders(accountId);
         });
+    }
+
+    @Scheduled(cron="0 0 6 * * MON-FRI")
+    private void performStartOfDayTasks() {
+        ordTrackDao.getIbAccounts().stream()
+                .map(IbAccount::getAccountId)
+                .filter(ibController::isConnected).forEach(ibController::requestPositions);
     }
 
     private void updateHeartbeats(String accountId) {
@@ -264,22 +273,35 @@ public class OrdTrackService implements ConnectionListener {
         SecType secType = SecType.valueOf(contract.getSecType());
         String exchange = contract.exchange() != null ? contract.exchange() : secType.getDefaultExchange();
 
+        long daysToExpiration = 0;
+        if (contract.lastTradeDateOrContractMonth() != null) {
+            LocalDate expiration = LocalDate.parse(contract.lastTradeDateOrContractMonth(), HanSettings.IB_DATE_FORMATTER);
+            daysToExpiration = ChronoUnit.DAYS.between(LocalDate.now(), expiration);
+        }
+
         positionMap.computeIfAbsent(accountId, k -> new HashMap<>());
         Position position = positionMap.get(accountId).get(conid);
-        boolean send = true;
 
-        if (position == null && positionSize != 0) {
-            positionMap.get(accountId).put(conid, new Position(accountId, conid, secType, underlyingSymbol, symbol, currency, exchange, positionSize));
-        } else if (positionSize != 0){
-            position.setSize(positionSize);
-        } else if (positionMap.get(accountId).containsKey(conid)) {
-            positionMap.get(accountId).remove(conid);
+        if (position == null) {
+            if (positionSize != 0 && daysToExpiration >= 0) {
+                positionMap.get(accountId).put(conid, new Position(accountId, conid, secType, underlyingSymbol, symbol, currency, exchange, positionSize));
+                sendPositionChangedMessage(symbol);
+            }
         } else {
-            send = false;
+            if (positionSize != 0 && daysToExpiration >= 0) {
+                if (position.getSize() != positionSize) {
+                    position.setSize(positionSize);
+                    sendPositionChangedMessage(symbol);
+                }
+            } else {
+                positionMap.get(accountId).remove(conid);
+                sendPositionChangedMessage(symbol);
+            }
         }
-        if (send) {
-            messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
-        }
+    }
+
+    private void sendPositionChangedMessage(String symbol) {
+        messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
     }
 
     public void execDetailsReceived(String accountId, Contract contract, Execution execution) {
