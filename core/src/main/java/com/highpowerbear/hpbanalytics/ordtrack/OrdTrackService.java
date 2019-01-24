@@ -3,19 +3,16 @@ package com.highpowerbear.hpbanalytics.ordtrack;
 import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
+import com.highpowerbear.hpbanalytics.entity.Execution;
+import com.highpowerbear.hpbanalytics.enums.*;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.connector.ConnectionListener;
 import com.highpowerbear.hpbanalytics.connector.IbController;
 import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.OrderStatus;
-import com.highpowerbear.hpbanalytics.enums.OrderType;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
 import com.ib.client.Contract;
-import com.ib.client.Execution;
 import com.ib.client.Order;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -304,8 +302,8 @@ public class OrdTrackService implements ConnectionListener {
         messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
     }
 
-    public void execDetailsReceived(String accountId, Contract contract, Execution execution) {
-        long permId = (long) execution.permId();
+    public void execDetailsReceived(String accountId, Contract contract, com.ib.client.Execution ibExecution) {
+        long permId = (long) ibExecution.permId();
 
         IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, permId);
         if (ibOrder == null) {
@@ -313,17 +311,25 @@ public class OrdTrackService implements ConnectionListener {
         }
 
         if (ibOrder.getSecType().equalsIgnoreCase(SecType.BAG.name()) && !contract.getSecType().equalsIgnoreCase(SecType.BAG.name())) {
-            ExecutionDto executionDto = new ExecutionDto(
-                    execution.acctNumber(),
-                    permId, execution.side(),
-                    (int) execution.shares(),
-                    contract.symbol(),
-                    contract.localSymbol(),
-                    contract.currency(),
-                    contract.getSecType(),
-                    execution.price());
+            String symbol = contract.localSymbol();
 
-            messageService.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, executionDto);
+            if (symbol.split(" ").length > 1) {
+                symbol = HanUtil.removeSpace(symbol);
+            }
+
+            Execution execution = new Execution();
+
+            execution.setOrigin("IB:" + ibExecution.acctNumber());
+            execution.setReferenceId(String.valueOf(permId));
+            execution.setAction(Action.getByExecSide(ibExecution.side()));
+            execution.setQuantity((int) ibExecution.shares());
+            execution.setUnderlying(contract.symbol());
+            execution.setCurrency(Currency.valueOf(contract.currency()));
+            execution.setSymbol(symbol);
+            execution.setSecType(SecType.valueOf(contract.getSecType()));
+            execution.setFillPrice(BigDecimal.valueOf(ibExecution.price()));
+
+            messageService.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, execution);
         }
     }
 

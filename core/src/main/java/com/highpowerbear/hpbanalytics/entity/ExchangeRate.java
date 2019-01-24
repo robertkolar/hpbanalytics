@@ -14,7 +14,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "exchange_rate", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class ExchangeRate implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 539031756808205732L;
 
     @Id
     private String date; // yyyy-MM-dd

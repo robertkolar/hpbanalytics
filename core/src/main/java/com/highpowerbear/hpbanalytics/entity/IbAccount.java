@@ -13,7 +13,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "ib_account", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class IbAccount implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -5309297107924803768L;
 
     @Id
     private String accountId;

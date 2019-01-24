@@ -30,7 +30,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "ib_order", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class IbOrder implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3229490830609675559L;
 
     @Id
     @SequenceGenerator(name="ib_order_generator", sequenceName = "ib_order_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)

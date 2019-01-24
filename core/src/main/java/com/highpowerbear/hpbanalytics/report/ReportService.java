@@ -3,7 +3,6 @@ package com.highpowerbear.hpbanalytics.report;
 import com.highpowerbear.hpbanalytics.common.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.report.model.ExecutionDto;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.*;
 import com.highpowerbear.hpbanalytics.enums.*;
@@ -53,42 +52,25 @@ public class ReportService {
             log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
             return;
         }
-        Execution e = new Execution();
+        Execution execution = new Execution();
 
-        e.setOrigin("IB:" + ibOrder.getAccountId());
-        e.setReferenceId(String.valueOf(ibOrder.getPermId()));
-        e.setAction(Action.valueOf(ibOrder.getAction()));
-        e.setQuantity(ibOrder.getQuantity());
-        e.setUnderlying(ibOrder.getUnderlying());
-        e.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
-        e.setSymbol(ibOrder.getSymbol());
-        e.setSecType(SecType.valueOf(ibOrder.getSecType()));
-        e.setFillDate(ibOrder.getStatusDate());
-        e.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
+        execution.setOrigin("IB:" + ibOrder.getAccountId());
+        execution.setReferenceId(String.valueOf(ibOrder.getPermId()));
+        execution.setAction(Action.valueOf(ibOrder.getAction()));
+        execution.setQuantity(ibOrder.getQuantity());
+        execution.setUnderlying(ibOrder.getUnderlying());
+        execution.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
+        execution.setSymbol(ibOrder.getSymbol());
+        execution.setSecType(SecType.valueOf(ibOrder.getSecType()));
+        execution.setFillDate(ibOrder.getStatusDate());
+        execution.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
 
-        processExecution(e);
+        processExecution(execution);
     }
 
     @JmsListener(destination = HanSettings.JMS_DEST_EXECUTION_RECEIVED)
-    public void executionReceived (ExecutionDto executionDto) {
-        Execution e = new Execution();
-
-        String symbol = executionDto.getLocalSymbol();
-
-        if (symbol.split(" ").length > 1) {
-            symbol = HanUtil.removeSpace(symbol);
-        }
-        e.setOrigin("IB:" + executionDto.getAcctNumber());
-        e.setReferenceId(String.valueOf(executionDto.getPermId()));
-        e.setAction(Action.getByExecSide(executionDto.getSide()));
-        e.setQuantity(executionDto.getCumQty());
-        e.setUnderlying(executionDto.getSymbol());
-        e.setCurrency(Currency.valueOf(executionDto.getCurrency()));
-        e.setSymbol(symbol);
-        e.setSecType(SecType.valueOf(executionDto.getSecType()));
-        e.setFillPrice(BigDecimal.valueOf(executionDto.getPrice()));
-
-        processExecution(e);
+    public void executionReceived (Execution execution) {
+        processExecution(execution);
     }
 
     private void processExecution(Execution execution) {
@@ -200,23 +182,23 @@ public class ReportService {
     }
 
     public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
-        Execution e = new Execution();
+        Execution execution = new Execution();
 
-        e.setReceivedDate(LocalDateTime.now());
-        e.setReport(trade.getReport());
-        e.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
-        e.setOrigin("INTERNAL");
-        e.setReferenceId("N/A");
-        e.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
-        e.setQuantity(Math.abs(trade.getOpenPosition()));
-        e.setSymbol(trade.getSymbol());
-        e.setUnderlying(trade.getUnderlying());
-        e.setCurrency(trade.getCurrency());
-        e.setSecType(trade.getSecType());
-        e.setFillDate(closeDate);
-        e.setFillPrice(closePrice);
+        execution.setReceivedDate(LocalDateTime.now());
+        execution.setReport(trade.getReport());
+        execution.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
+        execution.setOrigin("INTERNAL");
+        execution.setReferenceId("N/A");
+        execution.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
+        execution.setQuantity(Math.abs(trade.getOpenPosition()));
+        execution.setSymbol(trade.getSymbol());
+        execution.setUnderlying(trade.getUnderlying());
+        execution.setCurrency(trade.getCurrency());
+        execution.setSecType(trade.getSecType());
+        execution.setFillDate(closeDate);
+        execution.setFillPrice(closePrice);
 
-        newExecution(e);
+        newExecution(execution);
     }
 
     private List<Trade> analyze(List<Execution> executions) {

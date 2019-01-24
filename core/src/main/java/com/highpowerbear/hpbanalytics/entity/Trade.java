@@ -36,7 +36,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "trade", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Trade implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 3978501428965359313L;
 
     @Id
     @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)

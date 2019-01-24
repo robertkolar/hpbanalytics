@@ -25,7 +25,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "ib_order_event", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class IbOrderEvent implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 6734953610124648373L;
 
     @Id
     @SequenceGenerator(name="ib_order_event_generator", sequenceName = "ib_order_event_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)

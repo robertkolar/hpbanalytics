@@ -29,7 +29,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "execution", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Execution implements Serializable, Comparable<Execution> {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2067980957084297540L;
 
     @Id
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)

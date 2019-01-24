@@ -15,7 +15,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "report", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class Report implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 6577973080533509282L;
     
     @Id
     private Integer id;

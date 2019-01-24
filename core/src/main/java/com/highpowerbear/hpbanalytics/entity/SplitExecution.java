@@ -23,7 +23,7 @@ import java.util.Objects;
 @Entity
 @Table(name = "split_execution", schema = "hpbanalytics", catalog = "hpbanalytics")
 public class SplitExecution implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2511056076409280750L;
 
     @Id
     @SequenceGenerator(name="split_execution_generator", sequenceName = "split_execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
