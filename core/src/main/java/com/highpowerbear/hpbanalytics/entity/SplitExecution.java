@@ -62,7 +62,6 @@ public class SplitExecution implements Serializable {
         SplitExecution that = (SplitExecution) o;
 
         return (Objects.equals(id, that.id)) && (Objects.equals(currentPosition, that.currentPosition)) && Objects.equals(execution, that.execution);
-
     }
 
     @Override

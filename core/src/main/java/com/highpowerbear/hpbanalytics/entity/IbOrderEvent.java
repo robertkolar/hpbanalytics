@@ -53,7 +53,6 @@ public class IbOrderEvent implements Serializable {
         IbOrderEvent that = (IbOrderEvent) o;
 
         return Objects.equals(id, that.id);
-
     }
 
     @Override

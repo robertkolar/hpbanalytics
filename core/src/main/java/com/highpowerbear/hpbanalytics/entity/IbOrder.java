@@ -93,7 +93,6 @@ public class IbOrder implements Serializable {
         IbOrder ibOrder = (IbOrder) o;
 
         return Objects.equals(id, ibOrder.id);
-
     }
 
     @Override

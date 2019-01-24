@@ -69,7 +69,6 @@ public class Execution implements Serializable, Comparable<Execution> {
         Execution execution = (Execution) o;
 
         return Objects.equals(id, execution.id);
-
     }
 
     @Override

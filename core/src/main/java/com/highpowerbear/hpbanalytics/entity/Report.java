@@ -109,7 +109,6 @@ public class Report implements Serializable {
         Report report = (Report) o;
 
         return Objects.equals(id, report.id);
-
     }
 
     @Override

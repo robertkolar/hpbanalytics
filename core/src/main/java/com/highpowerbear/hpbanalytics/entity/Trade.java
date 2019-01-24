@@ -90,7 +90,6 @@ public class Trade implements Serializable {
         Trade trade = (Trade) o;
 
         return Objects.equals(id, trade.id);
-
     }
 
     @Override

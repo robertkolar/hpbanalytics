@@ -54,7 +54,6 @@ public class ExchangeRate implements Serializable {
         ExchangeRate that = (ExchangeRate) o;
 
         return Objects.equals(date, that.date);
-
     }
 
     @Override
