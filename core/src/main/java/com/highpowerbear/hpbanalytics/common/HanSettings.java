@@ -13,7 +13,7 @@ public class HanSettings {
     public static final String EXCHANGE_RATE_URL = "http://data.fixer.io/api";
     public static final int EXCHANGE_RATE_DAYS_BACK = 5;
     public static final int IFI_START_YEAR = 2016;
-    public static final int PL_SCALE = 4;
+    public static final int PL_SCALE = 5;
     public static final String JSON_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     public static final DateTimeFormatter JSON_DATE_FORMATTER = DateTimeFormatter.ofPattern(JSON_DATE_FORMAT);
     public static final DateTimeFormatter LOG_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss.SSS");

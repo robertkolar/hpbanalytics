@@ -186,18 +186,12 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeShortSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
-
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
-        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
-        Currency currency = se.getExecution().getCurrency();
-
-        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
-        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
+        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
+        sb.append(nf.format(fillValueBase(se))).append(DL);
 
         for (int k = 0; k < 5; k++) {
             sb.append(DL);
@@ -206,8 +200,6 @@ public class IfiCsvGenerator {
     }
 
     private BigDecimal writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
-
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
             sb.append(DL);
@@ -218,12 +210,8 @@ public class IfiCsvGenerator {
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
-        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
-        Currency currency = se.getExecution().getCurrency();
-
-        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
-        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
+        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
+        sb.append(nf.format(fillValueBase(se))).append(DL);
         sb.append(se.getCurrentPosition()).append(DL);
 
         BigDecimal profitLoss = null;
@@ -237,19 +225,13 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeLongSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
-
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
-        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
-        Currency currency = se.getExecution().getCurrency();
-
-        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
-        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
+        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
+        sb.append(nf.format(fillValueBase(se))).append(DL);
 
         for (int k = 0; k < 4; k++) {
             sb.append(DL);
@@ -258,8 +240,6 @@ public class IfiCsvGenerator {
     }
 
     private BigDecimal writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
-
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
             sb.append(DL);
@@ -268,12 +248,8 @@ public class IfiCsvGenerator {
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
-        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
-        Currency currency = se.getExecution().getCurrency();
-
-        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
-        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
+        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
+        sb.append(nf.format(fillValueBase(se))).append(DL);
         sb.append(se.getCurrentPosition()).append(DL);
 
         BigDecimal profitLoss = null;
@@ -297,6 +273,21 @@ public class IfiCsvGenerator {
         Currency currency = se.getExecution().getCurrency();
 
         return exchangeRate.getRate(HanSettings.PORTFOLIO_BASE, currency);
+    }
+
+    private double fillValue(SplitExecution se) {
+        BigDecimal contractFillPrice = se.getExecution().getFillPrice();
+        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade()));
+
+        return contractFillPrice.multiply(multiplier).doubleValue();
+    }
+
+    private double fillValueBase(SplitExecution se) {
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
+        BigDecimal contractFillPrice = se.getExecution().getFillPrice();
+        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade()));
+
+        return contractFillPrice.divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP).multiply(multiplier).doubleValue();
     }
 
     public List<Integer> getIfiYears() {

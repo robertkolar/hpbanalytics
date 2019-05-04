@@ -74,7 +74,7 @@ public class TradeCalculator {
             t.setCloseDate(seLast.getExecution().getFillDate());
 
             BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-            profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t))).setScale(HanSettings.PL_SCALE, RoundingMode.HALF_UP);
+            profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t)));
             t.setProfitLoss(profitLoss);
         }
     }
@@ -100,7 +100,7 @@ public class TradeCalculator {
             Execution e = se.getExecution();
 
             BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency()));
-            BigDecimal fillPrice = se.getExecution().getFillPrice().divide(exchangeRate, RoundingMode.HALF_UP);
+            BigDecimal fillPrice = se.getExecution().getFillPrice().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
 
             if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
                 cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
@@ -111,7 +111,7 @@ public class TradeCalculator {
         }
 
         BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-        profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t))).setScale(HanSettings.PL_SCALE, RoundingMode.HALF_UP);
+        profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t)));
 
         return profitLoss;
     }
