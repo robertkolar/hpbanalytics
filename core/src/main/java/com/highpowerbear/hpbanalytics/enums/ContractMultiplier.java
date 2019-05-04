@@ -26,13 +26,13 @@ public enum ContractMultiplier {
     M6A(10000),
     M6B(6250);
 
-    private final Integer multiplier;
+    private final int multiplier;
 
-    ContractMultiplier(Integer multiplier) {
+    ContractMultiplier(int multiplier) {
         this.multiplier = multiplier;
     }
 
-    public static Integer getByUnderlying(SecType secType, String underlying) {
+    public static int getByUnderlying(SecType secType, String underlying) {
         int multiplier = secType == SecType.OPT ? 100 : 1;
         String undl = underlying.replace(".", "_").toUpperCase();
 

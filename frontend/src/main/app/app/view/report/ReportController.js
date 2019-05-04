@@ -24,7 +24,7 @@ Ext.define('HanGui.view.report.ReportController', {
                 }
             });
         }
-        me.prepareIfiYearCombo();
+        me.prepareIfiYearMonthCombos();
 
         var socket  = new SockJS('/websocket');
         var stompClient = Stomp.over(socket);
@@ -122,24 +122,34 @@ Ext.define('HanGui.view.report.ReportController', {
         });
     },
 
-    prepareIfiYearCombo: function() {
+    prepareIfiYearMonthCombos: function() {
         var me = this,
-            ifiYearCombo =  me.lookupReference('ifiYearCombo');
+            ifiYearCombo =  me.lookupReference('ifiYearCombo'),
+            ifiEndMonthCombo =  me.lookupReference('ifiEndMonthCombo');
 
         Ext.Ajax.request({
             method: 'GET',
             url: HanGui.common.Definitions.urlPrefixReport + '/ifiyears',
 
             success: function(response, opts) {
+                // years
                 var ifiYears = Ext.decode(response.responseText);
                 var ifiYearsData = [];
                 for (var i = 0; i < ifiYears.length; i++) {
                     ifiYearsData.push([ifiYears[i]]);
                 }
-                var comboStore = ifiYearCombo.getStore();
-                comboStore.loadData(ifiYearsData);
+                ifiYearCombo.getStore().loadData(ifiYearsData);
+                var defaultYear = ifiYearCombo.getStore().getAt(ifiYearsData.length - 1);
+                ifiYearCombo.setValue(defaultYear);
 
-                ifiYearCombo.setValue(comboStore.getAt(ifiYearsData.length - 1));
+                // months
+                var ifiEndMonthsData = [];
+                for (var m = 1; m <= 12; m++) {
+                    ifiEndMonthsData.push([m]);
+                }
+                ifiEndMonthCombo.getStore().loadData(ifiEndMonthsData);
+                var defaultEndMonth = ifiEndMonthCombo.getStore().getAt(ifiEndMonthsData.length - 1);
+                ifiEndMonthCombo.setValue(defaultEndMonth);
             }
         });
     },
@@ -175,17 +185,26 @@ Ext.define('HanGui.view.report.ReportController', {
     onDownloadIfiReport: function(button, evt) {
         var me = this,
             year = me.lookupReference('ifiYearCombo').getValue(),
+            endMonth = me.lookupReference('ifiEndMonthCombo').getValue(),
             tradeType =  me.lookupReference('ifiTradeTypeCombo').getValue();
 
         Ext.Ajax.request({
             method: 'GET',
-            url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/ificsv/' + year + '/' + tradeType,
+            url: HanGui.common.Definitions.urlPrefixReport + '/reports/' + me.reportId  + '/ificsv/' + year + '/' + endMonth + '/' + tradeType,
 
             success: function(response, opts) {
                 var content = response.responseText;
-                var filename = 'IFI_' + year + '_' + tradeType.toLowerCase() + '.csv';
 
-                console.log(content);
+                var filename;
+                if (endMonth !== 12) {
+                    var endMonthStr = '' + endMonth;
+                    var padMonth = '00';
+                    endMonthStr = padMonth.substring(0, padMonth.length - endMonthStr.length) + endMonthStr;
+                    filename = 'IFI_' + year + '_' + endMonthStr + '_' + tradeType.toLowerCase() + '.csv';
+                } else {
+                    filename = 'IFI_' + year + '_'  + tradeType.toLowerCase() + '.csv';
+                }
+
                 var blob = new Blob([content], {
                     type: 'text/plain;charset=utf-8'
                 });

@@ -16,11 +16,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -63,16 +69,16 @@ public class IfiCsvGenerator {
         tradeTypeMap.put(TradeType.LONG, "običajni");
         tradeTypeMap.put(TradeType.SHORT, "na kratko");
 
-        nf.setMinimumFractionDigits(4);
-        nf.setMaximumFractionDigits(4);
+        nf.setMinimumFractionDigits(HanSettings.PL_SCALE);
+        nf.setMaximumFractionDigits(HanSettings.PL_SCALE);
         nf.setGroupingUsed(false);
     }
 
-    public String generate(int reportId, Integer year, TradeType tradeType) {
-        log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
+    public String generate(int reportId, int year, int endMonth, TradeType tradeType) {
+        log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year +  ", endMonth=" + endMonth + ", tradeType=" + tradeType);
 
         LocalDateTime beginDate = LocalDate.ofYearDay(year, 1).atStartOfDay();
-        LocalDateTime endDate = beginDate.plusYears(1);
+        LocalDateTime endDate = YearMonth.of(year, endMonth).atEndOfMonth().plusDays(1).atStartOfDay();
         List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
 
         log.info("beginDate=" + beginDate + ", endDate=" + endDate + ", trades=" + trades.size());
@@ -84,14 +90,14 @@ public class IfiCsvGenerator {
             writeCsvHeaderLong(sb);
         }
         int i = 0;
-        Double sumPlEur = 0D;
+        BigDecimal sumPl = BigDecimal.ZERO;
 
         for (Trade trade : trades) {
             if (!trade.getSecType().isDerivative()) {
                 continue;
             }
 
-            Double tradePlEur = 0D;
+            BigDecimal tradePl = BigDecimal.ZERO;
             i++;
             writeTrade(sb, trade, i);
             List<SplitExecution> splitExecutions = trade.getSplitExecutions();
@@ -102,22 +108,22 @@ public class IfiCsvGenerator {
                     writeTradeShortSplitExecutionSell(sb, se, i, j);
 
                 } else if (TradeType.SHORT.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
-                    Double plEur = writeTradeShortSplitExecutionBuy(sb, se, i, j);
+                    BigDecimal pl = writeTradeShortSplitExecutionBuy(sb, se, i, j);
 
-                    if (plEur != null) {
-                        tradePlEur = plEur;
+                    if (pl != null) {
+                        tradePl = pl;
                     }
                 } else if (TradeType.LONG.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
                     writeTradeLongSplitExecutionBuy(sb, se, i, j);
 
                 } else if (TradeType.LONG.equals(tradeType) && Action.SELL.equals(se.getExecution().getAction())) {
-                    Double plEur = writeTradeLongSplitExecutionSell(sb, se, i, j);
-                    if (plEur != null) {
-                        tradePlEur = plEur;
+                    BigDecimal pl = writeTradeLongSplitExecutionSell(sb, se, i, j);
+                    if (pl != null) {
+                        tradePl = pl;
                     }
                 }
             }
-            sumPlEur += tradePlEur;
+            sumPl = sumPl.add(tradePl);
             sb.append(NL);
         }
 
@@ -125,7 +131,7 @@ public class IfiCsvGenerator {
         for (int k = 0; k < 14; k++) {
             sb.append(DL);
         }
-        sb.append(nf.format(sumPlEur));
+        sb.append(nf.format(sumPl));
 
         log.info("END IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
         return sb.toString();
@@ -180,19 +186,18 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeShortSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        double exchangeRate = getExchangeRate(se);
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
-        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
-
+        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
+        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
         Currency currency = se.getExecution().getCurrency();
 
-        sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
+        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
+        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
 
         for (int k = 0; k < 5; k++) {
             sb.append(DL);
@@ -200,8 +205,8 @@ public class IfiCsvGenerator {
         sb.append(NL);
     }
 
-    private Double writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        double exchangeRate = getExchangeRate(se);
+    private BigDecimal writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
@@ -213,19 +218,18 @@ public class IfiCsvGenerator {
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
-        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
-
+        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
+        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
         Currency currency = se.getExecution().getCurrency();
 
-        sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
+        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
+        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
         sb.append(se.getCurrentPosition()).append(DL);
 
-        Double profitLoss = null;
+        BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
             profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
-            sb.append(nf.format(profitLoss));
+            sb.append(nf.format(profitLoss.doubleValue()));
         }
 
         sb.append(NL);
@@ -233,20 +237,19 @@ public class IfiCsvGenerator {
     }
 
     private void writeTradeLongSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        double exchangeRate = getExchangeRate(se);
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
 
         sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(acquireType).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
-        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
-
+        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
+        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
         Currency currency = se.getExecution().getCurrency();
 
-        sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
+        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
+        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
 
         for (int k = 0; k < 4; k++) {
             sb.append(DL);
@@ -254,8 +257,8 @@ public class IfiCsvGenerator {
         sb.append(NL);
     }
 
-    private Double writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        double exchangeRate = getExchangeRate(se);
+    private BigDecimal writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
 
         sb.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
@@ -265,19 +268,18 @@ public class IfiCsvGenerator {
         sb.append(se.getFillDate().format(dtf)).append(DL);
         sb.append(se.getSplitQuantity()).append(DL);
 
-        double fillPrice = se.getExecution().getFillPrice().doubleValue();
-        fillPrice *= tradeCalculator.getMultiplier(se.getTrade());
-
+        BigDecimal fillPrice = se.getExecution().getFillPrice().multiply(BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade())));
+        BigDecimal fillPriceBase = fillPrice.divide(exchangeRate, RoundingMode.HALF_UP);
         Currency currency = se.getExecution().getCurrency();
 
-        sb.append(currency == Currency.USD ? nf.format(fillPrice) : "").append(DL);
-        sb.append(nf.format(fillPrice / exchangeRate)).append(DL);
+        sb.append(currency == Currency.USD ? nf.format(fillPrice.doubleValue()) : "").append(DL);
+        sb.append(nf.format(fillPriceBase.doubleValue())).append(DL);
         sb.append(se.getCurrentPosition()).append(DL);
 
-        Double profitLoss = null;
+        BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
             profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
-            sb.append(nf.format(profitLoss));
+            sb.append(nf.format(profitLoss.doubleValue()));
         }
         sb.append(NL);
 

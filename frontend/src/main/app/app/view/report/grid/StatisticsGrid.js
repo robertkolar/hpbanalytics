@@ -283,7 +283,22 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             labelWidth: 65,
             store: Ext.create('Ext.data.Store', {
                 fields: ['year'],
-                data: [{"year": 2016}]
+                data: [{'year': 2016}]
+            })
+        }, {
+            xtype: 'combobox',
+            margin: '0 0 0 10',
+            editable: false,
+            queryMode: 'local',
+            displayField: 'endMonth',
+            valueField: 'endMonth',
+            reference: 'ifiEndMonthCombo',
+            fieldLabel: '',
+            width: 50,
+            labelWidth: 0,
+            store: Ext.create('Ext.data.Store', {
+                fields: ['endMonth'],
+                data: [{'endMonth': 1}]
             })
         }, {
             xtype: 'combobox',
@@ -299,8 +314,8 @@ Ext.define('HanGui.view.report.grid.StatisticsGrid', {
             store: Ext.create('Ext.data.Store', {
                 fields: ['abbr', 'name'],
                 data: [
-                    {"abbr": "LONG", "name": "Long"},
-                    {"abbr": "SHORT", "name": "Short"}
+                    {'abbr': 'LONG', 'name': 'Long'},
+                    {'abbr': 'SHORT', 'name': 'Short'}
                 ]
             }),
             value: 'SHORT'

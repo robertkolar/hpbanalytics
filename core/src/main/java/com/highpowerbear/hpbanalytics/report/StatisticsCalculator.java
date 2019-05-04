@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,7 +53,7 @@ public class StatisticsCalculator {
             return new ArrayList<>();
         }
 
-        Integer size = statisticsList.size();
+        int size = statisticsList.size();
 
         if (maxPoints == null || size < maxPoints) {
             maxPoints = size;
@@ -108,7 +109,7 @@ public class StatisticsCalculator {
         LocalDateTime lastPeriodDate = toBeginOfPeriod(lastDate, interval);
         LocalDateTime periodDate = firstPeriodDate;
 
-        double cumulProfitLoss = 0.0;
+        BigDecimal cumulProfitLoss = BigDecimal.ZERO;
         int statsCount = 1;
 
         while (!periodDate.isAfter(lastPeriodDate)) {
@@ -121,34 +122,34 @@ public class StatisticsCalculator {
             int numWinners = 0;
             int numLosers = 0;
             double pctWinners;
-            double winnersProfit = 0.0;
-            double losersLoss = 0.0;
-            double bigWinner = 0.0;
-            double bigLoser = 0.0;
-            double profitLoss;
+            BigDecimal winnersProfit = BigDecimal.ZERO;
+            BigDecimal losersLoss = BigDecimal.ZERO;
+            BigDecimal bigWinner = BigDecimal.ZERO;
+            BigDecimal bigLoser = BigDecimal.ZERO;
+            BigDecimal profitLoss;
 
             for (Trade t : tradesClosedForPeriod) {
-                double pl = tradeCalculator.calculatePLPortfolioBase(t);
+                BigDecimal pl = tradeCalculator.calculatePLPortfolioBase(t);
 
-                if (pl >= 0) {
+                if (pl.doubleValue() >= 0) {
                     numWinners++;
-                    winnersProfit += pl;
+                    winnersProfit = winnersProfit.add(pl);
 
-                    if (pl > bigWinner) {
+                    if (pl.compareTo(bigWinner) > 0) {
                         bigWinner = pl;
                     }
                 } else {
                     numLosers++;
-                    losersLoss += pl;
+                    losersLoss = losersLoss.add(pl);
 
-                    if (pl < bigLoser) {
+                    if (pl.compareTo(bigLoser) < 0) {
                         bigLoser = pl;
                     }
                 }
             }
             pctWinners = numClosed != 0 ? ((double) numWinners / (double) numClosed) * 100.0 : 0.0;
-            profitLoss = winnersProfit + losersLoss;
-            cumulProfitLoss += profitLoss;
+            profitLoss = winnersProfit.add(losersLoss);
+            cumulProfitLoss = cumulProfitLoss.add(profitLoss);
 
             Statistics s = new Statistics(
                     statsCount++,
@@ -159,12 +160,12 @@ public class StatisticsCalculator {
                     numWinners,
                     numLosers,
                     HanUtil.round2(pctWinners),
-                    HanUtil.round2(bigWinner),
-                    HanUtil.round2(bigLoser),
-                    HanUtil.round2(winnersProfit),
-                    HanUtil.round2(losersLoss),
-                    HanUtil.round2(profitLoss),
-                    HanUtil.round2(cumulProfitLoss)
+                    bigWinner,
+                    bigLoser,
+                    winnersProfit,
+                    losersLoss,
+                    profitLoss,
+                    cumulProfitLoss
             );
             stats.add(s);
 

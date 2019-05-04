@@ -7,17 +7,12 @@ import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
-import com.highpowerbear.hpbanalytics.enums.Action;
-import com.highpowerbear.hpbanalytics.enums.ContractMultiplier;
-import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.enums.TradeStatus;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
@@ -40,8 +35,6 @@ public class TradeCalculator {
     }
 
     public void calculateFields(Trade t) {
-        MathContext mc = new MathContext(8);
-
         SplitExecution seFirst = t.getSplitExecutions().get(0);
         SplitExecution seLast = t.getSplitExecutions().get(t.getSplitExecutions().size() - 1);
 
@@ -53,8 +46,8 @@ public class TradeCalculator {
         t.setSecType(seFirst.getExecution().getSecType());
         t.setOpenPosition(seLast.getCurrentPosition());
 
-        BigDecimal cumulativeOpenPrice = BigDecimal.valueOf(0d);
-        BigDecimal cumulativeClosePrice = BigDecimal.valueOf(0d);
+        BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
+        BigDecimal cumulativeClosePrice = BigDecimal.ZERO;
 
         int cumulativeQuantity = 0;
 
@@ -63,80 +56,80 @@ public class TradeCalculator {
 
             if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
                 cumulativeQuantity += se.getSplitQuantity();
-                cumulativeOpenPrice = cumulativeOpenPrice.add(new BigDecimal(se.getSplitQuantity()).multiply(e.getFillPrice(), mc));
+                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
             }
             if (t.getStatus() == TradeStatus.CLOSED) {
                 if ((t.getType() == TradeType.LONG && e.getAction() == Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Action.BUY)) {
-                    cumulativeClosePrice = cumulativeClosePrice.add(new BigDecimal(se.getSplitQuantity()).multiply(e.getFillPrice(), mc));
+                    cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
                 }
             }
         }
 
         t.setCumulativeQuantity(cumulativeQuantity);
         t.setOpenDate(seFirst.getExecution().getFillDate());
-        t.setAvgOpenPrice(cumulativeOpenPrice.divide(new BigDecimal(cumulativeQuantity), mc));
+        t.setAvgOpenPrice(cumulativeOpenPrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP));
 
         if (t.getStatus() == TradeStatus.CLOSED) {
-            t.setAvgClosePrice(cumulativeClosePrice.divide(new BigDecimal(cumulativeQuantity), mc));
+            t.setAvgClosePrice(cumulativeClosePrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP));
             t.setCloseDate(seLast.getExecution().getFillDate());
 
-            BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice, mc) : cumulativeOpenPrice.subtract(cumulativeClosePrice, mc));
-            profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t)), mc);
+            BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
+            profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t))).setScale(HanSettings.PL_SCALE, RoundingMode.HALF_UP);
             t.setProfitLoss(profitLoss);
         }
     }
 
-    public Double calculatePLPortfolioBase(Trade t) {
+    public BigDecimal calculatePLPortfolioBase(Trade t) {
 
         switch (HanSettings.STATISTICS_PL_METHOD) {
             case PORTFOLIO_BASE_OPEN_CLOSE: return calculatePLPortfolioBaseOpenClose(t);
             case PORTFOLIO_BASE_CLOSE_ONLY: return calculatePLPortfolioBaseCloseOnly(t);
             case PORTFOLIO_BASE_CURRENT: return calculatePLPortfolioBaseCurrent(t);
 
-            default: return null;
+            default: throw new IllegalStateException();
         }
     }
 
-    public Double calculatePLPortfolioBaseOpenClose(Trade t) {
+    public BigDecimal calculatePLPortfolioBaseOpenClose(Trade t) {
         validateClosed(t);
 
-        double cumulativeOpenPrice = 0d;
-        double cumulativeClosePrice = 0d;
+        BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
+        BigDecimal cumulativeClosePrice = BigDecimal.ZERO;
 
         for (SplitExecution se : t.getSplitExecutions()) {
             Execution e = se.getExecution();
 
-            double exchangeRate = getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency());
-            double fillPrice = se.getExecution().getFillPrice().doubleValue() / exchangeRate;
+            BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency()));
+            BigDecimal fillPrice = se.getExecution().getFillPrice().divide(exchangeRate, RoundingMode.HALF_UP);
 
             if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
-                cumulativeOpenPrice += se.getSplitQuantity() * fillPrice;
+                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
 
             } else if ((t.getType() == TradeType.LONG && e.getAction() == Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Action.BUY)) {
-                cumulativeClosePrice += se.getSplitQuantity() * fillPrice;
+                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
             }
         }
 
-        double profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice - cumulativeOpenPrice : cumulativeOpenPrice - cumulativeClosePrice);
-        profitLoss *= getMultiplier(t);
+        BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
+        profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t))).setScale(HanSettings.PL_SCALE, RoundingMode.HALF_UP);
 
         return profitLoss;
     }
 
-    private Double calculatePLPortfolioBaseCloseOnly(Trade t) {
+    private BigDecimal calculatePLPortfolioBaseCloseOnly(Trade t) {
         return calculatePLPortfolioBaseSimple(t, false);
     }
 
-    private Double calculatePLPortfolioBaseCurrent(Trade t) {
+    private BigDecimal calculatePLPortfolioBaseCurrent(Trade t) {
         return calculatePLPortfolioBaseSimple(t, true);
     }
 
-    private Double calculatePLPortfolioBaseSimple(Trade t, boolean current) {
+    private BigDecimal calculatePLPortfolioBaseSimple(Trade t, boolean current) {
         validateClosed(t);
         LocalDateTime plCalculationDate = current ? LocalDateTime.now() : t.getCloseDate();
-        double exchangeRate = getExchangeRate(plCalculationDate.toLocalDate(), t.getCurrency());
+        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(plCalculationDate.toLocalDate(), t.getCurrency()));
 
-        return t.getProfitLoss().doubleValue() / exchangeRate;
+        return t.getProfitLoss().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
     }
 
     public int getMultiplier(Trade t) {
@@ -147,7 +140,7 @@ public class TradeCalculator {
         }
     }
 
-    private Double getExchangeRate(LocalDate localDate, Currency currency) {
+    private double getExchangeRate(LocalDate localDate, Currency currency) {
         if (exchangeRateMap.isEmpty()) {
             List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
             exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));

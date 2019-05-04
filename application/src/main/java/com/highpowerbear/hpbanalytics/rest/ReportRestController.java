@@ -148,10 +148,10 @@ public class ReportRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}/executions/{executionid}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}/executions/{executionId}")
     public ResponseEntity<?> deleteExecution(
             @PathVariable("id") int reportId,
-            @PathVariable("executionid") long executionId) {
+            @PathVariable("executionId") long executionId) {
 
         Execution execution = reportDao.findExecution(executionId);
         if (execution == null || reportId != execution.getReportId()) {
@@ -182,10 +182,10 @@ public class ReportRestController {
         return ResponseEntity.ok(new RestList<>(trades, (int) numTrades));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeid}/close")
+    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeId}/close")
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") int id,
-            @PathVariable("tradeid") long tradeId,
+            @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTrade closeTrade) {
 
         Report report = reportDao.findReport(id);
@@ -281,16 +281,17 @@ public class ReportRestController {
         return ResponseEntity.ok(reportDao.getUnderlyings(reportId, Boolean.parseBoolean(openOnly)));
     }
 
-    @RequestMapping("/reports/{id}/ificsv/{year}/{tradetype}")
+    @RequestMapping("/reports/{id}/ificsv/{year}/{endMonth}/{tradeType}")
     public ResponseEntity<?> getIfiCsv(
             @PathVariable("id") int id,
             @PathVariable("year") int year,
-            @PathVariable("tradetype") TradeType tradeType) {
+            @PathVariable("endMonth") int endMonth,
+            @PathVariable("tradeType") TradeType tradeType) {
 
         Report report = reportDao.findReport(id);
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, tradeType));
+        return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, endMonth, tradeType));
     }
 }

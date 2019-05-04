@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.report.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.highpowerbear.hpbanalytics.common.HanSettings;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -20,15 +21,15 @@ public class Statistics {
     private final int numWinners;
     private final int numLosers;
     private final double pctWinners;
-    private final double bigWinner;
-    private final double bigLoser;
-    private final double winnersProfit;
-    private final double losersLoss;
-    private final double profitLoss;
-    private final double cumulProfitLoss;
+    private final BigDecimal bigWinner;
+    private final BigDecimal bigLoser;
+    private final BigDecimal winnersProfit;
+    private final BigDecimal losersLoss;
+    private final BigDecimal profitLoss;
+    private final BigDecimal cumulProfitLoss;
 
     public Statistics(int id, LocalDateTime periodDate, int numExecs, int numOpened,int numClosed, int numWinners, int numLosers, double pctWinners,
-                      double bigWinner, double bigLoser, double winnersProfit, double losersLoss, double profitLoss, double cumulProfitLoss) {
+                      BigDecimal bigWinner, BigDecimal bigLoser, BigDecimal winnersProfit, BigDecimal losersLoss, BigDecimal profitLoss, BigDecimal cumulProfitLoss) {
 
         this.id = id;
         this.periodDate = periodDate;
@@ -78,27 +79,27 @@ public class Statistics {
         return pctWinners;
     }
 
-    public double getBigWinner() {
+    public BigDecimal getBigWinner() {
         return bigWinner;
     }
 
-    public double getBigLoser() {
+    public BigDecimal getBigLoser() {
         return bigLoser;
     }
 
-    public double getWinnersProfit() {
+    public BigDecimal getWinnersProfit() {
         return winnersProfit;
     }
 
-    public double getLosersLoss() {
+    public BigDecimal getLosersLoss() {
         return losersLoss;
     }
 
-    public double getProfitLoss() {
+    public BigDecimal getProfitLoss() {
         return profitLoss;
     }
 
-    public double getCumulProfitLoss() {
+    public BigDecimal getCumulProfitLoss() {
         return cumulProfitLoss;
     }
 
