@@ -5,9 +5,13 @@ package com.highpowerbear.hpbanalytics.enums;
  */
 public enum ContractMultiplier {
     ES(50),
+    MES(5),
     NQ(20),
+    MNQ(2),
     RTY(50),
+    M2K(5),
     YM(5),
+    MYM(0.5),
     ESTX50(10),
     DAX(5),
     SMI(10),
@@ -26,14 +30,14 @@ public enum ContractMultiplier {
     M6A(10000),
     M6B(6250);
 
-    private final int multiplier;
+    private final double multiplier;
 
-    ContractMultiplier(int multiplier) {
+    ContractMultiplier(double multiplier) {
         this.multiplier = multiplier;
     }
 
-    public static int getByUnderlying(SecType secType, String underlying) {
-        int multiplier = secType == SecType.OPT ? 100 : 1;
+    public static double getByUnderlying(SecType secType, String underlying) {
+        double multiplier = secType == SecType.OPT ? 100d : 1d;
         String undl = underlying.replace(".", "_").toUpperCase();
 
         for (ContractMultiplier cm : ContractMultiplier.values()) {

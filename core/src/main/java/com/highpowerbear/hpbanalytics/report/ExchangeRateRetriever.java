@@ -14,6 +14,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import javax.annotation.PostConstruct;
 import java.time.LocalDate;
 
 /**
@@ -33,6 +34,11 @@ public class ExchangeRateRetriever {
     @Autowired
     public ExchangeRateRetriever(ReportDao reportDao) {
         this.reportDao = reportDao;
+    }
+
+    @PostConstruct
+    private void init() {
+        retrieveExchangeRates();
     }
 
     @Scheduled(cron="0 0 6 * * *")

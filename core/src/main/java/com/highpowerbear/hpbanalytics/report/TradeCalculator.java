@@ -132,7 +132,7 @@ public class TradeCalculator {
         return t.getProfitLoss().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
     }
 
-    public int getMultiplier(Trade t) {
+    public double getMultiplier(Trade t) {
         switch (t.getSecType()) {
             case OPT: return ContractMultiplier.getByUnderlying(SecType.OPT, t.getUnderlying());
             case FUT: return ContractMultiplier.getByUnderlying(SecType.FUT, t.getUnderlying());
