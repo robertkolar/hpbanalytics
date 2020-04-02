@@ -5,11 +5,12 @@ import java.util.Collection;
 /**
  * Created by robertk on 1/14/2015.
  */
-public class RestList<T> {
+public class GenericList<T> {
+
     private final Collection<T> items;
     private final int total;
 
-    public RestList(Collection<T> items, int total) {
+    public GenericList(Collection<T> items, int total) {
         this.items = items;
         this.total = total;
     }

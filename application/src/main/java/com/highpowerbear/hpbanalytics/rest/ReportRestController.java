@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.MessageService;
-import com.highpowerbear.hpbanalytics.rest.model.CloseTrade;
+import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
@@ -16,7 +16,7 @@ import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
 import com.highpowerbear.hpbanalytics.report.ReportService;
 import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
 import com.highpowerbear.hpbanalytics.report.model.Statistics;
-import com.highpowerbear.hpbanalytics.rest.model.RestList;
+import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -127,7 +127,7 @@ public class ReportRestController {
         List<Execution> executions = reportDao.getFilteredExecutions(id, filter, start, limit);
         long numExecutions = reportDao.getNumFilteredExecutions(id, filter);
 
-        return ResponseEntity.ok(new RestList<>(executions, (int) numExecutions));
+        return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/reports/{id}/executions")
@@ -179,14 +179,14 @@ public class ReportRestController {
         List<Trade> trades = reportDao.getFilteredTrades(id, filter, start, limit);
         long numTrades = reportDao.getNumFilteredTrades(id, filter);
 
-        return ResponseEntity.ok(new RestList<>(trades, (int) numTrades));
+        return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeId}/close")
     public ResponseEntity<?> closeTrade(
             @PathVariable("id") int id,
             @PathVariable("tradeId") long tradeId,
-            @RequestBody CloseTrade closeTrade) {
+            @RequestBody CloseTradeRequest r) {
 
         Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
@@ -199,7 +199,7 @@ public class ReportRestController {
             return ResponseEntity.badRequest().build();
         }
 
-        reportService.closeTrade(trade, closeTrade.getCloseDate(), closeTrade.getClosePrice());
+        reportService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
         messageService.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
@@ -230,7 +230,7 @@ public class ReportRestController {
                 statisticsPage.add(statistics.get(i));
             }
         }
-        return ResponseEntity.ok(new RestList<>(statisticsPage, statistics.size()));
+        return ResponseEntity.ok(new GenericList<>(statisticsPage, statistics.size()));
     }
 
     @RequestMapping("reports/{id}/charts/{interval}")
@@ -248,7 +248,7 @@ public class ReportRestController {
         }
         List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
 
-        return ResponseEntity.ok(new RestList<>(statistics, statistics.size()));
+        return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")

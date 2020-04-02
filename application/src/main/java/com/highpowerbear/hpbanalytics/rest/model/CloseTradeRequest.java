@@ -9,7 +9,8 @@ import java.time.LocalDateTime;
 /**
  * Created by robertk on 4/9/2018.
  */
-public class CloseTrade {
+public class CloseTradeRequest {
+
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime closeDate;
     private BigDecimal closePrice;
@@ -24,7 +25,7 @@ public class CloseTrade {
 
     @Override
     public String toString() {
-        return "CloseTrade{" +
+        return "CloseTradeRequest{" +
                 "closeDate=" + closeDate +
                 ", closePrice=" + closePrice +
                 '}';

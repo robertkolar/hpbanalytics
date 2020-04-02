@@ -8,7 +8,7 @@ import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
 import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
-import com.highpowerbear.hpbanalytics.rest.model.RestList;
+import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -37,11 +37,11 @@ public class OrdTrackRestController {
     }
 
     @RequestMapping("/ibaccounts")
-    public RestList<IbAccount> getIbAccount() {
+    public GenericList<IbAccount> getIbAccount() {
         List<IbAccount> ibAccounts = ordTrackDao.getIbAccounts();
         ibAccounts.forEach(ibAccount -> ibAccount.setConnected(ibController.isConnected(ibAccount.getAccountId())));
 
-        return new RestList<>(ibAccounts, ibAccounts.size());
+        return new GenericList<>(ibAccounts, ibAccounts.size());
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/ibaccounts")
@@ -104,7 +104,7 @@ public class OrdTrackRestController {
             ibOrders.add(ibOrder);
         }
 
-        return ResponseEntity.ok(new RestList<>(ibOrders, (int) ordTrackDao.getNumFilteredIbOrders(accountId, filter)));
+        return ResponseEntity.ok(new GenericList<>(ibOrders, (int) ordTrackDao.getNumFilteredIbOrders(accountId, filter)));
     }
 
     @RequestMapping("/ibaccounts/{accountId}/positions")
@@ -129,9 +129,9 @@ public class OrdTrackRestController {
             int toIndex = Math.min(fromIndex + limit, total);
             List<Position> positionsPaged = positions.subList(fromIndex, toIndex);
 
-            return ResponseEntity.ok(new RestList<>(positionsPaged, total));
+            return ResponseEntity.ok(new GenericList<>(positionsPaged, total));
         } else {
-            return ResponseEntity.ok(new RestList<>(positions, total));
+            return ResponseEntity.ok(new GenericList<>(positions, total));
         }
     }
 }
