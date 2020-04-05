@@ -5,6 +5,9 @@ package com.highpowerbear.hpbanalytics.config;
  */
 public class WsTopic {
 
+    private WsTopic() {
+    }
+
     // topics
     public static final String ORDTRACK = "/topic/ordtrack";
     public static final String REPORT = "/topic/report";

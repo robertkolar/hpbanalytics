@@ -1,0 +1,34 @@
+logging:
+  file:
+    name: hpbanalytics.log
+    max-history: 1
+server:
+  port: 8080
+spring:
+  datasource:
+    url:
+    username:
+    password:
+    hikari.maximum-pool-size: 7
+  jpa:
+    generate-ddl: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        temp:
+          use_jdbc_metadata_defaults: false
+        id:
+          new_generator_mappings: true
+        show_sql: false
+application:
+  ibkr:
+    account:
+    host: localhost
+    port: 4001
+    client-id: 0
+  fixer:
+    url: http://data.fixer.io/api
+    access-key:
+    symbols: EUR,USD,GBP,CHF,AUD,JPY,KRW,HKD,SGD
+    days-back: 5
+

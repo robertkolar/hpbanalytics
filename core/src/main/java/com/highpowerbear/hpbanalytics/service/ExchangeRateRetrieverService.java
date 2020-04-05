@@ -1,15 +1,14 @@
 package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
+import com.highpowerbear.hpbanalytics.config.ApplicationProperties;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.model.ExchangeRates;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -25,15 +24,15 @@ public class ExchangeRateRetrieverService {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetrieverService.class);
 
     private final ReportDao reportDao;
-
-    @Value( "${fixer.access-key}" )
-    private String fixerAccessKey;
+    private final ApplicationProperties applicationProperties;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public ExchangeRateRetrieverService(ReportDao reportDao) {
+    public ExchangeRateRetrieverService(ReportDao reportDao,
+                                        ApplicationProperties applicationProperties) {
         this.reportDao = reportDao;
+        this.applicationProperties = applicationProperties;
     }
 
     @PostConstruct
@@ -44,10 +43,11 @@ public class ExchangeRateRetrieverService {
     @Scheduled(cron="0 0 6 * * *")
     private void retrieveExchangeRates() {
         log.info("BEGIN ExchangeRateRetriever.retrieve");
+        final int daysBack = applicationProperties.getFixer().getDaysBack();
 
-        for (int i = 0; i < HanSettings.EXCHANGE_RATE_DAYS_BACK; i++) {
+        for (int i = 0; i < daysBack; i++) {
             ExchangeRate exchangeRate = new ExchangeRate();
-            LocalDate localDate = LocalDate.now().plusDays(i - HanSettings.EXCHANGE_RATE_DAYS_BACK);
+            LocalDate localDate = LocalDate.now().plusDays(i - daysBack);
             String date = HanUtil.formatExchangeRateDate(localDate);
 
             exchangeRate.setDate(date);
@@ -69,7 +69,11 @@ public class ExchangeRateRetrieverService {
     }
 
     private ExchangeRates retrieve(String date) {
-        String query = HanSettings.EXCHANGE_RATE_URL + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=" + HanSettings.EXCHANGE_RATES_SYMBOLS;
+        String fixerUrl = applicationProperties.getFixer().getUrl();
+        String fixerAccessKey = applicationProperties.getFixer().getAccessKey();
+        String fixerSymbols = applicationProperties.getFixer().getSymbols();
+
+        String query = fixerUrl + "/" + date + "?access_key=" + fixerAccessKey + "&symbols=" + fixerSymbols;
         ExchangeRates exchangeRates = restTemplate.getForObject(query, ExchangeRates.class);
 
         log.info("retrieved exchange rates " + exchangeRates);
