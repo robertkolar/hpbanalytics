@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.connector;
 
-import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
 import com.ib.client.Contract;
 import com.ib.client.Execution;
@@ -11,8 +12,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import java.net.SocketException;
-
-import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_ORDTRACK;
 
 /**
  *
@@ -59,7 +58,7 @@ public class IbListener extends GenericIbListener {
     public void error(Exception e) {
         super.error(e);
         if (e instanceof SocketException && e.getMessage().equals("Socket closed")) {
-            messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
+            messageService.sendWsMessage(WsTopic.ORDTRACK, "ibConnection disconnected");
         }
     }
 
@@ -68,20 +67,20 @@ public class IbListener extends GenericIbListener {
         super.error(id, errorCode, errorMsg);
         if (errorCode == 507) {
             ibController.connectionBroken(accountId);
-            messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
+            messageService.sendWsMessage(WsTopic.ORDTRACK, "ibConnection disconnected");
         }
     }
 
     @Override
     public void connectionClosed() {
         super.connectionClosed();
-        messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection disconnected");
+        messageService.sendWsMessage(WsTopic.ORDTRACK, "ibConnection disconnected");
     }
 
     @Override
     public void connectAck() {
         super.connectAck();
-        messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "ibConnection connected");
+        messageService.sendWsMessage(WsTopic.ORDTRACK, "ibConnection connected");
     }
 
     @Override

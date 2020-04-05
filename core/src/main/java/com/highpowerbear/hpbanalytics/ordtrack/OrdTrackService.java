@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.ordtrack;
 
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.enums.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -25,7 +26,7 @@ import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static com.highpowerbear.hpbanalytics.common.HanSettings.*;
+import static com.highpowerbear.hpbanalytics.config.HanSettings.*;
 
 /**
  * Created by robertk on 12/11/2018.
@@ -158,7 +159,7 @@ public class OrdTrackService implements ConnectionListener {
             return;
         }
 
-        IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, (long) permId);
+        IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, permId);
         if (ibOrder == null) {
             return;
         }
@@ -179,7 +180,7 @@ public class OrdTrackService implements ConnectionListener {
             ordTrackDao.updateIbOrder(ibOrder);
             removeHeartbeat(ibOrder);
         }
-        messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "order status changed");
+        messageService.sendWsMessage(WsTopic.ORDTRACK, "order status changed");
     }
 
     private boolean checkListenIb(IbAccount ibAccount) {
@@ -273,7 +274,7 @@ public class OrdTrackService implements ConnectionListener {
 
         long daysToExpiration = 0;
         if (contract.lastTradeDateOrContractMonth() != null) {
-            LocalDate expiration = LocalDate.parse(contract.lastTradeDateOrContractMonth(), HanSettings.IB_DATE_FORMATTER);
+            LocalDate expiration = HanUtil.fromIbDateString(contract.lastTradeDateOrContractMonth());
             daysToExpiration = ChronoUnit.DAYS.between(LocalDate.now(), expiration);
         }
 
@@ -299,11 +300,11 @@ public class OrdTrackService implements ConnectionListener {
     }
 
     private void sendPositionChangedMessage(String symbol) {
-        messageService.sendWsMessage(WS_TOPIC_ORDTRACK, "position changed " + symbol);
+        messageService.sendWsMessage(WsTopic.ORDTRACK, "position changed " + symbol);
     }
 
     public void execDetailsReceived(String accountId, Contract contract, com.ib.client.Execution ibExecution) {
-        long permId = (long) ibExecution.permId();
+        long permId = ibExecution.permId();
 
         IbOrder ibOrder = ordTrackDao.getIbOrderByPermId(accountId, permId);
         if (ibOrder == null) {

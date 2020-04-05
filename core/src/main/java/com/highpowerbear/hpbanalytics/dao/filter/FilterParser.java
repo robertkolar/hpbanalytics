@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.dao.filter;
 
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;

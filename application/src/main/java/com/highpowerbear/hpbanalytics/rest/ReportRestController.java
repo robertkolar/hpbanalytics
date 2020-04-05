@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
@@ -29,8 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_REPORT;
 
 /**
  * Created by robertk on 12/21/2017.
@@ -91,7 +90,7 @@ public class ReportRestController {
         }
 
         reportService.analyzeAll(id);
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " analyzed");
+        messageService.sendWsMessage(WsTopic.REPORT, "report " + id + " analyzed");
 
         return ResponseEntity.ok().build();
     }
@@ -106,7 +105,7 @@ public class ReportRestController {
         }
 
         reportService.deleteReport(id);
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "report " + id + " deleted");
+        messageService.sendWsMessage(WsTopic.REPORT, "report " + id + " deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -143,7 +142,7 @@ public class ReportRestController {
         execution.setReport(report);
 
         reportService.newExecution(execution);
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "new execution processed");
+        messageService.sendWsMessage(WsTopic.REPORT, "new execution processed");
 
         return ResponseEntity.ok().build();
     }
@@ -158,7 +157,7 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
         reportService.deleteExecution(executionId);
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "execution " + executionId + " deleted");
+        messageService.sendWsMessage(WsTopic.REPORT, "execution " + executionId + " deleted");
 
         return ResponseEntity.ok().build();
     }
@@ -200,7 +199,7 @@ public class ReportRestController {
         }
 
         reportService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "trade " + tradeId + " closed");
+        messageService.sendWsMessage(WsTopic.REPORT, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
     }

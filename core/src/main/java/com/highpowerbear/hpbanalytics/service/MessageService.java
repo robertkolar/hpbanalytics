@@ -1,5 +1,6 @@
-package com.highpowerbear.hpbanalytics.common;
+package com.highpowerbear.hpbanalytics.service;
 
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

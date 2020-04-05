@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

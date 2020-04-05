@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.report;
 
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.*;
 import com.highpowerbear.hpbanalytics.enums.*;
@@ -46,7 +47,7 @@ public class ReportService {
     public void orderFilled(String ibOrderId) {
         log.info("handling execution for order " + ibOrderId);
 
-        IbOrder ibOrder = reportDao.findIbOrder(Long.valueOf(ibOrderId));
+        IbOrder ibOrder = reportDao.findIbOrder(Long.parseLong(ibOrderId));
 
         if (ibOrder.getStatus() != OrderStatus.FILLED) {
             log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
@@ -88,7 +89,7 @@ public class ReportService {
         execution.setReport(report);
 
         newExecution(execution);
-        messageService.sendWsMessage(HanSettings.WS_TOPIC_REPORT,  "new execution processed");
+        messageService.sendWsMessage(WsTopic.REPORT,  "new execution processed");
     }
 
     @Transactional

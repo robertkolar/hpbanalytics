@@ -2,11 +2,16 @@ package com.highpowerbear.hpbanalytics.common;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Created by robertk on 5/29/2017.
  */
 public class HanUtil {
+
+    private static final DateTimeFormatter LOG_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss.SSS");
+    private static final DateTimeFormatter EXCHANGE_RATE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter IB_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
 
     public static void waitMilliseconds(int milliseconds) {
         try {
@@ -44,11 +49,15 @@ public class HanUtil {
         return round(number, 2);
     }
 
+    public static LocalDate fromIbDateString(String ibDateString) {
+        return LocalDate.parse(ibDateString, IB_DATE_FORMATTER);
+    }
+
     public static String formatLogDate(final LocalDateTime localDateTime) {
-        return localDateTime.format(HanSettings.LOG_DATE_FORMATTER);
+        return localDateTime.format(LOG_DATE_FORMATTER);
     }
 
     public static String formatExchangeRateDate(final LocalDate localDate) {
-        return localDate.format(HanSettings.EXCHANGE_RATE_DATE_FORMATTER);
+        return localDate.format(EXCHANGE_RATE_DATE_FORMATTER);
     }
 }

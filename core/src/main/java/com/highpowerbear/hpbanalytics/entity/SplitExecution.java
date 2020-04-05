@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 
 import javax.persistence.Entity;

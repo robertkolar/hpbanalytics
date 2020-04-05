@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.common.HanSettings;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import net.minidev.json.annotate.JsonIgnore;
 

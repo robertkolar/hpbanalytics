@@ -1,7 +1,8 @@
 package com.highpowerbear.hpbanalytics.report;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.common.MessageService;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
@@ -23,8 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static com.highpowerbear.hpbanalytics.common.HanSettings.WS_TOPIC_REPORT;
 
 /**
  * Created by robertk on 4/26/2015.
@@ -76,7 +75,7 @@ public class StatisticsCalculator {
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
-        messageService.sendWsMessage(WS_TOPIC_REPORT, "statistics calculated for report " + reportId);
+        messageService.sendWsMessage(WsTopic.REPORT, "statistics calculated for report " + reportId);
     }
 
     private String statisticsKey(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
