@@ -1,17 +1,17 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.report.model.ExchangeRates;
+import com.highpowerbear.hpbanalytics.model.ExchangeRates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
@@ -20,9 +20,9 @@ import java.time.LocalDate;
 /**
  * Created by robertk on 10/10/2016.
  */
-@Component
-public class ExchangeRateRetriever {
-    private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetriever.class);
+@Service
+public class ExchangeRateRetrieverService {
+    private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetrieverService.class);
 
     private final ReportDao reportDao;
 
@@ -32,7 +32,7 @@ public class ExchangeRateRetriever {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public ExchangeRateRetriever(ReportDao reportDao) {
+    public ExchangeRateRetrieverService(ReportDao reportDao) {
         this.reportDao = reportDao;
     }
 

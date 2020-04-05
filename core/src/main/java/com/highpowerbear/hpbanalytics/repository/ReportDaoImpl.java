@@ -1,7 +1,7 @@
-package com.highpowerbear.hpbanalytics.dao;
+package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -11,7 +11,7 @@ import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
+import com.highpowerbear.hpbanalytics.model.ReportInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;

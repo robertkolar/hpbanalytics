@@ -2,7 +2,7 @@ package com.highpowerbear.hpbanalytics.connector;
 
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.service.MessageService;
-import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
+import com.highpowerbear.hpbanalytics.service.OrderTrackerService;
 import com.ib.client.Contract;
 import com.ib.client.Execution;
 import com.ib.client.Order;
@@ -22,15 +22,15 @@ import java.net.SocketException;
 public class IbListener extends GenericIbListener {
 
     private final IbController ibController;
-    private final OrdTrackService ordTrackService;
+    private final OrderTrackerService orderTrackerService;
     private final MessageService messageService;
 
     private String accountId;
 
     @Autowired
-    public IbListener(IbController ibController, OrdTrackService ordTrackService, MessageService messageService) {
+    public IbListener(IbController ibController, OrderTrackerService orderTrackerService, MessageService messageService) {
         this.ibController = ibController;
-        this.ordTrackService = ordTrackService;
+        this.orderTrackerService = orderTrackerService;
         this.messageService = messageService;
     }
 
@@ -45,13 +45,13 @@ public class IbListener extends GenericIbListener {
     @Override
     public void openOrder(int orderId, Contract contract, Order order, OrderState orderState) {
         super.openOrder(orderId, contract, order, orderState);
-        ordTrackService.openOrderReceived(accountId, orderId, contract, order);
+        orderTrackerService.openOrderReceived(accountId, orderId, contract, order);
     }
 
     @Override
     public void orderStatus(int orderId, String status, double filled, double remaining, double avgFillPrice, int permId, int parentId, double lastFillPrice, int clientId, String whyHeld, double mktCapPrice) {
         super.orderStatus(orderId, status, filled, remaining, avgFillPrice, permId, parentId, lastFillPrice, clientId, whyHeld, mktCapPrice);
-        ordTrackService.orderStatusReceived(accountId, status, remaining, avgFillPrice, permId);
+        orderTrackerService.orderStatusReceived(accountId, status, remaining, avgFillPrice, permId);
     }
 
     @Override
@@ -86,12 +86,12 @@ public class IbListener extends GenericIbListener {
     @Override
     public void position(String account, Contract contract, double pos, double avgCost) {
         super.position(account, contract, pos, avgCost);
-        ordTrackService.positionReceived(accountId, contract, pos);
+        orderTrackerService.positionReceived(accountId, contract, pos);
     }
 
     @Override
     public void execDetails(int reqId, Contract contract, Execution execution) {
         super.execDetails(reqId, contract, execution);
-        ordTrackService.execDetailsReceived(accountId, contract, execution);
+        orderTrackerService.execDetailsReceived(accountId, contract, execution);
     }
 }

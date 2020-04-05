@@ -1,13 +1,13 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.connector.IbController;
-import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
-import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
-import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
+import com.highpowerbear.hpbanalytics.repository.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.repository.filter.FilterParser;
+import com.highpowerbear.hpbanalytics.repository.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.ordtrack.OrdTrackService;
-import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
+import com.highpowerbear.hpbanalytics.service.OrderTrackerService;
+import com.highpowerbear.hpbanalytics.model.Position;
 import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,14 +25,14 @@ public class OrdTrackRestController {
 
     private final IbController ibController;
     private final OrdTrackDao ordTrackDao;
-    private final OrdTrackService ordTrackService;
+    private final OrderTrackerService orderTrackerService;
     private final FilterParser filterParser;
 
     @Autowired
-    public OrdTrackRestController(IbController ibController, OrdTrackDao ordTrackDao, OrdTrackService ordTrackService, FilterParser filterParser) {
+    public OrdTrackRestController(IbController ibController, OrdTrackDao ordTrackDao, OrderTrackerService orderTrackerService, FilterParser filterParser) {
         this.ibController = ibController;
         this.ordTrackDao = ordTrackDao;
-        this.ordTrackService = ordTrackService;
+        this.orderTrackerService = orderTrackerService;
         this.filterParser = filterParser;
     }
 
@@ -100,7 +100,7 @@ public class OrdTrackRestController {
         IbOrderFilter filter = filterParser.parseIbOrderFilter(jsonFilter);
 
         for (IbOrder ibOrder : ordTrackDao.getFilteredIbOrders(accountId, filter, start, limit)) {
-            ibOrder.setHeartbeatCount(ordTrackService.getHeartbeatCount(accountId, ibOrder));
+            ibOrder.setHeartbeatCount(orderTrackerService.getHeartbeatCount(accountId, ibOrder));
             ibOrders.add(ibOrder);
         }
 
@@ -118,7 +118,7 @@ public class OrdTrackRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Position> positions = ordTrackService.getPositions(accountId);
+        List<Position> positions = orderTrackerService.getPositions(accountId);
         if (positions == null) {
             positions = new ArrayList<>();
         }

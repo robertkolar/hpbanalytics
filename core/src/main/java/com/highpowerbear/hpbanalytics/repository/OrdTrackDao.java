@@ -1,6 +1,6 @@
-package com.highpowerbear.hpbanalytics.dao;
+package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.dao.filter.IbOrderFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.IbOrderFilter;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
 

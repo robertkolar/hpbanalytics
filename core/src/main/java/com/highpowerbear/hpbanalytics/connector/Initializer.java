@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.connector;
 
-import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.repository.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

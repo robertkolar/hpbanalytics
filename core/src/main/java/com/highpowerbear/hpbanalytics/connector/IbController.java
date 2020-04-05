@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.connector;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.repository.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.ib.client.EClientSocket;
 import com.ib.client.EJavaSignal;

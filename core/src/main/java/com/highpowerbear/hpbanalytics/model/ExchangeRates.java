@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.report.model;
+package com.highpowerbear.hpbanalytics.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

@@ -1,27 +1,20 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.service.MessageService;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.*;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.*;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jms.annotation.JmsListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,21 +26,20 @@ public class ReportService {
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
     private final ReportDao reportDao;
-    private final TradeCalculator tradeCalculator;
+    private final TradeCalculatorService tradeCalculatorService;
     private final MessageService messageService;
 
     @Autowired
-    public ReportService(ReportDao reportDao, TradeCalculator tradeCalculator, MessageService messageService) {
+    public ReportService(ReportDao reportDao, TradeCalculatorService tradeCalculatorService, MessageService messageService) {
         this.reportDao = reportDao;
-        this.tradeCalculator = tradeCalculator;
+        this.tradeCalculatorService = tradeCalculatorService;
         this.messageService = messageService;
     }
 
-    @JmsListener(destination = HanSettings.JMS_DEST_ORDER_FILLED)
-    public void orderFilled(String ibOrderId) {
+    public void orderFilled(Long ibOrderId) {
         log.info("handling execution for order " + ibOrderId);
 
-        IbOrder ibOrder = reportDao.findIbOrder(Long.parseLong(ibOrderId));
+        IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
 
         if (ibOrder.getStatus() != OrderStatus.FILLED) {
             log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
@@ -69,8 +61,7 @@ public class ReportService {
         processExecution(execution);
     }
 
-    @JmsListener(destination = HanSettings.JMS_DEST_EXECUTION_RECEIVED)
-    public void executionReceived (Execution execution) {
+    public void executionReceived(Execution execution) {
         processExecution(execution);
     }
 
@@ -315,7 +306,7 @@ public class ReportService {
                 }
             }
             trade.setSplitExecutions(new ArrayList<>(singleTradeSet));
-            tradeCalculator.calculateFields(trade);
+            tradeCalculatorService.calculateFields(trade);
             trades.add(trade);
             singleSymbolSet.removeAll(singleTradeSet);
         }

@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.entity;
 
-import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
+import com.highpowerbear.hpbanalytics.model.ReportInfo;
 
 import javax.persistence.Entity;
 import javax.persistence.Id;

@@ -1,18 +1,18 @@
-package com.highpowerbear.hpbanalytics.ordtrack;
+package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.entity.Execution;
+import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.enums.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.connector.ConnectionListener;
 import com.highpowerbear.hpbanalytics.connector.IbController;
-import com.highpowerbear.hpbanalytics.dao.OrdTrackDao;
+import com.highpowerbear.hpbanalytics.repository.OrdTrackDao;
 import com.highpowerbear.hpbanalytics.entity.IbAccount;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
-import com.highpowerbear.hpbanalytics.ordtrack.model.Position;
+import com.highpowerbear.hpbanalytics.model.Position;
 import com.ib.client.Contract;
 import com.ib.client.Order;
 import org.slf4j.Logger;
@@ -25,6 +25,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
 
 import static com.highpowerbear.hpbanalytics.config.HanSettings.*;
 
@@ -32,21 +33,30 @@ import static com.highpowerbear.hpbanalytics.config.HanSettings.*;
  * Created by robertk on 12/11/2018.
  */
 @Service
-public class OrdTrackService implements ConnectionListener {
-    private static final Logger log = LoggerFactory.getLogger(OrdTrackService.class);
+public class OrderTrackerService implements ConnectionListener {
+    private static final Logger log = LoggerFactory.getLogger(OrderTrackerService.class);
 
     private final IbController ibController;
     private final OrdTrackDao ordTrackDao;
     private final MessageService messageService;
+    private final ReportService reportService;
+    private final ExecutorService executor;
 
     private final Map<String, Map<Integer, Position>> positionMap = new HashMap<>(); // accountId -> (conid -> position)
     private final Map<String, Map<IbOrder, Integer>> openOrderHeartbeatMap = new HashMap<>(); // accountId --> (ibOrder --> number of failed heartbeats left before UNKNOWN)
 
     @Autowired
-    public OrdTrackService(IbController ibController, OrdTrackDao ordTrackDao, MessageService messageService) {
+    public OrderTrackerService(IbController ibController,
+                               OrdTrackDao ordTrackDao,
+                               MessageService messageService,
+                               ReportService reportService,
+                               ExecutorService executor) {
+
         this.ibController = ibController;
         this.ordTrackDao = ordTrackDao;
         this.messageService = messageService;
+        this.reportService = reportService;
+        this.executor = executor;
 
         ibController.addConnectionListener(this);
 
@@ -172,7 +182,7 @@ public class OrdTrackService implements ConnectionListener {
             ordTrackDao.updateIbOrder(ibOrder);
             removeHeartbeat(ibOrder);
             if (!ibOrder.getSecType().equals(SecType.BAG.name())) {
-                messageService.sendJmsMesage(JMS_DEST_ORDER_FILLED, String.valueOf(ibOrder.getId()));
+                executor.execute(() -> reportService.orderFilled(ibOrder.getId())); // new thread
             }
 
         } else if (OrderStatus.CANCELLED.getIbStatus().equals(status) && !OrderStatus.CANCELLED.equals(ibOrder.getStatus())) {
@@ -330,7 +340,7 @@ public class OrdTrackService implements ConnectionListener {
             execution.setSecType(SecType.valueOf(contract.getSecType()));
             execution.setFillPrice(BigDecimal.valueOf(ibExecution.price()));
 
-            messageService.sendJmsMesage(JMS_DEST_EXECUTION_RECEIVED, execution);
+            executor.execute(() -> reportService.executionReceived(execution)); // new thread
         }
     }
 

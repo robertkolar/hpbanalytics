@@ -14,6 +14,7 @@ public class HanSettings {
     public static final int EXCHANGE_RATE_DAYS_BACK = 5;
     public static final int IFI_START_YEAR = 2016;
     public static final int PL_SCALE = 5;
+    public static final int SCHEDULED_THREAD_POOL_SIZE = 10;
     public static final Currency PORTFOLIO_BASE = Currency.EUR;
     public static final StatisticsPLMethod STATISTICS_PL_METHOD = StatisticsPLMethod.PORTFOLIO_BASE_CLOSE_ONLY;
     public static final String EMAIL_FROM = "hpb@highpowerbear.com";

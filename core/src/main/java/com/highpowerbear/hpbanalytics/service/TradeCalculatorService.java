@@ -1,15 +1,15 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -22,15 +22,15 @@ import java.util.Map;
 /**
  * Created by robertk on 12/25/2017.
  */
-@Component
-public class TradeCalculator {
+@Service
+public class TradeCalculatorService {
 
     private final ReportDao reportDao;
 
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
 
     @Autowired
-    public TradeCalculator(ReportDao reportDao) {
+    public TradeCalculatorService(ReportDao reportDao) {
         this.reportDao = reportDao;
     }
 

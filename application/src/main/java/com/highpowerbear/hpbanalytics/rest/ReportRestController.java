@@ -3,20 +3,20 @@ package com.highpowerbear.hpbanalytics.rest;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
-import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.dao.filter.FilterParser;
-import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
+import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.FilterParser;
+import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.report.IfiCsvGenerator;
-import com.highpowerbear.hpbanalytics.report.ReportService;
-import com.highpowerbear.hpbanalytics.report.StatisticsCalculator;
-import com.highpowerbear.hpbanalytics.report.model.Statistics;
+import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
+import com.highpowerbear.hpbanalytics.service.ReportService;
+import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
+import com.highpowerbear.hpbanalytics.model.Statistics;
 import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,25 +39,25 @@ import java.util.List;
 public class ReportRestController {
 
     private final ReportDao reportDao;
-    private final StatisticsCalculator statisticsCalculator;
+    private final StatisticsCalculatorService statisticsCalculatorService;
     private final ReportService reportService;
     private final FilterParser filterParser;
-    private final IfiCsvGenerator ifiCsvGenerator;
+    private final IfiCsvGeneratorService ifiCsvGeneratorService;
     private final MessageService messageService;
 
     @Autowired
-    public ReportRestController(ReportDao reportDao, StatisticsCalculator statisticsCalculator, ReportService reportService, FilterParser filterParser, IfiCsvGenerator ifiCsvGenerator, MessageService messageService) {
+    public ReportRestController(ReportDao reportDao, StatisticsCalculatorService statisticsCalculatorService, ReportService reportService, FilterParser filterParser, IfiCsvGeneratorService ifiCsvGeneratorService, MessageService messageService) {
         this.reportDao = reportDao;
-        this.statisticsCalculator = statisticsCalculator;
+        this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;
         this.filterParser = filterParser;
-        this.ifiCsvGenerator = ifiCsvGenerator;
+        this.ifiCsvGeneratorService = ifiCsvGeneratorService;
         this.messageService = messageService;
     }
 
     @RequestMapping("/ifiyears")
     public ResponseEntity<?> getIfiYears() {
-        return ResponseEntity.ok(ifiCsvGenerator.getIfiYears());
+        return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
     }
 
     @RequestMapping("/reports")
@@ -220,7 +220,7 @@ public class ReportRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, null);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(report, interval, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -245,7 +245,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        List<Statistics> statistics = statisticsCalculator.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
 
         return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
@@ -263,7 +263,7 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        statisticsCalculator.calculateStatistics(id, interval, tradeType, secType, currency, underlying);
+        statisticsCalculatorService.calculateStatistics(id, interval, tradeType, secType, currency, underlying);
 
         return ResponseEntity.ok().build();
     }
@@ -291,6 +291,6 @@ public class ReportRestController {
         if (report == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(ifiCsvGenerator.generate(id, year, endMonth, tradeType));
+        return ResponseEntity.ok(ifiCsvGeneratorService.generate(id, year, endMonth, tradeType));
     }
 }

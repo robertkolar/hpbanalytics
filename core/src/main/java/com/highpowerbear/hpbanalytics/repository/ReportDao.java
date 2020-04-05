@@ -1,7 +1,7 @@
-package com.highpowerbear.hpbanalytics.dao;
+package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.dao.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.dao.filter.TradeFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.IbOrder;
@@ -9,7 +9,7 @@ import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.report.model.ReportInfo;
+import com.highpowerbear.hpbanalytics.model.ReportInfo;
 
 import java.time.LocalDateTime;
 import java.util.List;

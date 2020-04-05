@@ -1,20 +1,19 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.service.MessageService;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-import com.highpowerbear.hpbanalytics.report.model.Statistics;
+import com.highpowerbear.hpbanalytics.model.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Async;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -28,21 +27,21 @@ import java.util.stream.Collectors;
 /**
  * Created by robertk on 4/26/2015.
  */
-@Component
-public class StatisticsCalculator {
-    private static final Logger log = LoggerFactory.getLogger(StatisticsCalculator.class);
+@Service
+public class StatisticsCalculatorService {
+    private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
 
     private final ReportDao reportDao;
     private final MessageService messageService;
-    private final TradeCalculator tradeCalculator;
+    private final TradeCalculatorService tradeCalculatorService;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
-    public StatisticsCalculator(ReportDao reportDao, MessageService messageService, TradeCalculator tradeCalculator) {
+    public StatisticsCalculatorService(ReportDao reportDao, MessageService messageService, TradeCalculatorService tradeCalculatorService) {
         this.reportDao = reportDao;
         this.messageService = messageService;
-        this.tradeCalculator = tradeCalculator;
+        this.tradeCalculatorService = tradeCalculatorService;
     }
 
     public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
@@ -128,7 +127,7 @@ public class StatisticsCalculator {
             BigDecimal profitLoss;
 
             for (Trade t : tradesClosedForPeriod) {
-                BigDecimal pl = tradeCalculator.calculatePLPortfolioBase(t);
+                BigDecimal pl = tradeCalculatorService.calculatePLPortfolioBase(t);
 
                 if (pl.doubleValue() >= 0) {
                     numWinners++;

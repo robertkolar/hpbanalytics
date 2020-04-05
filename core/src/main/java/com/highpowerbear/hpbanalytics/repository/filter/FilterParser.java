@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.dao.filter;
+package com.highpowerbear.hpbanalytics.repository.filter;
 
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;

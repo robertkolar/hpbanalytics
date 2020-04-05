@@ -1,8 +1,8 @@
-package com.highpowerbear.hpbanalytics.report;
+package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.dao.ReportDao;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
@@ -13,7 +13,7 @@ import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
@@ -33,12 +33,12 @@ import java.util.stream.IntStream;
 /**
  * Created by robertk on 10/10/2016.
  */
-@Component
-public class IfiCsvGenerator {
-    private static final Logger log = LoggerFactory.getLogger(IfiCsvGenerator.class);
+@Service
+public class IfiCsvGeneratorService {
+    private static final Logger log = LoggerFactory.getLogger(IfiCsvGeneratorService.class);
 
     private final ReportDao reportDao;
-    private final TradeCalculator tradeCalculator;
+    private final TradeCalculatorService tradeCalculatorService;
 
     private final String NL = "\n";
     private final String DL = ",";
@@ -53,9 +53,9 @@ public class IfiCsvGenerator {
     private final List<Integer> ifiYears;
 
     @Autowired
-    public IfiCsvGenerator(ReportDao reportDao, TradeCalculator tradeCalculator) {
+    public IfiCsvGeneratorService(ReportDao reportDao, TradeCalculatorService tradeCalculatorService) {
         this.reportDao = reportDao;
-        this.tradeCalculator = tradeCalculator;
+        this.tradeCalculatorService = tradeCalculatorService;
 
         ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
     }
@@ -216,7 +216,7 @@ public class IfiCsvGenerator {
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            profitLoss = tradeCalculatorService.calculatePLPortfolioBaseOpenClose(se.getTrade());
             sb.append(nf.format(profitLoss.doubleValue()));
         }
 
@@ -254,7 +254,7 @@ public class IfiCsvGenerator {
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculator.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            profitLoss = tradeCalculatorService.calculatePLPortfolioBaseOpenClose(se.getTrade());
             sb.append(nf.format(profitLoss.doubleValue()));
         }
         sb.append(NL);
@@ -277,7 +277,7 @@ public class IfiCsvGenerator {
 
     private double fillValue(SplitExecution se) {
         BigDecimal contractFillPrice = se.getExecution().getFillPrice();
-        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade()));
+        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculatorService.getMultiplier(se.getTrade()));
 
         return contractFillPrice.multiply(multiplier).doubleValue();
     }
@@ -285,7 +285,7 @@ public class IfiCsvGenerator {
     private double fillValueBase(SplitExecution se) {
         BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
         BigDecimal contractFillPrice = se.getExecution().getFillPrice();
-        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculator.getMultiplier(se.getTrade()));
+        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculatorService.getMultiplier(se.getTrade()));
 
         return contractFillPrice.divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP).multiply(multiplier).doubleValue();
     }
