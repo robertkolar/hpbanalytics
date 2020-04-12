@@ -9,8 +9,9 @@ public class WsTopic {
     }
 
     // topics
-    public static final String ORDTRACK = "/topic/ordtrack";
-    public static final String REPORT = "/topic/report";
+    public static final String EXECUTION = "execution";
+    public static final String TRADE = "trade";
+    public static final String STATISTICS = "statistics";
 
     // settings
     public static final String TOPIC_PREFIX = "/topic";

@@ -74,7 +74,7 @@ public class StatisticsCalculatorService {
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
-        messageService.sendWsMessage(WsTopic.REPORT, "statistics calculated for report " + reportId);
+        messageService.sendWsMessage(WsTopic.STATISTICS, "statistics calculated for report " + reportId);
     }
 
     private String statisticsKey(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {

@@ -56,7 +56,7 @@ public class ReportService {
         execution.setReport(report);
 
         newExecution(execution);
-        messageService.sendWsMessage(WsTopic.REPORT,  "new execution processed");
+        messageService.sendWsMessage(WsTopic.EXECUTION,  "new execution processed");
     }
 
     @Transactional
