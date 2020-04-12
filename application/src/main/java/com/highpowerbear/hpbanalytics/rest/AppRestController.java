@@ -35,8 +35,8 @@ import java.util.List;
  * Created by robertk on 12/21/2017.
  */
 @RestController
-@RequestMapping("/report")
-public class ReportRestController {
+@RequestMapping("/")
+public class AppRestController {
 
     private final ReportDao reportDao;
     private final StatisticsCalculatorService statisticsCalculatorService;
@@ -46,7 +46,7 @@ public class ReportRestController {
     private final MessageService messageService;
 
     @Autowired
-    public ReportRestController(ReportDao reportDao, StatisticsCalculatorService statisticsCalculatorService, ReportService reportService, FilterParser filterParser, IfiCsvGeneratorService ifiCsvGeneratorService, MessageService messageService) {
+    public AppRestController(ReportDao reportDao, StatisticsCalculatorService statisticsCalculatorService, ReportService reportService, FilterParser filterParser, IfiCsvGeneratorService ifiCsvGeneratorService, MessageService messageService) {
         this.reportDao = reportDao;
         this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;

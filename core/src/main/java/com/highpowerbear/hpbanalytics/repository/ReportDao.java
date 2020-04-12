@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.SecType;
@@ -18,8 +17,6 @@ import java.util.List;
  * Created by robertk on 12/16/2017.
  */
 public interface ReportDao {
-
-    IbOrder findIbOrder(long ibOrderId);
 
     Report getReportByOriginAndSecType(String origin, SecType secType);
     Report findReport(int reportId);

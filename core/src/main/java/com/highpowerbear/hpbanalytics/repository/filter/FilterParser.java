@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.repository.filter;
 
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
-import com.highpowerbear.hpbanalytics.enums.OrderStatus;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import org.springframework.stereotype.Component;
@@ -21,42 +20,6 @@ import java.util.Set;
  */
 @Component
 public class FilterParser {
-
-    public IbOrderFilter parseIbOrderFilter(String jsonFilter) {
-        IbOrderFilter filter = new IbOrderFilter();
-
-        if (jsonFilter != null) {
-            JsonReader jsonReader = Json.createReader(new StringReader(jsonFilter));
-            JsonArray array = jsonReader.readArray();
-            for (int i = 0; i < array.size(); i++) {
-                String property = array.getJsonObject(i).getJsonString(FilterEnums.FilterKey.PROPERTY.toString()).getString();
-
-                if (FilterEnums.IbOrderFilterField.SYMBOL.getVarName().equals(property)) {
-                    filter.getSymbolFilterMap().put(parseOperatorString(array, i), parseString(array, i));
-
-                } else if (FilterEnums.IbOrderFilterField.SEC_TYPE.getVarName().equals(property)) {
-                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
-                    filter.getSecTypeFilterMap().put(operator, new HashSet<>());
-                    for (String v : parseValues(array, i)) {
-                        filter.getSecTypeFilterMap().get(operator).add(v.toUpperCase());
-                    }
-
-                } else if (FilterEnums.IbOrderFilterField.SUBMIT_DATE.getVarName().equals(property)) {
-                    LocalDateTime localDateTime = LocalDateTime.parse(parseString(array, i), HanSettings.JSON_DATE_FORMATTER);
-                    filter.getSubmitDateFilterMap().put(parseOperatorDate(array, i), localDateTime);
-
-                } else if (FilterEnums.IbOrderFilterField.STATUS.getVarName().equals(property)) {
-                    FilterEnums.FilterOperatorEnum operator = parseOperatorEnum(array, i);
-                    filter.getStatusFilterMap().put(operator, new HashSet<>());
-                    for (String v : parseValues(array, i)) {
-                        filter.getStatusFilterMap().get(operator).add(OrderStatus.valueOf(v.toUpperCase()));
-                    }
-                }
-            }
-            jsonReader.close();
-        }
-        return filter;
-    }
 
     public ExecutionFilter parseExecutionFilter(String jsonFilter) {
         ExecutionFilter filter = new ExecutionFilter();

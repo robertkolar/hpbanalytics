@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.IbOrder;
 import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -39,11 +38,6 @@ public class ReportDaoImpl implements ReportDao {
     @Autowired
     public ReportDaoImpl(QueryBuilder queryBuilder) {
         this.queryBuilder = queryBuilder;
-    }
-
-    @Override
-    public IbOrder findIbOrder(long ibOrderId) {
-        return em.find(IbOrder.class, ibOrderId);
     }
 
     @Override

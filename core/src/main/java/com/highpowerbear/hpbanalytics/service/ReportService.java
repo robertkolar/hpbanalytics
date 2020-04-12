@@ -2,9 +2,14 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.entity.*;
-import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.*;
+import com.highpowerbear.hpbanalytics.entity.Execution;
+import com.highpowerbear.hpbanalytics.entity.Report;
+import com.highpowerbear.hpbanalytics.entity.SplitExecution;
+import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.enums.Action;
+import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.highpowerbear.hpbanalytics.enums.TradeStatus;
+import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,36 +41,7 @@ public class ReportService {
         this.messageService = messageService;
     }
 
-    public void orderFilled(Long ibOrderId) {
-        log.info("handling execution for order " + ibOrderId);
-
-        IbOrder ibOrder = reportDao.findIbOrder(ibOrderId);
-
-        if (ibOrder.getStatus() != OrderStatus.FILLED) {
-            log.error("cannot create execution, ibOrder " + ibOrderId + " not filled");
-            return;
-        }
-        Execution execution = new Execution();
-
-        execution.setOrigin("IB:" + ibOrder.getAccountId());
-        execution.setReferenceId(String.valueOf(ibOrder.getPermId()));
-        execution.setAction(Action.valueOf(ibOrder.getAction()));
-        execution.setQuantity(ibOrder.getQuantity());
-        execution.setUnderlying(ibOrder.getUnderlying());
-        execution.setCurrency(Currency.valueOf(ibOrder.getCurrency()));
-        execution.setSymbol(ibOrder.getSymbol());
-        execution.setSecType(SecType.valueOf(ibOrder.getSecType()));
-        execution.setFillDate(ibOrder.getStatusDate());
-        execution.setFillPrice(BigDecimal.valueOf(ibOrder.getFillPrice()));
-
-        processExecution(execution);
-    }
-
     public void executionReceived(Execution execution) {
-        processExecution(execution);
-    }
-
-    private void processExecution(Execution execution) {
         execution.setReceivedDate(LocalDateTime.now());
 
         if (execution.getFillDate() == null) {

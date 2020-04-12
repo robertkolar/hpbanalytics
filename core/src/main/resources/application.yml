@@ -21,11 +21,6 @@ spring:
           new_generator_mappings: true
         show_sql: false
 application:
-  ibkr:
-    account:
-    host: localhost
-    port: 4001
-    client-id: 0
   fixer:
     url: http://data.fixer.io/api
     access-key:
