@@ -42,6 +42,7 @@ public class Trade implements Serializable {
     @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trade_generator")
     private Long id;
+    private Integer reportId;
     @Enumerated(EnumType.STRING)
     private TradeType type;
     private String symbol;
@@ -61,17 +62,9 @@ public class Trade implements Serializable {
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
-    @ManyToOne
-    @JsonIgnore
-    private Report report;
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @OrderBy("fillDate ASC")
     private List<SplitExecution> splitExecutions;
-
-    @JsonProperty
-    public Integer getReportId() {
-        return this.report.getId();
-    }
 
     @JsonProperty
     public String getDuration() {
@@ -95,6 +88,30 @@ public class Trade implements Serializable {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Integer reportId) {
+        this.reportId = reportId;
+    }
+
+    public TradeType getType() {
+        return type;
+    }
+
+    public void setType(TradeType type) {
+        this.type = type;
     }
 
     public String getSymbol() {
@@ -129,30 +146,6 @@ public class Trade implements Serializable {
         this.secType = secType;
     }
 
-    public Integer getOpenPosition() {
-        return openPosition;
-    }
-
-    public void setOpenPosition(Integer openPosition) {
-        this.openPosition = openPosition;
-    }
-    
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public TradeType getType() {
-        return type;
-    }
-
-    public void setType(TradeType type) {
-        this.type = type;
-    }
-
     public Integer getCumulativeQuantity() {
         return cumulativeQuantity;
     }
@@ -169,20 +162,12 @@ public class Trade implements Serializable {
         this.status = status;
     }
 
-    public LocalDateTime getOpenDate() {
-        return openDate;
+    public Integer getOpenPosition() {
+        return openPosition;
     }
 
-    public void setOpenDate(LocalDateTime openDate) {
-        this.openDate = openDate;
-    }
-
-    public LocalDateTime getCloseDate() {
-        return closeDate;
-    }
-
-    public void setCloseDate(LocalDateTime closeDate) {
-        this.closeDate = closeDate;
+    public void setOpenPosition(Integer openPosition) {
+        this.openPosition = openPosition;
     }
 
     public BigDecimal getAvgOpenPrice() {
@@ -193,6 +178,14 @@ public class Trade implements Serializable {
         this.avgOpenPrice = avgOpenPrice;
     }
 
+    public LocalDateTime getOpenDate() {
+        return openDate;
+    }
+
+    public void setOpenDate(LocalDateTime openDate) {
+        this.openDate = openDate;
+    }
+
     public BigDecimal getAvgClosePrice() {
         return avgClosePrice;
     }
@@ -201,20 +194,20 @@ public class Trade implements Serializable {
         this.avgClosePrice = avgClosePrice;
     }
 
+    public LocalDateTime getCloseDate() {
+        return closeDate;
+    }
+
+    public void setCloseDate(LocalDateTime closeDate) {
+        this.closeDate = closeDate;
+    }
+
     public BigDecimal getProfitLoss() {
         return profitLoss;
     }
 
     public void setProfitLoss(BigDecimal profitLoss) {
         this.profitLoss = profitLoss;
-    }
-
-    public Report getReport() {
-        return report;
-    }
-
-    public void setReport(Report source) {
-        this.report = source;
     }
 
     public List<SplitExecution> getSplitExecutions() {
@@ -240,6 +233,7 @@ public class Trade implements Serializable {
     public String toString() {
         return "Trade{" +
                 "id=" + id +
+                ", reportId=" + reportId +
                 ", type=" + type +
                 ", symbol='" + symbol + '\'' +
                 ", underlying='" + underlying + '\'' +

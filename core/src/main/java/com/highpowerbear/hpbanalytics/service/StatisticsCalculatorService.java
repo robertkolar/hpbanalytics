@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
@@ -44,9 +43,9 @@ public class StatisticsCalculatorService {
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(Report report, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(Integer reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
 
-        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(report.getId(), interval, tradeType, secType, currency, underlying));
+        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(reportId, interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
             return new ArrayList<>();
         }

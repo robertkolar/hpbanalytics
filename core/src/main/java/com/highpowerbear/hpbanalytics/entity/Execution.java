@@ -35,11 +35,9 @@ public class Execution implements Serializable, Comparable<Execution> {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
+    private Integer reportId;
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime receivedDate;
-    @ManyToOne
-    @JsonIgnore
-    private Report report;
     private String comment;
     private String origin; // in case of IB origin --> IB:ibAccountId, in case of manual addition --> manual
     private String referenceId; // in case of IB origin --> permId
@@ -55,11 +53,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
-
-    @JsonProperty
-    public Integer getReportId() {
-        return (report != null ? report.getId() : null);
-    }
 
     @Override
     public boolean equals(Object o) {
@@ -93,20 +86,20 @@ public class Execution implements Serializable, Comparable<Execution> {
         this.id = id;
     }
 
+    public Integer getReportId() {
+        return reportId;
+    }
+
+    public void setReportId(Integer reportId) {
+        this.reportId = reportId;
+    }
+
     public LocalDateTime getReceivedDate() {
         return receivedDate;
     }
 
     public void setReceivedDate(LocalDateTime receivedDate) {
         this.receivedDate = receivedDate;
-    }
-
-    public Report getReport() {
-        return report;
-    }
-
-    public void setReport(Report report) {
-        this.report = report;
     }
 
     public String getComment() {

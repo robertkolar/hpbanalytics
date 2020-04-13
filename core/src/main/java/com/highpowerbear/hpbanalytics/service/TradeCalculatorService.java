@@ -38,7 +38,7 @@ public class TradeCalculatorService {
         SplitExecution seFirst = t.getSplitExecutions().get(0);
         SplitExecution seLast = t.getSplitExecutions().get(t.getSplitExecutions().size() - 1);
 
-        t.setReport(seFirst.getExecution().getReport());
+        t.setReportId(seFirst.getExecution().getReportId());
         t.setType(seFirst.getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT);
         t.setSymbol(seFirst.getExecution().getSymbol());
         t.setUnderlying(seFirst.getExecution().getUnderlying());

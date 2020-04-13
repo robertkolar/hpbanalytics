@@ -1,7 +1,6 @@
 package com.highpowerbear.hpbanalytics.repository;
 
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
@@ -18,15 +17,15 @@ import java.time.LocalDateTime;
 @Component
 public class QueryBuilder {
 
-    public TypedQuery<Execution> buildFilteredExecutionsQuery(EntityManager em, Report report, ExecutionFilter filter) {
-        return buildFilteredExecutionsQuery(em, report, filter, Execution.class);
+    public TypedQuery<Execution> buildFilteredExecutionsQuery(EntityManager em, int reportId, ExecutionFilter filter) {
+        return buildFilteredExecutionsQuery(em, reportId, filter, Execution.class);
     }
 
-    public TypedQuery<Long> buildFilteredExecutionsCountQuery(EntityManager em, Report report, ExecutionFilter filter) {
-        return buildFilteredExecutionsQuery(em, report, filter, Long.class);
+    public TypedQuery<Long> buildFilteredExecutionsCountQuery(EntityManager em, int reportId, ExecutionFilter filter) {
+        return buildFilteredExecutionsQuery(em, reportId, filter, Long.class);
     }
 
-    private <T> TypedQuery<T> buildFilteredExecutionsQuery(EntityManager em, Report report, ExecutionFilter filter, Class<T> clazz) {
+    private <T> TypedQuery<T> buildFilteredExecutionsQuery(EntityManager em, int reportId, ExecutionFilter filter, Class<T> clazz) {
         boolean isCount = clazz.isAssignableFrom(Long.class);
 
         StringBuilder sb = new StringBuilder();
@@ -50,7 +49,7 @@ public class QueryBuilder {
         sb.append(isCount ? "" : " ORDER BY e.fillDate DESC");
         TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
-        q.setParameter("report", report);
+        q.setParameter("report", reportId);
 
         for (FilterEnums.FilterOperatorString op : filter.getSymbolFilterMap().keySet()) {
             boolean isLike = FilterEnums.FilterOperatorString.LIKE.equals(op);
@@ -75,15 +74,15 @@ public class QueryBuilder {
         return q;
     }
 
-    public TypedQuery<Trade> buildFilteredTradesQuery(EntityManager em, Report report, TradeFilter filter) {
-        return buildFilteredTradesQuery(em, report, filter, Trade.class);
+    public TypedQuery<Trade> buildFilteredTradesQuery(EntityManager em, int reportId, TradeFilter filter) {
+        return buildFilteredTradesQuery(em, reportId, filter, Trade.class);
     }
 
-    public TypedQuery<Long> buildFilteredTradesCountQuery(EntityManager em, Report report, TradeFilter filter) {
-        return buildFilteredTradesQuery(em, report, filter, Long.class);
+    public TypedQuery<Long> buildFilteredTradesCountQuery(EntityManager em, int reportId, TradeFilter filter) {
+        return buildFilteredTradesQuery(em, reportId, filter, Long.class);
     }
 
-    private <T> TypedQuery<T> buildFilteredTradesQuery(EntityManager em, Report report, TradeFilter filter, Class<T> clazz) {
+    private <T> TypedQuery<T> buildFilteredTradesQuery(EntityManager em, int reportId, TradeFilter filter, Class<T> clazz) {
         boolean isCount = clazz.isAssignableFrom(Long.class);
 
         StringBuilder sb = new StringBuilder();
@@ -110,7 +109,7 @@ public class QueryBuilder {
         sb.append(isCount ? "" : " ORDER BY t.openDate DESC");
         TypedQuery<T> q = em.createQuery(sb.toString(), clazz);
 
-        q.setParameter("report", report);
+        q.setParameter("reportId", reportId);
 
         for (FilterEnums.FilterOperatorString op : filter.getSymbolFilterMap().keySet()) {
             boolean isLike = FilterEnums.FilterOperatorString.LIKE.equals(op);

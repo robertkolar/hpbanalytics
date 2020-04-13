@@ -8,7 +8,6 @@ import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.repository.filter.FilterParser;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
@@ -46,7 +45,13 @@ public class AppRestController {
     private final MessageService messageService;
 
     @Autowired
-    public AppRestController(ReportDao reportDao, StatisticsCalculatorService statisticsCalculatorService, ReportService reportService, FilterParser filterParser, IfiCsvGeneratorService ifiCsvGeneratorService, MessageService messageService) {
+    public AppRestController(ReportDao reportDao,
+                             StatisticsCalculatorService statisticsCalculatorService,
+                             ReportService reportService,
+                             FilterParser filterParser,
+                             IfiCsvGeneratorService ifiCsvGeneratorService,
+                             MessageService messageService) {
+
         this.reportDao = reportDao;
         this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;
@@ -60,71 +65,26 @@ public class AppRestController {
         return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
     }
 
-    @RequestMapping("/reports")
-    public ResponseEntity<?> getReports() {
-        List<Report> reports = reportDao.getReports();
-
-        reports.forEach(report -> report.setReportInfo(reportDao.getReportInfo(report.getId())));
-
-        return ResponseEntity.ok(reports);
-    }
-
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports")
-    public ResponseEntity<?> updateReport(
-            @RequestBody Report report) {
-
-        Report reportDb = reportDao.findReport(report.getId());
-        if (reportDb == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(reportDao.updateReport(report));
-    }
-
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}")
     public ResponseEntity<?> analyzeReport(
-            @PathVariable("id") int id) {
+            @PathVariable("id") int reportId) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        reportService.analyzeAll(id);
-        messageService.sendWsMessage(WsTopic.REPORT, "report " + id + " analyzed");
-
-        return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}")
-    public ResponseEntity<?> deleteReport(
-            @PathVariable("id") int id) {
-
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        reportService.deleteReport(id);
-        messageService.sendWsMessage(WsTopic.REPORT, "report " + id + " deleted");
+        reportService.analyzeAll(reportId);
+        messageService.sendWsMessage(WsTopic.TRADE, "report " + reportId + " analyzed");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/executions")
     public ResponseEntity<?> getFilteredExecutions(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @RequestParam(required = false, value = "filter") String jsonFilter,
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         ExecutionFilter filter = filterParser.parseExecutionFilter(jsonFilter);
-        List<Execution> executions = reportDao.getFilteredExecutions(id, filter, start, limit);
-        long numExecutions = reportDao.getNumFilteredExecutions(id, filter);
+        List<Execution> executions = reportDao.getFilteredExecutions(reportId, filter, start, limit);
+        long numExecutions = reportDao.getNumFilteredExecutions(reportId, filter);
 
         return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
@@ -134,15 +94,12 @@ public class AppRestController {
             @PathVariable("id") int reportId,
             @RequestBody Execution execution) {
 
-        Report report = reportDao.findReport(reportId);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
         execution.setId(null);
-        execution.setReport(report);
+        execution.setReportId(reportId);
 
         reportService.newExecution(execution);
-        messageService.sendWsMessage(WsTopic.REPORT, "new execution processed");
+        messageService.sendWsMessage(WsTopic.EXECUTION, "new execution processed");
+        messageService.sendWsMessage(WsTopic.TRADE, "new execution processed");
 
         return ResponseEntity.ok().build();
     }
@@ -157,40 +114,34 @@ public class AppRestController {
             return ResponseEntity.notFound().build();
         }
         reportService.deleteExecution(executionId);
-        messageService.sendWsMessage(WsTopic.REPORT, "execution " + executionId + " deleted");
+        messageService.sendWsMessage(WsTopic.EXECUTION, "execution " + executionId + " deleted");
+        messageService.sendWsMessage(WsTopic.TRADE, "execution " + executionId + " deleted");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/trades")
     public ResponseEntity<?> getFilteredTrades(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @RequestParam(required = false, value = "filter") String jsonFilter,
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-
         TradeFilter filter = filterParser.parseTradeFilter(jsonFilter);
-        List<Trade> trades = reportDao.getFilteredTrades(id, filter, start, limit);
-        long numTrades = reportDao.getNumFilteredTrades(id, filter);
+        List<Trade> trades = reportDao.getFilteredTrades(reportId, filter, start, limit);
+        long numTrades = reportDao.getNumFilteredTrades(reportId, filter);
 
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/trades/{tradeId}/close")
+    @RequestMapping(method = RequestMethod.PUT, value = "/trades/{tradeId}/close")
     public ResponseEntity<?> closeTrade(
-            @PathVariable("id") int id,
             @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTradeRequest r) {
 
-        Report report = reportDao.findReport(id);
         Trade trade = reportDao.findTrade(tradeId);
 
-        if (report == null || trade == null) {
+        if (trade == null) {
             return ResponseEntity.notFound().build();
         }
 
@@ -199,14 +150,15 @@ public class AppRestController {
         }
 
         reportService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
-        messageService.sendWsMessage(WsTopic.REPORT, "trade " + tradeId + " closed");
+        messageService.sendWsMessage(WsTopic.EXECUTION, "trade " + tradeId + " closed");
+        messageService.sendWsMessage(WsTopic.TRADE, "trade " + tradeId + " closed");
 
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping("/reports/{id}/statistics/{interval}")
     public ResponseEntity<?> getStatistics(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") String tradeType,
             @RequestParam(required = false, value = "secType") String secType,
@@ -215,12 +167,7 @@ public class AppRestController {
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(report, interval, tradeType, secType, currency, underlying, null);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(reportId, interval, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -234,36 +181,28 @@ public class AppRestController {
 
     @RequestMapping("reports/{id}/charts/{interval}")
     public ResponseEntity<?> getCharts(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") String tradeType,
             @RequestParam(required = false, value = "secType") String secType,
             @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(report, interval, tradeType, secType, currency, underlying, 120);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(reportId, interval, tradeType, secType, currency, underlying, 120);
 
         return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")
     public ResponseEntity<?> calculateStatistics(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") String tradeType,
             @RequestParam(required = false, value = "secType") String secType,
             @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-        statisticsCalculatorService.calculateStatistics(id, interval, tradeType, secType, currency, underlying);
+        statisticsCalculatorService.calculateStatistics(reportId, interval, tradeType, secType, currency, underlying);
 
         return ResponseEntity.ok().build();
     }
@@ -273,24 +212,16 @@ public class AppRestController {
             @PathVariable("id") int reportId,
             @RequestParam(required = false, value = "openOnly") String openOnly) {
 
-        Report report = reportDao.findReport(reportId);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(reportDao.getUnderlyings(reportId, Boolean.parseBoolean(openOnly)));
     }
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{endMonth}/{tradeType}")
     public ResponseEntity<?> getIfiCsv(
-            @PathVariable("id") int id,
+            @PathVariable("id") int reportId,
             @PathVariable("year") int year,
             @PathVariable("endMonth") int endMonth,
             @PathVariable("tradeType") TradeType tradeType) {
 
-        Report report = reportDao.findReport(id);
-        if (report == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(ifiCsvGeneratorService.generate(id, year, endMonth, tradeType));
+        return ResponseEntity.ok(ifiCsvGeneratorService.generate(reportId, year, endMonth, tradeType));
     }
 }

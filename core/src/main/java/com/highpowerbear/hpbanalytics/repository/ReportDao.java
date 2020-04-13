@@ -1,14 +1,11 @@
 package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.Trade;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.model.ReportInfo;
+import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -17,13 +14,6 @@ import java.util.List;
  * Created by robertk on 12/16/2017.
  */
 public interface ReportDao {
-
-    Report getReportByOriginAndSecType(String origin, SecType secType);
-    Report findReport(int reportId);
-    Report updateReport(Report report);
-    void deleteReport(int reportId);
-    List<Report> getReports();
-    ReportInfo getReportInfo(int reportId);
 
     List<Execution> getExecutions(int reportId);
     List<Execution> getExecutionsAfterDate(int reportId, LocalDateTime date, String symbol);

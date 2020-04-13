@@ -3,7 +3,6 @@ package com.highpowerbear.hpbanalytics.service;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Report;
 import com.highpowerbear.hpbanalytics.entity.SplitExecution;
 import com.highpowerbear.hpbanalytics.entity.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
@@ -47,13 +46,6 @@ public class ReportService {
         if (execution.getFillDate() == null) {
             execution.setFillDate(execution.getReceivedDate());
         }
-        Report report = reportDao.getReportByOriginAndSecType(execution.getOrigin(), execution.getSecType());
-
-        if (report == null) {
-            log.warn("no report for origin=" + execution.getOrigin() + " and secType=" + execution.getSecType() + ", skipping");
-            return;
-        }
-        execution.setReport(report);
 
         newExecution(execution);
         messageService.sendWsMessage(WsTopic.EXECUTION,  "new execution processed");
@@ -75,11 +67,6 @@ public class ReportService {
         reportDao.createTrades(trades);
 
         log.info("END report processing for report " + reportId);
-    }
-
-    @Transactional
-    public void deleteReport(int reportId) {
-        reportDao.deleteReport(reportId);
     }
 
     @Transactional
@@ -153,7 +140,7 @@ public class ReportService {
         Execution execution = new Execution();
 
         execution.setReceivedDate(LocalDateTime.now());
-        execution.setReport(trade.getReport());
+        execution.setReportId(trade.getReportId());
         execution.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
         execution.setOrigin("INTERNAL");
         execution.setReferenceId("N/A");
