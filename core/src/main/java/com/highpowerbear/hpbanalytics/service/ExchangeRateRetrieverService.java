@@ -2,10 +2,10 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.ApplicationProperties;
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
+import com.highpowerbear.hpbanalytics.database.ExchangeRate;
+import com.highpowerbear.hpbanalytics.database.ExchangeRateRepository;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.model.ExchangeRates;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,15 +23,16 @@ import java.time.LocalDate;
 public class ExchangeRateRetrieverService {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetrieverService.class);
 
-    private final ReportDao reportDao;
+    private final ExchangeRateRepository exchangeRateRepository;
     private final ApplicationProperties applicationProperties;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public ExchangeRateRetrieverService(ReportDao reportDao,
+    public ExchangeRateRetrieverService(ExchangeRateRepository exchangeRateRepository,
                                         ApplicationProperties applicationProperties) {
-        this.reportDao = reportDao;
+
+        this.exchangeRateRepository = exchangeRateRepository;
         this.applicationProperties = applicationProperties;
     }
 
@@ -62,7 +63,7 @@ public class ExchangeRateRetrieverService {
             exchangeRate.setEurHkd(exchangeRates.getRate(Currency.HKD));
             exchangeRate.setEurSgd(exchangeRates.getRate(Currency.SGD));
 
-            reportDao.createOrUpdateExchangeRate(exchangeRate);
+            exchangeRateRepository.save(exchangeRate);
         }
 
         log.info("END ExchangeRateRetriever.retrieve");

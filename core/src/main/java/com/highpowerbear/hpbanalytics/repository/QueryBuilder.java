@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.FilterEnums;
 import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;

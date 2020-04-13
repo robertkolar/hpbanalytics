@@ -2,14 +2,12 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
-import com.highpowerbear.hpbanalytics.entity.SplitExecution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +35,8 @@ import java.util.stream.IntStream;
 public class IfiCsvGeneratorService {
     private static final Logger log = LoggerFactory.getLogger(IfiCsvGeneratorService.class);
 
+    private final ExchangeRateRepository exchangeRateRepository;
+    private final TradeRepository tradeRepository;
     private final ReportDao reportDao;
     private final TradeCalculatorService tradeCalculatorService;
 
@@ -53,7 +53,13 @@ public class IfiCsvGeneratorService {
     private final List<Integer> ifiYears;
 
     @Autowired
-    public IfiCsvGeneratorService(ReportDao reportDao, TradeCalculatorService tradeCalculatorService) {
+    public IfiCsvGeneratorService(ExchangeRateRepository exchangeRateRepository,
+                                  TradeRepository tradeRepository,
+                                  ReportDao reportDao,
+                                  TradeCalculatorService tradeCalculatorService) {
+
+        this.exchangeRateRepository = exchangeRateRepository;
+        this.tradeRepository = tradeRepository;
         this.reportDao = reportDao;
         this.tradeCalculatorService = tradeCalculatorService;
 
@@ -216,7 +222,7 @@ public class IfiCsvGeneratorService {
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculatorService.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(se.getTrade());
             sb.append(nf.format(profitLoss.doubleValue()));
         }
 
@@ -254,7 +260,7 @@ public class IfiCsvGeneratorService {
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
-            profitLoss = tradeCalculatorService.calculatePLPortfolioBaseOpenClose(se.getTrade());
+            profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(se.getTrade());
             sb.append(nf.format(profitLoss.doubleValue()));
         }
         sb.append(NL);
@@ -264,11 +270,15 @@ public class IfiCsvGeneratorService {
 
     private double getExchangeRate(SplitExecution se) {
         String date = HanUtil.formatExchangeRateDate(se.getFillDate().toLocalDate());
-        ExchangeRate exchangeRate = reportDao.getExchangeRate(date);
+        ExchangeRate exchangeRate = exchangeRateRepository.findById(date).orElse(null);
 
         if (exchangeRate == null) {
             String previousDate = HanUtil.formatExchangeRateDate(se.getFillDate().plusDays(-1).toLocalDate());
-            exchangeRate = reportDao.getExchangeRate(previousDate);
+            exchangeRate = exchangeRateRepository.findById(previousDate).orElse(null);
+
+            if (exchangeRate == null) {
+                throw new IllegalStateException("exchange rate not available for " + date + " or " + previousDate);
+            }
         }
         Currency currency = se.getExecution().getCurrency();
 

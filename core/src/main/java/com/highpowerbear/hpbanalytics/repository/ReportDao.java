@@ -1,8 +1,7 @@
 package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
@@ -36,8 +35,4 @@ public interface ReportDao {
     List<Trade> getTradesBetweenDates(int reportId, LocalDateTime beginDate, LocalDateTime endDate, TradeType tradeType);
 
     List<String> getUnderlyings(int reportId, boolean openOnly);
-
-    ExchangeRate getExchangeRate(String date);
-    List<ExchangeRate> getAllExchangeRates();
-    void createOrUpdateExchangeRate(ExchangeRate exchangeRate);
 }

@@ -2,11 +2,7 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.SplitExecution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,13 +21,12 @@ import java.util.Map;
 @Service
 public class TradeCalculatorService {
 
-    private final ReportDao reportDao;
-
+    private final ExchangeRateRepository exchangeRateRepository;
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
 
     @Autowired
-    public TradeCalculatorService(ReportDao reportDao) {
-        this.reportDao = reportDao;
+    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository) {
+        this.exchangeRateRepository = exchangeRateRepository;
     }
 
     public void calculateFields(Trade t) {
@@ -79,18 +74,18 @@ public class TradeCalculatorService {
         }
     }
 
-    public BigDecimal calculatePLPortfolioBase(Trade t) {
+    public BigDecimal calculatePlPortfolioBase(Trade t) {
 
         switch (HanSettings.STATISTICS_PL_METHOD) {
-            case PORTFOLIO_BASE_OPEN_CLOSE: return calculatePLPortfolioBaseOpenClose(t);
-            case PORTFOLIO_BASE_CLOSE_ONLY: return calculatePLPortfolioBaseCloseOnly(t);
-            case PORTFOLIO_BASE_CURRENT: return calculatePLPortfolioBaseCurrent(t);
+            case PORTFOLIO_BASE_OPEN_CLOSE: return calculatePlPortfolioBaseOpenClose(t);
+            case PORTFOLIO_BASE_CLOSE_ONLY: return calculatePlPortfolioBaseCloseOnly(t);
+            case PORTFOLIO_BASE_CURRENT: return calculatePlPortfolioBaseCurrent(t);
 
             default: throw new IllegalStateException();
         }
     }
 
-    public BigDecimal calculatePLPortfolioBaseOpenClose(Trade t) {
+    public BigDecimal calculatePlPortfolioBaseOpenClose(Trade t) {
         validateClosed(t);
 
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
@@ -116,11 +111,11 @@ public class TradeCalculatorService {
         return profitLoss;
     }
 
-    private BigDecimal calculatePLPortfolioBaseCloseOnly(Trade t) {
+    private BigDecimal calculatePlPortfolioBaseCloseOnly(Trade t) {
         return calculatePLPortfolioBaseSimple(t, false);
     }
 
-    private BigDecimal calculatePLPortfolioBaseCurrent(Trade t) {
+    private BigDecimal calculatePlPortfolioBaseCurrent(Trade t) {
         return calculatePLPortfolioBaseSimple(t, true);
     }
 
@@ -142,7 +137,7 @@ public class TradeCalculatorService {
 
     private double getExchangeRate(LocalDate localDate, Currency currency) {
         if (exchangeRateMap.isEmpty()) {
-            List<ExchangeRate> exchangeRates = reportDao.getAllExchangeRates();
+            List<ExchangeRate> exchangeRates = exchangeRateRepository.findAll();
             exchangeRates.forEach(exchangeRate -> exchangeRateMap.put(exchangeRate.getDate(), exchangeRate));
         }
 
@@ -150,7 +145,7 @@ public class TradeCalculatorService {
         ExchangeRate exchangeRate = exchangeRateMap.get(date);
 
         if (exchangeRate == null) {
-            exchangeRate = reportDao.getExchangeRate(date);
+            exchangeRate = exchangeRateRepository.findById(date).orElse(null);
 
             if (exchangeRate != null) {
                 exchangeRateMap.put(date, exchangeRate);
@@ -159,8 +154,12 @@ public class TradeCalculatorService {
                 exchangeRate = exchangeRateMap.get(previousDate);
 
                 if (exchangeRate == null) {
-                    exchangeRate = reportDao.getExchangeRate(previousDate);
-                    exchangeRateMap.put(date, exchangeRate);
+                    exchangeRate = exchangeRateRepository.findById(previousDate).orElse(null);
+                    if (exchangeRate != null) {
+                        exchangeRateMap.put(date, exchangeRate);
+                    } else {
+                        throw new IllegalStateException("exchange rate not available for " + date + " or " + previousDate);
+                    }
                 }
             }
         }

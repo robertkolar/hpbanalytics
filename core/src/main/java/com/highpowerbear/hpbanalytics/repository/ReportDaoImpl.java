@@ -1,14 +1,13 @@
 package com.highpowerbear.hpbanalytics.repository;
 
-import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
-import com.highpowerbear.hpbanalytics.entity.ExchangeRate;
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
+import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Propagation;
@@ -221,22 +220,5 @@ public class ReportDaoImpl implements ReportDao {
         }
 
         return query.getResultList();
-    }
-
-    @Override
-    public ExchangeRate getExchangeRate(String date) {
-        return em.find(ExchangeRate.class, date);
-    }
-
-    @Override
-    public List<ExchangeRate> getAllExchangeRates() {
-        TypedQuery<ExchangeRate> q = em.createQuery("SELECT er FROM ExchangeRate er", ExchangeRate.class);
-        return q.getResultList();
-    }
-
-    @Transactional
-    @Override
-    public void createOrUpdateExchangeRate(ExchangeRate exchangeRate) {
-        em.merge(exchangeRate);
     }
 }

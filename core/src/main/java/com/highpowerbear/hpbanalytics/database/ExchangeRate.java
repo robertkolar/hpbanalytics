@@ -1,4 +1,4 @@
-package com.highpowerbear.hpbanalytics.entity;
+package com.highpowerbear.hpbanalytics.database;
 
 import com.highpowerbear.hpbanalytics.enums.Currency;
 

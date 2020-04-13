@@ -3,9 +3,9 @@ package com.highpowerbear.hpbanalytics.service;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
-import com.highpowerbear.hpbanalytics.entity.Execution;
-import com.highpowerbear.hpbanalytics.entity.SplitExecution;
-import com.highpowerbear.hpbanalytics.entity.Trade;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.SplitExecution;
+import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.model.Statistics;
 import org.slf4j.Logger;
@@ -126,7 +126,7 @@ public class StatisticsCalculatorService {
             BigDecimal profitLoss;
 
             for (Trade t : tradesClosedForPeriod) {
-                BigDecimal pl = tradeCalculatorService.calculatePLPortfolioBase(t);
+                BigDecimal pl = tradeCalculatorService.calculatePlPortfolioBase(t);
 
                 if (pl.doubleValue() >= 0) {
                     numWinners++;
