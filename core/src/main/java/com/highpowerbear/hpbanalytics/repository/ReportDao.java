@@ -14,13 +14,6 @@ import java.util.List;
  */
 public interface ReportDao {
 
-    List<Execution> getExecutions(int reportId);
-    List<Execution> getExecutionsAfterDate(int reportId, LocalDateTime date, String symbol);
-    List<Execution> getExecutionsAfterDateInclusive(int reportId, LocalDateTime date, String symbol);
-    boolean existsExecution(long executionId);
-    Execution findExecution(long executionId);
-    void createExecution(Execution execution);
-    void deleteExecution(long executionId);
     List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, int start, int limit);
     long getNumFilteredExecutions(int reportId, ExecutionFilter filter);
 

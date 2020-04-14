@@ -38,60 +38,6 @@ public class ReportDaoImpl implements ReportDao {
     }
 
     @Override
-    public List<Execution> getExecutions(int reportId) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.reportId = :reportId ORDER BY e.fillDate ASC", Execution.class);
-        q.setParameter("reportId", reportId);
-
-        return q.getResultList();
-    }
-
-    @Override
-    public List<Execution> getExecutionsAfterDate(int reportId, LocalDateTime date, String symbol) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.reportId = :reportId AND e.fillDate > :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
-
-        q.setParameter("reportId", reportId);
-        q.setParameter("date", date);
-        q.setParameter("symbol", symbol);
-
-        return q.getResultList();
-    }
-
-    @Override
-    public List<Execution> getExecutionsAfterDateInclusive(int reportId, LocalDateTime date, String symbol) {
-        TypedQuery<Execution> q = em.createQuery("SELECT e FROM Execution e WHERE e.reportId = :reportId AND e.fillDate >= :date AND e.symbol = :symbol ORDER BY e.fillDate ASC", Execution.class);
-
-        q.setParameter("reportId", reportId);
-        q.setParameter("date", date);
-        q.setParameter("symbol", symbol);
-
-        return q.getResultList();
-    }
-
-    @Override
-    public boolean existsExecution(long executionId) {
-        Execution execution = em.find(Execution.class, executionId);
-        return (execution != null);
-    }
-
-    @Override
-    public Execution findExecution(long executionId) {
-        return em.find(Execution.class, executionId);
-    }
-
-    @Transactional
-    @Override
-    public void createExecution(Execution execution) {
-        em.persist(execution);
-    }
-
-    @Transactional
-    @Override
-    public void deleteExecution(long executionId) {
-        Execution execution = em.find(Execution.class, executionId);
-        em.remove(execution);
-    }
-
-    @Override
     public List<Execution> getFilteredExecutions(int reportId, ExecutionFilter filter, int start, int limit) {
         TypedQuery<Execution> q = queryBuilder.buildFilteredExecutionsQuery(em , reportId, filter);
 

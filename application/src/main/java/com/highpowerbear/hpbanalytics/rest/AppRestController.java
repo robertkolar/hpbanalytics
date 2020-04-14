@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
@@ -37,6 +38,7 @@ import java.util.List;
 @RequestMapping("/")
 public class AppRestController {
 
+    private final ExecutionRepository executionRepository;
     private final ReportDao reportDao;
     private final StatisticsCalculatorService statisticsCalculatorService;
     private final ReportService reportService;
@@ -45,13 +47,15 @@ public class AppRestController {
     private final MessageService messageService;
 
     @Autowired
-    public AppRestController(ReportDao reportDao,
+    public AppRestController(ExecutionRepository executionRepository,
+                             ReportDao reportDao,
                              StatisticsCalculatorService statisticsCalculatorService,
                              ReportService reportService,
                              FilterParser filterParser,
                              IfiCsvGeneratorService ifiCsvGeneratorService,
                              MessageService messageService) {
 
+        this.executionRepository = executionRepository;
         this.reportDao = reportDao;
         this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;
@@ -109,7 +113,7 @@ public class AppRestController {
             @PathVariable("id") int reportId,
             @PathVariable("executionId") long executionId) {
 
-        Execution execution = reportDao.findExecution(executionId);
+        Execution execution = executionRepository.findById(executionId).orElse(null);
         if (execution == null || reportId != execution.getReportId()) {
             return ResponseEntity.notFound().build();
         }

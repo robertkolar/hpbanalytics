@@ -3,6 +3,7 @@ package com.highpowerbear.hpbanalytics.service;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.SplitExecution;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.Action;
@@ -29,12 +30,18 @@ import java.util.stream.Collectors;
 public class ReportService {
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
+    private final ExecutionRepository executionRepository;
     private final ReportDao reportDao;
     private final TradeCalculatorService tradeCalculatorService;
     private final MessageService messageService;
 
     @Autowired
-    public ReportService(ReportDao reportDao, TradeCalculatorService tradeCalculatorService, MessageService messageService) {
+    public ReportService(ExecutionRepository executionRepository,
+                         ReportDao reportDao,
+                         TradeCalculatorService tradeCalculatorService,
+                         MessageService messageService) {
+
+        this.executionRepository = executionRepository;
         this.reportDao = reportDao;
         this.tradeCalculatorService = tradeCalculatorService;
         this.messageService = messageService;
@@ -56,7 +63,7 @@ public class ReportService {
         log.info("BEGIN report processing for report " + reportId);
 
         reportDao.deleteAllTrades(reportId);
-        List<Execution> executions = reportDao.getExecutions(reportId);
+        List<Execution> executions = executionRepository.getByReportIdOrderByFillDateAsc(reportId);
 
         if (executions.isEmpty()) {
             log.info("END report processing for report " + reportId + ", no executions, skipping");
@@ -71,7 +78,11 @@ public class ReportService {
 
     @Transactional
     public void deleteExecution(long executionId) {
-        Execution execution = reportDao.findExecution(executionId);
+        Execution execution = executionRepository.findById(executionId).orElse(null);
+        if (execution == null) {
+            log.warn("execution " + executionId + " does not exists, cannot delete");
+            return;
+        }
 
         int reportId = execution.getReportId();
         String symbol = execution.getSymbol();
@@ -80,13 +91,13 @@ public class ReportService {
         logTradesAffected(execution, tradesAffected);
 
         reportDao.deleteTrades(tradesAffected);
-        reportDao.deleteExecution(executionId);
+        executionRepository.deleteById(executionId);
 
         SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
         boolean isCleanCut = (firstSe.getSplitQuantity().equals(firstSe.getExecution().getQuantity()));
-        boolean omitFirstSe = (isCleanCut && !reportDao.existsExecution(firstSe.getExecution().getId())); // cleanCut is redundant
+        boolean omitFirstSe = (isCleanCut && !executionRepository.existsById(firstSe.getExecution().getId())); // cleanCut is redundant
 
-        List<Execution> executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
+        List<Execution> executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateAfterOrderByFillDateAsc(reportId, symbol, firstSe.getExecution().getFillDate());
         List<Trade> newTrades = analyzeSingleSymbol(executionsToAnalyzeAgain, (omitFirstSe ? null : firstSe));
 
         if (!newTrades.isEmpty()) {
@@ -105,10 +116,7 @@ public class ReportService {
         log.info("deleting " + tradesAffected.size() + " trades");
         reportDao.deleteTrades(tradesAffected);
 
-        reportDao.createExecution(execution);
-
-        // refresh from db
-        execution = reportDao.findExecution(execution.getId());
+        execution = executionRepository.save(execution);
 
         List<Execution> executionsToAnalyzeAgain = new ArrayList<>();
         List<Trade> trades;
@@ -121,9 +129,9 @@ public class ReportService {
             log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + HanUtil.formatLogDate(execution.getFillDate()) + ", " + HanUtil.formatLogDate(firstSe.getExecution().getFillDate()));
 
             if (isNewAfterFirst) {
-                executionsToAnalyzeAgain = reportDao.getExecutionsAfterDate(reportId, firstSe.getExecution().getFillDate(), symbol);
+                executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateAfterOrderByFillDateAsc(reportId, symbol, firstSe.getExecution().getFillDate());
             } else {
-                executionsToAnalyzeAgain = reportDao.getExecutionsAfterDateInclusive(reportId, execution.getFillDate(), symbol);
+                executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(reportId, symbol, execution.getFillDate());
             }
             trades = analyzeSingleSymbol(executionsToAnalyzeAgain, isNewAfterFirst ? firstSe : null);
 
