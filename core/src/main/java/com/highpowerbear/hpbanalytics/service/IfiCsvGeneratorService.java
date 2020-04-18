@@ -7,7 +7,6 @@ import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +36,6 @@ public class IfiCsvGeneratorService {
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final TradeRepository tradeRepository;
-    private final ReportDao reportDao;
     private final TradeCalculatorService tradeCalculatorService;
 
     private final String NL = "\n";
@@ -55,12 +53,10 @@ public class IfiCsvGeneratorService {
     @Autowired
     public IfiCsvGeneratorService(ExchangeRateRepository exchangeRateRepository,
                                   TradeRepository tradeRepository,
-                                  ReportDao reportDao,
                                   TradeCalculatorService tradeCalculatorService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.tradeRepository = tradeRepository;
-        this.reportDao = reportDao;
         this.tradeCalculatorService = tradeCalculatorService;
 
         ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
@@ -85,7 +81,7 @@ public class IfiCsvGeneratorService {
 
         LocalDateTime beginDate = LocalDate.ofYearDay(year, 1).atStartOfDay();
         LocalDateTime endDate = YearMonth.of(year, endMonth).atEndOfMonth().plusDays(1).atStartOfDay();
-        List<Trade> trades = reportDao.getTradesBetweenDates(reportId, beginDate, endDate, tradeType);
+        List<Trade> trades = tradeRepository.getByReportIdAndTypeAndCloseDateBetweenOrderByOpenDateAsc(reportId, tradeType, beginDate, endDate);
 
         log.info("beginDate=" + beginDate + ", endDate=" + endDate + ", trades=" + trades.size());
         StringBuilder sb = new StringBuilder();

@@ -2,6 +2,10 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
+import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.enums.Currency;
+import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.SplitExecution;
@@ -11,6 +15,8 @@ import com.highpowerbear.hpbanalytics.model.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Sort;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -31,21 +37,26 @@ public class StatisticsCalculatorService {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
 
     private final ReportDao reportDao;
+    private final TradeRepository tradeRepository;
     private final MessageService messageService;
     private final TradeCalculatorService tradeCalculatorService;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
-    public StatisticsCalculatorService(ReportDao reportDao, MessageService messageService, TradeCalculatorService tradeCalculatorService) {
+    public StatisticsCalculatorService(ReportDao reportDao,
+                                       TradeRepository tradeRepository,
+                                       MessageService messageService,
+                                       TradeCalculatorService tradeCalculatorService) {
         this.reportDao = reportDao;
+        this.tradeRepository = tradeRepository;
         this.messageService = messageService;
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(Integer reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying, Integer maxPoints) {
 
-        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(reportId, interval, tradeType, secType, currency, underlying));
+        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, reportId, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
             return new ArrayList<>();
         }
@@ -63,33 +74,34 @@ public class StatisticsCalculatorService {
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+    public void calculateStatistics(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
         log.info("BEGIN statistics calculation for report " + reportId + ", interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
-        List<Trade> trades = reportDao.getTrades(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), normalizeParam(underlying));
+        Example<Trade> filter = HanUtil.createTradeFilter(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
+        List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
         List<Statistics> stats = doCalculate(trades, interval);
-        statisticsMap.put(statisticsKey(reportId, interval, tradeType, secType, currency, underlying), stats);
+        statisticsMap.put(statisticsKey(interval, reportId, tradeType, secType, currency, underlying), stats);
 
         log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
 
         messageService.sendWsMessage(WsTopic.STATISTICS, "statistics calculated for report " + reportId);
     }
 
-    private String statisticsKey(int reportId, StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+    private String statisticsKey(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
 
         String reportIdKey = String.valueOf(reportId);
         String intervalKey = interval.name();
-        String tradeTypeKey = tradeType == null ? "ALL" : tradeType;
-        String secTypeKey = secType == null ? "ALL" : secType;
-        String currencyKey = currency == null ? "ALL" : currency;
+        String tradeTypeKey = tradeType == null ? "ALL" : tradeType.toString();
+        String secTypeKey = secType == null ? "ALL" : secType.toString();
+        String currencyKey = currency == null ? "ALL" : currency.toString();
         String underlyingKey = underlying == null ? "ALL" : underlying;
 
         return reportIdKey + "_" + intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
     }
 
-    private String normalizeParam(String param) {
-        return "ALL".equals(param) ? null : param;
+    private <T> T normalizeParam(T param) {
+        return "ALL".equals(String.valueOf(param)) ? null : param;
     }
 
     private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {

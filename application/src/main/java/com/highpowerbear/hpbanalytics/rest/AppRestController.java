@@ -2,6 +2,8 @@ package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
+import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.enums.*;
 import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.repository.ReportDao;
@@ -10,9 +12,6 @@ import com.highpowerbear.hpbanalytics.repository.filter.FilterParser;
 import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.Trade;
-import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-import com.highpowerbear.hpbanalytics.enums.TradeStatus;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
 import com.highpowerbear.hpbanalytics.service.ReportService;
 import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
@@ -39,6 +38,7 @@ import java.util.List;
 public class AppRestController {
 
     private final ExecutionRepository executionRepository;
+    private final TradeRepository tradeRepository;
     private final ReportDao reportDao;
     private final StatisticsCalculatorService statisticsCalculatorService;
     private final ReportService reportService;
@@ -48,6 +48,7 @@ public class AppRestController {
 
     @Autowired
     public AppRestController(ExecutionRepository executionRepository,
+                             TradeRepository tradeRepository,
                              ReportDao reportDao,
                              StatisticsCalculatorService statisticsCalculatorService,
                              ReportService reportService,
@@ -56,6 +57,7 @@ public class AppRestController {
                              MessageService messageService) {
 
         this.executionRepository = executionRepository;
+        this.tradeRepository = tradeRepository;
         this.reportDao = reportDao;
         this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;
@@ -143,13 +145,12 @@ public class AppRestController {
             @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTradeRequest r) {
 
-        Trade trade = reportDao.findTrade(tradeId);
+        Trade trade = tradeRepository.findById(tradeId).orElse(null);
 
         if (trade == null) {
             return ResponseEntity.notFound().build();
-        }
 
-        if (!TradeStatus.OPEN.equals(trade.getStatus())) {
+        } else if (!TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
 
@@ -164,14 +165,14 @@ public class AppRestController {
     public ResponseEntity<?> getStatistics(
             @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") String tradeType,
-            @RequestParam(required = false, value = "secType") String secType,
-            @RequestParam(required = false, value = "currency") String currency,
+            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
+            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying,
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(reportId, interval, tradeType, secType, currency, underlying, null);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, reportId, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -187,12 +188,12 @@ public class AppRestController {
     public ResponseEntity<?> getCharts(
             @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") String tradeType,
-            @RequestParam(required = false, value = "secType") String secType,
-            @RequestParam(required = false, value = "currency") String currency,
+            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
+            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(reportId, interval, tradeType, secType, currency, underlying, 120);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, reportId, tradeType, secType, currency, underlying, 120);
 
         return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
@@ -201,12 +202,12 @@ public class AppRestController {
     public ResponseEntity<?> calculateStatistics(
             @PathVariable("id") int reportId,
             @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") String tradeType,
-            @RequestParam(required = false, value = "secType") String secType,
-            @RequestParam(required = false, value = "currency") String currency,
+            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
+            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        statisticsCalculatorService.calculateStatistics(reportId, interval, tradeType, secType, currency, underlying);
+        statisticsCalculatorService.calculateStatistics(interval, reportId, tradeType, secType, currency, underlying);
 
         return ResponseEntity.ok().build();
     }
@@ -214,9 +215,15 @@ public class AppRestController {
     @RequestMapping("/reports/{id}/underlyings")
     public ResponseEntity<?> getUnderlyings(
             @PathVariable("id") int reportId,
-            @RequestParam(required = false, value = "openOnly") String openOnly) {
+            @RequestParam(required = false, value = "openOnly") boolean openOnly) {
 
-        return ResponseEntity.ok(reportDao.getUnderlyings(reportId, Boolean.parseBoolean(openOnly)));
+        List<String> underlyings;
+        if (openOnly) {
+            underlyings = tradeRepository.getOpenUnderlyings(reportId);
+        } else {
+            underlyings = tradeRepository.getAllUnderlyings(reportId);
+        }
+        return ResponseEntity.ok(underlyings);
     }
 
     @RequestMapping("/reports/{id}/ificsv/{year}/{endMonth}/{tradeType}")

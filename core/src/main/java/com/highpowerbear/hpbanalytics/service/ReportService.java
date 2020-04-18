@@ -2,15 +2,11 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.database.Execution;
-import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
-import com.highpowerbear.hpbanalytics.database.SplitExecution;
-import com.highpowerbear.hpbanalytics.database.Trade;
+import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,18 +27,18 @@ public class ReportService {
     private static final Logger log = LoggerFactory.getLogger(ReportService.class);
 
     private final ExecutionRepository executionRepository;
-    private final ReportDao reportDao;
+    private final TradeRepository tradeRepository;
     private final TradeCalculatorService tradeCalculatorService;
     private final MessageService messageService;
 
     @Autowired
     public ReportService(ExecutionRepository executionRepository,
-                         ReportDao reportDao,
+                         TradeRepository tradeRepository,
                          TradeCalculatorService tradeCalculatorService,
                          MessageService messageService) {
 
         this.executionRepository = executionRepository;
-        this.reportDao = reportDao;
+        this.tradeRepository = tradeRepository;
         this.tradeCalculatorService = tradeCalculatorService;
         this.messageService = messageService;
     }
@@ -62,16 +58,15 @@ public class ReportService {
     public void analyzeAll(int reportId) {
         log.info("BEGIN report processing for report " + reportId);
 
-        reportDao.deleteAllTrades(reportId);
+        tradeRepository.deleteByReportId(reportId);
         List<Execution> executions = executionRepository.getByReportIdOrderByFillDateAsc(reportId);
 
         if (executions.isEmpty()) {
             log.info("END report processing for report " + reportId + ", no executions, skipping");
             return;
         }
-
         List<Trade> trades = analyze(executions);
-        reportDao.createTrades(trades);
+        tradeRepository.saveAll(trades);
 
         log.info("END report processing for report " + reportId);
     }
@@ -87,10 +82,10 @@ public class ReportService {
         int reportId = execution.getReportId();
         String symbol = execution.getSymbol();
 
-        List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        List<Trade> tradesAffected = tradeRepository.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
-        reportDao.deleteTrades(tradesAffected);
+        tradeRepository.deleteAll(tradesAffected); // TODO cascade delete splitExecutions, check if it is already handled
         executionRepository.deleteById(executionId);
 
         SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
@@ -101,7 +96,7 @@ public class ReportService {
         List<Trade> newTrades = analyzeSingleSymbol(executionsToAnalyzeAgain, (omitFirstSe ? null : firstSe));
 
         if (!newTrades.isEmpty()) {
-            reportDao.createTrades(newTrades);
+            tradeRepository.saveAll(newTrades);
         }
     }
 
@@ -110,11 +105,11 @@ public class ReportService {
         int reportId = execution.getReportId();
         String symbol = execution.getSymbol();
 
-        List<Trade> tradesAffected = reportDao.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        List<Trade> tradesAffected = tradeRepository.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
         log.info("deleting " + tradesAffected.size() + " trades");
-        reportDao.deleteTrades(tradesAffected);
+        tradeRepository.deleteAll(tradesAffected); // TODO cascade delete splitExecutions, check if it is already handled
 
         execution = executionRepository.save(execution);
 
@@ -141,7 +136,7 @@ public class ReportService {
         }
 
         log.info("creating " + trades.size() + " trades");
-        reportDao.createTrades(trades);
+        tradeRepository.saveAll(trades);
     }
 
     public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
