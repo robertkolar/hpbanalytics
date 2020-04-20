@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.database;
 
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -11,7 +12,7 @@ import java.util.List;
 /**
  * Created by robertk on 4/13/2020.
  */
-public interface TradeRepository extends JpaRepository<Trade, Long> {
+public interface TradeRepository extends JpaRepository<Trade, Long>, JpaSpecificationExecutor<Trade> {
 
     List<Trade> getByReportIdAndTypeAndCloseDateBetweenOrderByOpenDateAsc(int reportId, TradeType tradeType, LocalDateTime beginDate, LocalDateTime endDate); // TODO check if inclusive, should be
     void deleteByReportId(int reportId); // TODO cascade delete splitExecutions, check if it is already handled

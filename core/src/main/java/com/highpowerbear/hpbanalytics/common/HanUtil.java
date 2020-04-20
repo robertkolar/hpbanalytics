@@ -1,11 +1,5 @@
 package com.highpowerbear.hpbanalytics.common;
 
-import com.highpowerbear.hpbanalytics.database.Trade;
-import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
-import org.springframework.data.domain.Example;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -65,16 +59,5 @@ public class HanUtil {
 
     public static String formatExchangeRateDate(final LocalDate localDate) {
         return localDate.format(EXCHANGE_RATE_DATE_FORMATTER);
-    }
-
-    public static Example<Trade> createTradeFilter(int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
-        Trade example = new Trade();
-        example.setReportId(reportId);
-        example.setType(tradeType);
-        example.setSecType(secType);
-        example.setCurrency(currency);
-        example.setUnderlying(underlying);
-
-        return Example.of(example);
     }
 }

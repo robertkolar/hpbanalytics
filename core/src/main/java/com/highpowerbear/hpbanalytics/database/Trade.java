@@ -100,123 +100,138 @@ public class Trade implements Serializable {
         return reportId;
     }
 
-    public void setReportId(Integer reportId) {
+    public Trade setReportId(Integer reportId) {
         this.reportId = reportId;
+        return this;
     }
 
     public TradeType getType() {
         return type;
     }
 
-    public void setType(TradeType type) {
+    public Trade setType(TradeType type) {
         this.type = type;
+        return this;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
+    public Trade setSymbol(String symbol) {
         this.symbol = symbol;
+        return this;
     }
 
     public String getUnderlying() {
         return underlying;
     }
 
-    public void setUnderlying(String underlying) {
+    public Trade setUnderlying(String underlying) {
         this.underlying = underlying;
+        return this;
     }
 
     public Currency getCurrency() {
         return currency;
     }
 
-    public void setCurrency(Currency currency) {
+    public Trade setCurrency(Currency currency) {
         this.currency = currency;
+        return this;
     }
 
     public SecType getSecType() {
         return secType;
     }
 
-    public void setSecType(SecType secType) {
+    public Trade setSecType(SecType secType) {
         this.secType = secType;
+        return this;
     }
 
     public Integer getCumulativeQuantity() {
         return cumulativeQuantity;
     }
 
-    public void setCumulativeQuantity(Integer cummulativeQuantity) {
-        this.cumulativeQuantity = cummulativeQuantity;
+    public Trade setCumulativeQuantity(Integer cumulativeQuantity) {
+        this.cumulativeQuantity = cumulativeQuantity;
+        return this;
     }
 
     public TradeStatus getStatus() {
         return status;
     }
 
-    public void setStatus(TradeStatus status) {
+    public Trade setStatus(TradeStatus status) {
         this.status = status;
+        return this;
     }
 
     public Integer getOpenPosition() {
         return openPosition;
     }
 
-    public void setOpenPosition(Integer openPosition) {
+    public Trade setOpenPosition(Integer openPosition) {
         this.openPosition = openPosition;
+        return this;
     }
 
     public BigDecimal getAvgOpenPrice() {
         return avgOpenPrice;
     }
 
-    public void setAvgOpenPrice(BigDecimal avgOpenPrice) {
+    public Trade setAvgOpenPrice(BigDecimal avgOpenPrice) {
         this.avgOpenPrice = avgOpenPrice;
+        return this;
     }
 
     public LocalDateTime getOpenDate() {
         return openDate;
     }
 
-    public void setOpenDate(LocalDateTime openDate) {
+    public Trade setOpenDate(LocalDateTime openDate) {
         this.openDate = openDate;
+        return this;
     }
 
     public BigDecimal getAvgClosePrice() {
         return avgClosePrice;
     }
 
-    public void setAvgClosePrice(BigDecimal avgClosePrice) {
+    public Trade setAvgClosePrice(BigDecimal avgClosePrice) {
         this.avgClosePrice = avgClosePrice;
+        return this;
     }
 
     public LocalDateTime getCloseDate() {
         return closeDate;
     }
 
-    public void setCloseDate(LocalDateTime closeDate) {
+    public Trade setCloseDate(LocalDateTime closeDate) {
         this.closeDate = closeDate;
+        return this;
     }
 
     public BigDecimal getProfitLoss() {
         return profitLoss;
     }
 
-    public void setProfitLoss(BigDecimal profitLoss) {
+    public Trade setProfitLoss(BigDecimal profitLoss) {
         this.profitLoss = profitLoss;
+        return this;
     }
 
     public List<SplitExecution> getSplitExecutions() {
         return splitExecutions;
     }
 
-    public void setSplitExecutions(List<SplitExecution> splitExecutions) {
+    public Trade setSplitExecutions(List<SplitExecution> splitExecutions) {
         for (SplitExecution se : splitExecutions) {
             se.setTrade(this);
         }
         this.splitExecutions = splitExecutions;
+        return this;
     }
 
     public SplitExecution getLastSplitExecution() {

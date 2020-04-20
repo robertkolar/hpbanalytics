@@ -1,30 +1,23 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
-import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.*;
-import com.highpowerbear.hpbanalytics.service.MessageService;
+import com.highpowerbear.hpbanalytics.model.DataFilter;
+import com.highpowerbear.hpbanalytics.model.Statistics;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
-import com.highpowerbear.hpbanalytics.repository.filter.ExecutionFilter;
-import com.highpowerbear.hpbanalytics.repository.filter.FilterParser;
-import com.highpowerbear.hpbanalytics.repository.filter.TradeFilter;
-import com.highpowerbear.hpbanalytics.database.Execution;
-import com.highpowerbear.hpbanalytics.database.Trade;
+import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
+import com.highpowerbear.hpbanalytics.service.MessageService;
 import com.highpowerbear.hpbanalytics.service.ReportService;
 import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
-import com.highpowerbear.hpbanalytics.model.Statistics;
-import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,29 +32,23 @@ public class AppRestController {
 
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
-    private final ReportDao reportDao;
     private final StatisticsCalculatorService statisticsCalculatorService;
     private final ReportService reportService;
-    private final FilterParser filterParser;
     private final IfiCsvGeneratorService ifiCsvGeneratorService;
     private final MessageService messageService;
 
     @Autowired
     public AppRestController(ExecutionRepository executionRepository,
                              TradeRepository tradeRepository,
-                             ReportDao reportDao,
                              StatisticsCalculatorService statisticsCalculatorService,
                              ReportService reportService,
-                             FilterParser filterParser,
                              IfiCsvGeneratorService ifiCsvGeneratorService,
                              MessageService messageService) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
-        this.reportDao = reportDao;
         this.statisticsCalculatorService = statisticsCalculatorService;
         this.reportService = reportService;
-        this.filterParser = filterParser;
         this.ifiCsvGeneratorService = ifiCsvGeneratorService;
         this.messageService = messageService;
     }
@@ -84,13 +71,15 @@ public class AppRestController {
     @RequestMapping("/reports/{id}/executions")
     public ResponseEntity<?> getFilteredExecutions(
             @PathVariable("id") int reportId,
-            @RequestParam(required = false, value = "filter") String jsonFilter,
-            @RequestParam("start") int start,
-            @RequestParam("limit") int limit) {
+            @RequestParam("page") int page,
+            @RequestParam("limit") int limit,
+            @RequestParam(required = false, value = "filter") DataFilter filter) {
 
-        ExecutionFilter filter = filterParser.parseExecutionFilter(jsonFilter);
-        List<Execution> executions = reportDao.getFilteredExecutions(reportId, filter, start, limit);
-        long numExecutions = reportDao.getNumFilteredExecutions(reportId, filter);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "fillDate"));
+        Specification<Execution> specification = DataFilters.executionFilterSpecification(filter);
+
+        List<Execution> executions = executionRepository.findAll(specification, pageable).getContent();
+        long numExecutions = executionRepository.count(specification);
 
         return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
@@ -129,13 +118,15 @@ public class AppRestController {
     @RequestMapping("/reports/{id}/trades")
     public ResponseEntity<?> getFilteredTrades(
             @PathVariable("id") int reportId,
-            @RequestParam(required = false, value = "filter") String jsonFilter,
-            @RequestParam("start") int start,
-            @RequestParam("limit") int limit) {
+            @RequestParam("page") int page,
+            @RequestParam("limit") int limit,
+            @RequestParam(required = false, value = "filter") DataFilter filter) {
 
-        TradeFilter filter = filterParser.parseTradeFilter(jsonFilter);
-        List<Trade> trades = reportDao.getFilteredTrades(reportId, filter, start, limit);
-        long numTrades = reportDao.getNumFilteredTrades(reportId, filter);
+        Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "openDate"));
+        Specification<Trade> specification = DataFilters.tradeFilterSpecification(filter);
+
+        List<Trade> trades = tradeRepository.findAll(specification, pageable).getContent();
+        long numTrades = tradeRepository.count(specification);
 
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }

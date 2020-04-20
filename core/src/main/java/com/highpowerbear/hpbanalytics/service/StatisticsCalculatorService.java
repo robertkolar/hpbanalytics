@@ -2,15 +2,11 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.SecType;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.repository.ReportDao;
-import com.highpowerbear.hpbanalytics.database.Execution;
-import com.highpowerbear.hpbanalytics.database.SplitExecution;
-import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
+import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.Statistics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +32,6 @@ import java.util.stream.Collectors;
 public class StatisticsCalculatorService {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
 
-    private final ReportDao reportDao;
     private final TradeRepository tradeRepository;
     private final MessageService messageService;
     private final TradeCalculatorService tradeCalculatorService;
@@ -44,11 +39,10 @@ public class StatisticsCalculatorService {
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     @Autowired
-    public StatisticsCalculatorService(ReportDao reportDao,
-                                       TradeRepository tradeRepository,
+    public StatisticsCalculatorService(TradeRepository tradeRepository,
                                        MessageService messageService,
                                        TradeCalculatorService tradeCalculatorService) {
-        this.reportDao = reportDao;
+
         this.tradeRepository = tradeRepository;
         this.messageService = messageService;
         this.tradeCalculatorService = tradeCalculatorService;
@@ -77,7 +71,7 @@ public class StatisticsCalculatorService {
     public void calculateStatistics(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
         log.info("BEGIN statistics calculation for report " + reportId + ", interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
-        Example<Trade> filter = HanUtil.createTradeFilter(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
+        Example<Trade> filter = DataFilters.tradeFilterByExample(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
         List<Statistics> stats = doCalculate(trades, interval);
