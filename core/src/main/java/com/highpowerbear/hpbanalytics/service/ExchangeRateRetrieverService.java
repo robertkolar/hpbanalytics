@@ -47,21 +47,21 @@ public class ExchangeRateRetrieverService {
         final int daysBack = applicationProperties.getFixer().getDaysBack();
 
         for (int i = 0; i < daysBack; i++) {
-            ExchangeRate exchangeRate = new ExchangeRate();
             LocalDate localDate = LocalDate.now().plusDays(i - daysBack);
             String date = HanUtil.formatExchangeRateDate(localDate);
 
-            exchangeRate.setDate(date);
             ExchangeRates exchangeRates = retrieve(date);
 
-            exchangeRate.setEurUsd(exchangeRates.getRate(Currency.USD));
-            exchangeRate.setEurGbp(exchangeRates.getRate(Currency.GBP));
-            exchangeRate.setEurChf(exchangeRates.getRate(Currency.CHF));
-            exchangeRate.setEurAud(exchangeRates.getRate(Currency.AUD));
-            exchangeRate.setEurJpy(exchangeRates.getRate(Currency.JPY));
-            exchangeRate.setEurKrw(exchangeRates.getRate(Currency.KRW));
-            exchangeRate.setEurHkd(exchangeRates.getRate(Currency.HKD));
-            exchangeRate.setEurSgd(exchangeRates.getRate(Currency.SGD));
+            ExchangeRate exchangeRate = new ExchangeRate()
+                    .setDate(date)
+                    .setEurUsd(exchangeRates.getRate(Currency.USD))
+                    .setEurGbp(exchangeRates.getRate(Currency.GBP))
+                    .setEurChf(exchangeRates.getRate(Currency.CHF))
+                    .setEurAud(exchangeRates.getRate(Currency.AUD))
+                    .setEurJpy(exchangeRates.getRate(Currency.JPY))
+                    .setEurKrw(exchangeRates.getRate(Currency.KRW))
+                    .setEurHkd(exchangeRates.getRate(Currency.HKD))
+                    .setEurSgd(exchangeRates.getRate(Currency.SGD));
 
             exchangeRateRepository.save(exchangeRate);
         }

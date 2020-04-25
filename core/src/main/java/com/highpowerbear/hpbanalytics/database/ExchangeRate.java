@@ -65,71 +65,80 @@ public class ExchangeRate implements Serializable {
         return date;
     }
 
-    public void setDate(String date) {
+    public ExchangeRate setDate(String date) {
         this.date = date;
+        return this;
     }
 
     public Double getEurUsd() {
         return eurUsd;
     }
 
-    public void setEurUsd(Double eurUsd) {
+    public ExchangeRate setEurUsd(Double eurUsd) {
         this.eurUsd = eurUsd;
+        return this;
     }
 
     public Double getEurGbp() {
         return eurGbp;
     }
 
-    public void setEurGbp(Double eurGbp) {
+    public ExchangeRate setEurGbp(Double eurGbp) {
         this.eurGbp = eurGbp;
+        return this;
     }
 
     public Double getEurChf() {
         return eurChf;
     }
 
-    public void setEurChf(Double eurChf) {
+    public ExchangeRate setEurChf(Double eurChf) {
         this.eurChf = eurChf;
+        return this;
     }
 
     public Double getEurAud() {
         return eurAud;
     }
 
-    public void setEurAud(Double eurAud) {
+    public ExchangeRate setEurAud(Double eurAud) {
         this.eurAud = eurAud;
+        return this;
     }
 
     public Double getEurJpy() {
         return eurJpy;
     }
 
-    public void setEurJpy(Double eurJpy) {
+    public ExchangeRate setEurJpy(Double eurJpy) {
         this.eurJpy = eurJpy;
+        return this;
     }
 
     public Double getEurKrw() {
         return eurKrw;
     }
 
-    public void setEurKrw(Double eurKrw) {
+    public ExchangeRate setEurKrw(Double eurKrw) {
         this.eurKrw = eurKrw;
+        return this;
     }
 
     public Double getEurHkd() {
         return eurHkd;
     }
 
-    public void setEurHkd(Double eurHkd) {
+    public ExchangeRate setEurHkd(Double eurHkd) {
         this.eurHkd = eurHkd;
+        return this;
     }
 
     public Double getEurSgd() {
         return eurSgd;
     }
 
-    public void setEurSgd(Double eurSgd) {
+    public ExchangeRate setEurSgd(Double eurSgd) {
         this.eurSgd = eurSgd;
+        return this;
     }
 }

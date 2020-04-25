@@ -89,8 +89,9 @@ public class AppRestController {
             @PathVariable("id") int reportId,
             @RequestBody Execution execution) {
 
-        execution.setId(null);
-        execution.setReportId(reportId);
+        execution
+                .setId(null)
+                .setReportId(reportId);
 
         reportService.newExecution(execution);
         messageService.sendWsMessage(WsTopic.EXECUTION, "new execution processed");

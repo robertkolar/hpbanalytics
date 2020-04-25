@@ -76,47 +76,53 @@ public class SplitExecution implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
+    public SplitExecution setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public Execution getExecution() {
         return execution;
     }
 
-    public void setExecution(Execution execution) {
+    public SplitExecution setExecution(Execution execution) {
         this.execution = execution;
+        return this;
     }
 
     public Integer getSplitQuantity() {
         return splitQuantity;
     }
 
-    public void setSplitQuantity(Integer splitQuantity) {
+    public SplitExecution setSplitQuantity(Integer splitQuantity) {
         this.splitQuantity = splitQuantity;
+        return this;
     }
 
     public Trade getTrade() {
         return trade;
     }
 
-    public void setTrade(Trade trade) {
+    public SplitExecution setTrade(Trade trade) {
         this.trade = trade;
+        return this;
     }
 
     public Integer getCurrentPosition() {
         return currentPosition;
     }
 
-    public void setCurrentPosition(Integer currentPosition) {
+    public SplitExecution setCurrentPosition(Integer currentPosition) {
         this.currentPosition = currentPosition;
+        return this;
     }
 
     public LocalDateTime getFillDate() {
         return fillDate;
     }
 
-    public void setFillDate(LocalDateTime fillDate) {
+    public SplitExecution setFillDate(LocalDateTime fillDate) {
         this.fillDate = fillDate;
+        return this;
     }
 }

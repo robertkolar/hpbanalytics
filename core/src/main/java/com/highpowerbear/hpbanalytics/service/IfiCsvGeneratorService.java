@@ -139,127 +139,130 @@ public class IfiCsvGeneratorService {
         return sb.toString();
     }
 
-    private void writeCsvHeaderShort(StringBuilder sb) {
-        sb.append("Zap. št.").append(DL);
-        sb.append("Vrsta IFI").append(DL);
-        sb.append("Vrsta posla").append(DL);
-        sb.append("Trgovalna koda").append(DL);
-        sb.append("Datum odsvojitve").append(DL);
-        sb.append("Količina odsvojenega IFI").append(DL);
-        sb.append("Vrednost ob odsvojitvi (na enoto) USD").append(DL);
-        sb.append("Vrednost ob odsvojitvi (na enoto) EUR").append(DL);
-        sb.append("Datum pridobitve").append(DL);
-        sb.append("Način pridobitve").append(DL);
-        sb.append("Količina").append(DL);
-        sb.append("Vrednost ob pridobitvi na enoto) USD").append(DL);
-        sb.append("Vrednost ob pridobitvi (na enoto) EUR").append(DL);
-        sb.append("Zaloga IFI").append(DL);
-        sb.append("Dobiček Izguba EUR").append(NL);
+    private void writeCsvHeaderShort(StringBuilder stringBuilder) {
+        stringBuilder
+                .append("Zap. št.").append(DL)
+                .append("Vrsta IFI").append(DL)
+                .append("Vrsta posla").append(DL)
+                .append("Trgovalna koda").append(DL)
+                .append("Datum odsvojitve").append(DL)
+                .append("Količina odsvojenega IFI").append(DL)
+                .append("Vrednost ob odsvojitvi (na enoto) USD").append(DL)
+                .append("Vrednost ob odsvojitvi (na enoto) EUR").append(DL)
+                .append("Datum pridobitve").append(DL)
+                .append("Način pridobitve").append(DL)
+                .append("Količina").append(DL)
+                .append("Vrednost ob pridobitvi na enoto) USD").append(DL)
+                .append("Vrednost ob pridobitvi (na enoto) EUR").append(DL)
+                .append("Zaloga IFI").append(DL)
+                .append("Dobiček Izguba EUR").append(NL);
     }
 
-    private void writeCsvHeaderLong(StringBuilder sb) {
-        sb.append("Zap. št.").append(DL);
-        sb.append("Vrsta IFI").append(DL);
-        sb.append("Vrsta posla").append(DL);
-        sb.append("Trgovalna koda").append(DL);
-        sb.append("Datum pridobitve").append(DL);
-        sb.append("Način pridobitve").append(DL);
-        sb.append("Količina").append(DL);
-        sb.append("Nabavna vrednost ob pridobitvi (na enoto) USD").append(DL);
-        sb.append("Nabavna vrednost ob pridobitvi (na enoto) EUR").append(DL);
-        sb.append("Datum odsvojitve").append(DL);
-        sb.append("Količina odsvojenega IFI").append(DL);
-        sb.append("Vrednost ob odsvojitvi (na enoto) USD").append(DL);
-        sb.append("Vrednost ob odsvojitvi (na enoto) EUR").append(DL);
-        sb.append("Zaloga IFI").append(DL);
-        sb.append("Dobiček Izguba EUR").append(NL);
+    private void writeCsvHeaderLong(StringBuilder stringBuilder) {
+        stringBuilder
+                .append("Zap. št.").append(DL)
+                .append("Vrsta IFI").append(DL)
+                .append("Vrsta posla").append(DL)
+                .append("Trgovalna koda").append(DL)
+                .append("Datum pridobitve").append(DL)
+                .append("Način pridobitve").append(DL)
+                .append("Količina").append(DL)
+                .append("Nabavna vrednost ob pridobitvi (na enoto) USD").append(DL)
+                .append("Nabavna vrednost ob pridobitvi (na enoto) EUR").append(DL)
+                .append("Datum odsvojitve").append(DL)
+                .append("Količina odsvojenega IFI").append(DL)
+                .append("Vrednost ob odsvojitvi (na enoto) USD").append(DL)
+                .append("Vrednost ob odsvojitvi (na enoto) EUR").append(DL)
+                .append("Zaloga IFI").append(DL)
+                .append("Dobiček Izguba EUR").append(NL);
     }
 
-    private void writeTrade(StringBuilder sb, Trade trade, int i) {
-        sb.append(i).append(DL);
-        sb.append(secTypeMap.get(trade.getSecType())).append(DL);
-        sb.append(tradeTypeMap.get(trade.getType())).append(DL);
-        sb.append(trade.getSymbol()).append(DL);
+    private void writeTrade(StringBuilder stringBuilder, Trade trade, int i) {
+        stringBuilder
+                .append(i).append(DL)
+                .append(secTypeMap.get(trade.getSecType())).append(DL)
+                .append(tradeTypeMap.get(trade.getType())).append(DL)
+                .append(trade.getSymbol()).append(DL);
 
         for (int k = 0; k < 10; k++) {
-            sb.append(DL);
+            stringBuilder.append(DL);
         }
-        sb.append(NL);
+        stringBuilder.append(NL);
     }
 
-    private void writeTradeShortSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
-        sb.append(se.getFillDate().format(dtf)).append(DL);
-        sb.append(se.getSplitQuantity()).append(DL);
-
-        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
-        sb.append(nf.format(fillValueBase(se))).append(DL);
+    private void writeTradeShortSplitExecutionSell(StringBuilder stringBuilder, SplitExecution se, int i, int j) {
+        stringBuilder
+                .append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL)
+                .append(se.getFillDate().format(dtf)).append(DL)
+                .append(se.getSplitQuantity()).append(DL)
+                .append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL)
+                .append(nf.format(fillValueBase(se))).append(DL);
 
         for (int k = 0; k < 5; k++) {
-            sb.append(DL);
+            stringBuilder.append(DL);
         }
-        sb.append(NL);
+        stringBuilder.append(NL);
     }
 
-    private BigDecimal writeTradeShortSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        sb.append(i).append("_").append(j);
+    private BigDecimal writeTradeShortSplitExecutionBuy(StringBuilder stringBuilder, SplitExecution se, int i, int j) {
+        stringBuilder.append(i).append("_").append(j);
         for (int k = 0; k < 7; k++) {
-            sb.append(DL);
+            stringBuilder.append(DL);
         }
 
-        sb.append(DL);
-        sb.append(se.getFillDate().format(dtf)).append(DL);
-        sb.append(acquireType).append(DL);
-        sb.append(se.getSplitQuantity()).append(DL);
-
-        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
-        sb.append(nf.format(fillValueBase(se))).append(DL);
-        sb.append(se.getCurrentPosition()).append(DL);
+        stringBuilder
+                .append(DL)
+                .append(se.getFillDate().format(dtf)).append(DL)
+                .append(acquireType).append(DL)
+                .append(se.getSplitQuantity()).append(DL)
+                .append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL)
+                .append(nf.format(fillValueBase(se))).append(DL)
+                .append(se.getCurrentPosition()).append(DL);
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
             profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(se.getTrade());
-            sb.append(nf.format(profitLoss.doubleValue()));
+            stringBuilder.append(nf.format(profitLoss.doubleValue()));
         }
 
-        sb.append(NL);
+        stringBuilder.append(NL);
         return profitLoss;
     }
 
-    private void writeTradeLongSplitExecutionBuy(StringBuilder sb, SplitExecution se, int i, int j) {
-        sb.append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL);
-        sb.append(se.getFillDate().format(dtf)).append(DL);
-        sb.append(acquireType).append(DL);
-        sb.append(se.getSplitQuantity()).append(DL);
-
-        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
-        sb.append(nf.format(fillValueBase(se))).append(DL);
+    private void writeTradeLongSplitExecutionBuy(StringBuilder stringBuilder, SplitExecution se, int i, int j) {
+        stringBuilder
+                .append(i).append("_").append(j).append(DL).append(DL).append(DL).append(DL)
+                .append(se.getFillDate().format(dtf)).append(DL)
+                .append(acquireType).append(DL)
+                .append(se.getSplitQuantity()).append(DL)
+                .append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL)
+                .append(nf.format(fillValueBase(se))).append(DL);
 
         for (int k = 0; k < 4; k++) {
-            sb.append(DL);
+            stringBuilder.append(DL);
         }
-        sb.append(NL);
+        stringBuilder.append(NL);
     }
 
-    private BigDecimal writeTradeLongSplitExecutionSell(StringBuilder sb, SplitExecution se, int i, int j) {
-        sb.append(i).append("_").append(j);
+    private BigDecimal writeTradeLongSplitExecutionSell(StringBuilder stringBuilder, SplitExecution se, int i, int j) {
+        stringBuilder.append(i).append("_").append(j);
         for (int k = 0; k < 8; k++) {
-            sb.append(DL);
+            stringBuilder.append(DL);
         }
-        sb.append(DL);
-        sb.append(se.getFillDate().format(dtf)).append(DL);
-        sb.append(se.getSplitQuantity()).append(DL);
-
-        sb.append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL);
-        sb.append(nf.format(fillValueBase(se))).append(DL);
-        sb.append(se.getCurrentPosition()).append(DL);
+        stringBuilder
+                .append(DL)
+                .append(se.getFillDate().format(dtf)).append(DL)
+                .append(se.getSplitQuantity()).append(DL)
+                .append(se.getExecution().getCurrency() == Currency.USD ? nf.format(fillValue(se)) : "").append(DL)
+                .append(nf.format(fillValueBase(se))).append(DL)
+                .append(se.getCurrentPosition()).append(DL);
 
         BigDecimal profitLoss = null;
         if (se.getCurrentPosition().equals(0)) {
             profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(se.getTrade());
-            sb.append(nf.format(profitLoss.doubleValue()));
+            stringBuilder.append(nf.format(profitLoss.doubleValue()));
         }
-        sb.append(NL);
+        stringBuilder.append(NL);
 
         return profitLoss;
     }

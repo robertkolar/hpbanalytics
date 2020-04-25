@@ -79,111 +79,125 @@ public class Execution implements Serializable, Comparable<Execution> {
         return id;
     }
 
-    public void setId(Long id) {
+    public Execution setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public Integer getReportId() {
         return reportId;
     }
 
-    public void setReportId(Integer reportId) {
+    public Execution setReportId(Integer reportId) {
         this.reportId = reportId;
+        return this;
     }
 
     public LocalDateTime getReceivedDate() {
         return receivedDate;
     }
 
-    public void setReceivedDate(LocalDateTime receivedDate) {
+    public Execution setReceivedDate(LocalDateTime receivedDate) {
         this.receivedDate = receivedDate;
+        return this;
     }
 
     public String getComment() {
         return comment;
     }
 
-    public void setComment(String comment) {
+    public Execution setComment(String comment) {
         this.comment = comment;
+        return this;
     }
 
     public String getOrigin() {
         return origin;
     }
 
-    public void setOrigin(String origin) {
+    public Execution setOrigin(String origin) {
         this.origin = origin;
+        return this;
     }
 
     public String getReferenceId() {
         return referenceId;
     }
 
-    public void setReferenceId(String referenceId) {
+    public Execution setReferenceId(String referenceId) {
         this.referenceId = referenceId;
+        return this;
     }
 
     public Action getAction() {
         return action;
     }
 
-    public void setAction(Action action) {
+    public Execution setAction(Action action) {
         this.action = action;
+        return this;
     }
 
     public SecType getSecType() {
         return secType;
     }
 
-    public void setSecType(SecType secType) {
+    public Execution setSecType(SecType secType) {
         this.secType = secType;
+        return this;
     }
 
     public Integer getQuantity() {
         return quantity;
     }
 
-    public void setQuantity(Integer quantity) {
+    public Execution setQuantity(Integer quantity) {
         this.quantity = quantity;
+        return this;
     }
 
     public String getSymbol() {
         return symbol;
     }
 
-    public void setSymbol(String symbol) {
+    public Execution setSymbol(String symbol) {
         this.symbol = symbol;
+        return this;
     }
 
     public String getUnderlying() {
         return underlying;
     }
 
-    public void setUnderlying(String underlying) {
+    public Execution setUnderlying(String underlying) {
         this.underlying = underlying;
+        return this;
     }
 
     public Currency getCurrency() {
         return currency;
     }
 
-    public void setCurrency(Currency currency) {
+    public Execution setCurrency(Currency currency) {
         this.currency = currency;
+        return this;
     }
 
     public LocalDateTime getFillDate() {
         return fillDate;
     }
     
-    public void setFillDate(LocalDateTime fillDate) {
+    public Execution setFillDate(LocalDateTime fillDate) {
         this.fillDate = fillDate;
+        return this;
     }
 
     public BigDecimal getFillPrice() {
         return fillPrice;
     }
 
-    public void setFillPrice(BigDecimal fillPrice) {
+    public Execution setFillPrice(BigDecimal fillPrice) {
         this.fillPrice = fillPrice;
+        return this;
     }
 }

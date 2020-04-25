@@ -92,8 +92,9 @@ public class Trade implements Serializable {
         return id;
     }
 
-    public void setId(Long id) {
+    public Trade setId(Long id) {
         this.id = id;
+        return this;
     }
 
     public Integer getReportId() {

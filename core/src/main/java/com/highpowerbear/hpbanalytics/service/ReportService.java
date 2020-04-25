@@ -43,6 +43,7 @@ public class ReportService {
         this.messageService = messageService;
     }
 
+    // TODO listen
     public void executionReceived(Execution execution) {
         execution.setReceivedDate(LocalDateTime.now());
 
@@ -140,35 +141,33 @@ public class ReportService {
     }
 
     public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
-        Execution execution = new Execution();
-
-        execution.setReceivedDate(LocalDateTime.now());
-        execution.setReportId(trade.getReportId());
-        execution.setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE");
-        execution.setOrigin("INTERNAL");
-        execution.setReferenceId("N/A");
-        execution.setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY);
-        execution.setQuantity(Math.abs(trade.getOpenPosition()));
-        execution.setSymbol(trade.getSymbol());
-        execution.setUnderlying(trade.getUnderlying());
-        execution.setCurrency(trade.getCurrency());
-        execution.setSecType(trade.getSecType());
-        execution.setFillDate(closeDate);
-        execution.setFillPrice(closePrice);
-
-        newExecution(execution);
+        newExecution(new Execution()
+                .setReceivedDate(LocalDateTime.now())
+                .setReportId(trade.getReportId())
+                .setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE")
+                .setOrigin("INTERNAL")
+                .setReferenceId("N/A")
+                .setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY)
+                .setQuantity(Math.abs(trade.getOpenPosition()))
+                .setSymbol(trade.getSymbol())
+                .setUnderlying(trade.getUnderlying())
+                .setCurrency(trade.getCurrency())
+                .setSecType(trade.getSecType())
+                .setFillDate(closeDate)
+                .setFillPrice(closePrice));
     }
 
     private List<Trade> analyze(List<Execution> executions) {
         return createTrades(createSplitExecutions(executions));
     }
     
-    private List<Trade> analyzeSingleSymbol(List<Execution> executions, SplitExecution firstSe) {
-        if (firstSe != null) {
-            firstSe.setId(null);
-            firstSe.setTrade(null);
+    private List<Trade> analyzeSingleSymbol(List<Execution> executions, SplitExecution firstSplitExecution) {
+        if (firstSplitExecution != null) {
+            firstSplitExecution
+                    .setId(null)
+                    .setTrade(null);
         }
-        return createTradesSingleSymbol(createSesSingleSymbol(executions, firstSe));
+        return createTradesSingleSymbol(createSesSingleSymbol(executions, firstSplitExecution));
     }
     
     
@@ -197,46 +196,41 @@ public class ReportService {
         for (Execution e : executions) {
             int ePos = (e.getAction() == Action.BUY ? e.getQuantity() : -e.getQuantity());
             int newPos = currentPos + ePos;
-            SplitExecution se;
 
             if (currentPos < 0 && newPos > 0) {
                 // split
-                se = new SplitExecution(); // first
-                se.setExecution(e);
-                se.setFillDate(e.getFillDate());
-                se.setSplitQuantity(-currentPos);
-                se.setCurrentPosition(0);
-                sesSingleSymbol.add(se); 
-                se = new SplitExecution(); //second
-                se.setExecution(e);
-                se.setFillDate(e.getFillDate());
-                se.setSplitQuantity(newPos);
-                se.setCurrentPosition(newPos);
-                sesSingleSymbol.add(se);
+                sesSingleSymbol.add(new SplitExecution() // first
+                        .setExecution(e)
+                        .setFillDate(e.getFillDate())
+                        .setSplitQuantity(-currentPos)
+                        .setCurrentPosition(0));
+
+                sesSingleSymbol.add( new SplitExecution() // second
+                        .setExecution(e)
+                        .setFillDate(e.getFillDate())
+                        .setSplitQuantity(newPos)
+                        .setCurrentPosition(newPos));
 
             } else if (currentPos > 0 && newPos < 0) {
                 // split
-                se = new SplitExecution(); // first
-                se.setExecution(e);
-                se.setFillDate(e.getFillDate());
-                se.setSplitQuantity(currentPos);
-                se.setCurrentPosition(0);
-                sesSingleSymbol.add(se);
-                se = new SplitExecution(); //second
-                se.setExecution(e);
-                se.setFillDate(e.getFillDate());
-                se.setSplitQuantity(-newPos);
-                se.setCurrentPosition(newPos);
-                sesSingleSymbol.add(se);
+                sesSingleSymbol.add(new SplitExecution() // first
+                        .setExecution(e)
+                        .setFillDate(e.getFillDate())
+                        .setSplitQuantity(currentPos)
+                        .setCurrentPosition(0));
 
+                sesSingleSymbol.add(new SplitExecution() // second
+                        .setExecution(e)
+                        .setFillDate(e.getFillDate())
+                        .setSplitQuantity(-newPos)
+                        .setCurrentPosition(newPos));
             } else {
                 // normal
-                se = new SplitExecution();
-                se.setExecution(e);
-                se.setFillDate(e.getFillDate());
-                se.setSplitQuantity(e.getQuantity());
-                se.setCurrentPosition(newPos);
-                sesSingleSymbol.add(se);
+                sesSingleSymbol.add(new SplitExecution()
+                        .setExecution(e)
+                        .setFillDate(e.getFillDate())
+                        .setSplitQuantity(e.getQuantity())
+                        .setCurrentPosition(newPos));
             }
             currentPos = newPos;
         }
@@ -261,8 +255,8 @@ public class ReportService {
 
         while (!singleSymbolSet.isEmpty()) {
             Set<SplitExecution> singleTradeSet = new LinkedHashSet<>();
-            Trade trade = new Trade();
-            trade.setStatus(TradeStatus.OPEN);
+            Trade trade = new Trade()
+                    .setStatus(TradeStatus.OPEN);
 
             for (SplitExecution se : singleSymbolSet) {
                 singleTradeSet.add(se);
