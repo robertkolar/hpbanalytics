@@ -53,24 +53,17 @@ public class AppRestController {
         this.messageService = messageService;
     }
 
-    @RequestMapping("/ifiyears")
-    public ResponseEntity<?> getIfiYears() {
-        return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
-    }
+    @RequestMapping(method = RequestMethod.POST, value = "analyze")
+    public ResponseEntity<?> analyze() {
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}")
-    public ResponseEntity<?> analyzeReport(
-            @PathVariable("id") int reportId) {
-
-        reportService.analyzeAll(reportId);
-        messageService.sendWsMessage(WsTopic.TRADE, "report " + reportId + " analyzed");
+        reportService.analyzeAll();
+        messageService.sendWsMessage(WsTopic.TRADE, "analysis performed");
 
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping("/reports/{id}/executions")
+    @RequestMapping("execution")
     public ResponseEntity<?> getFilteredExecutions(
-            @PathVariable("id") int reportId,
             @RequestParam("page") int page,
             @RequestParam("limit") int limit,
             @RequestParam(required = false, value = "filter") DataFilter filter) {
@@ -84,14 +77,11 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/reports/{id}/executions")
+    @RequestMapping(method = RequestMethod.POST, value = "execution")
     public ResponseEntity<?> createExecution(
-            @PathVariable("id") int reportId,
             @RequestBody Execution execution) {
 
-        execution
-                .setId(null)
-                .setReportId(reportId);
+        execution.setId(null);
 
         reportService.newExecution(execution);
         messageService.sendWsMessage(WsTopic.EXECUTION, "new execution processed");
@@ -100,13 +90,12 @@ public class AppRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, value = "/reports/{id}/executions/{executionId}")
+    @RequestMapping(method = RequestMethod.DELETE, value = "execution/{executionId}")
     public ResponseEntity<?> deleteExecution(
-            @PathVariable("id") int reportId,
             @PathVariable("executionId") long executionId) {
 
         Execution execution = executionRepository.findById(executionId).orElse(null);
-        if (execution == null || reportId != execution.getReportId()) {
+        if (execution == null ) {
             return ResponseEntity.notFound().build();
         }
         reportService.deleteExecution(executionId);
@@ -116,9 +105,8 @@ public class AppRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping("/reports/{id}/trades")
+    @RequestMapping("trade")
     public ResponseEntity<?> getFilteredTrades(
-            @PathVariable("id") int reportId,
             @RequestParam("page") int page,
             @RequestParam("limit") int limit,
             @RequestParam(required = false, value = "filter") DataFilter filter) {
@@ -132,7 +120,7 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "/trades/{tradeId}/close")
+    @RequestMapping(method = RequestMethod.PUT, value = "trade/{tradeId}/close")
     public ResponseEntity<?> closeTrade(
             @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTradeRequest r) {
@@ -153,10 +141,22 @@ public class AppRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping("/reports/{id}/statistics/{interval}")
+    @RequestMapping("trade/underlyings")
+    public ResponseEntity<?> getUnderlyings(
+            @RequestParam(required = false, value = "openOnly") boolean openOnly) {
+
+        List<String> underlyings;
+        if (openOnly) {
+            underlyings = tradeRepository.findOpenUnderlyings();
+        } else {
+            underlyings = tradeRepository.findAllUnderlyings();
+        }
+        return ResponseEntity.ok(underlyings);
+    }
+
+    @RequestMapping("statistics")
     public ResponseEntity<?> getStatistics(
-            @PathVariable("id") int reportId,
-            @PathVariable("interval") StatisticsInterval interval,
+            @RequestParam("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") TradeType tradeType,
             @RequestParam(required = false, value = "secType") SecType secType,
             @RequestParam(required = false, value = "currency") Currency currency,
@@ -164,7 +164,7 @@ public class AppRestController {
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, reportId, tradeType, secType, currency, underlying, null);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -176,55 +176,43 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(statisticsPage, statistics.size()));
     }
 
-    @RequestMapping("reports/{id}/charts/{interval}")
-    public ResponseEntity<?> getCharts(
-            @PathVariable("id") int reportId,
-            @PathVariable("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") SecType secType,
-            @RequestParam(required = false, value = "currency") Currency currency,
-            @RequestParam(required = false, value = "underlying") String underlying) {
-
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, reportId, tradeType, secType, currency, underlying, 120);
-
-        return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
-    }
-
-    @RequestMapping(method = RequestMethod.PUT, value = "/reports/{id}/statistics/{interval}")
+    @RequestMapping(method = RequestMethod.POST, value = "statistics")
     public ResponseEntity<?> calculateStatistics(
-            @PathVariable("id") int reportId,
-            @PathVariable("interval") StatisticsInterval interval,
+            @RequestParam("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") TradeType tradeType,
             @RequestParam(required = false, value = "secType") SecType secType,
             @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        statisticsCalculatorService.calculateStatistics(interval, reportId, tradeType, secType, currency, underlying);
+        statisticsCalculatorService.calculateStatistics(interval, tradeType, secType, currency, underlying);
 
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping("/reports/{id}/underlyings")
-    public ResponseEntity<?> getUnderlyings(
-            @PathVariable("id") int reportId,
-            @RequestParam(required = false, value = "openOnly") boolean openOnly) {
+    @RequestMapping("statistics/charts")
+    public ResponseEntity<?> getCharts(
+            @RequestParam("interval") StatisticsInterval interval,
+            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
+            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "currency") Currency currency,
+            @RequestParam(required = false, value = "underlying") String underlying) {
 
-        List<String> underlyings;
-        if (openOnly) {
-            underlyings = tradeRepository.getOpenUnderlyings(reportId);
-        } else {
-            underlyings = tradeRepository.getAllUnderlyings(reportId);
-        }
-        return ResponseEntity.ok(underlyings);
+        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, tradeType, secType, currency, underlying, 120);
+
+        return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
 
-    @RequestMapping("/reports/{id}/ificsv/{year}/{endMonth}/{tradeType}")
-    public ResponseEntity<?> getIfiCsv(
-            @PathVariable("id") int reportId,
-            @PathVariable("year") int year,
-            @PathVariable("endMonth") int endMonth,
-            @PathVariable("tradeType") TradeType tradeType) {
+    @RequestMapping("ifi/years")
+    public ResponseEntity<?> getIfiYears() {
+        return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
+    }
 
-        return ResponseEntity.ok(ifiCsvGeneratorService.generate(reportId, year, endMonth, tradeType));
+    @RequestMapping("ifi/csv")
+    public ResponseEntity<?> getIfiCsv(
+            @RequestParam("year") int year,
+            @RequestParam("endMonth") int endMonth,
+            @RequestParam("tradeType") TradeType tradeType) {
+
+        return ResponseEntity.ok(ifiCsvGeneratorService.generate(year, endMonth, tradeType));
     }
 }

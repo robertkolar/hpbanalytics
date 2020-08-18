@@ -34,7 +34,6 @@ public class TradeCalculatorService {
         SplitExecution seLast = trade.getSplitExecutions().get(trade.getSplitExecutions().size() - 1);
 
         trade
-            .setReportId(seFirst.getExecution().getReportId())
             .setType(seFirst.getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT)
             .setSymbol(seFirst.getExecution().getSymbol())
             .setUnderlying(seFirst.getExecution().getUnderlying())

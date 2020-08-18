@@ -40,7 +40,6 @@ public class Trade implements Serializable {
     @SequenceGenerator(name="trade_generator", sequenceName = "trade_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "trade_generator")
     private Long id;
-    private Integer reportId;
     @Enumerated(EnumType.STRING)
     private TradeType type;
     private String symbol;
@@ -94,15 +93,6 @@ public class Trade implements Serializable {
 
     public Trade setId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public Integer getReportId() {
-        return reportId;
-    }
-
-    public Trade setReportId(Integer reportId) {
-        this.reportId = reportId;
         return this;
     }
 
@@ -247,7 +237,6 @@ public class Trade implements Serializable {
     public String toString() {
         return "Trade{" +
                 "id=" + id +
-                ", reportId=" + reportId +
                 ", type=" + type +
                 ", symbol='" + symbol + '\'' +
                 ", underlying='" + underlying + '\'' +

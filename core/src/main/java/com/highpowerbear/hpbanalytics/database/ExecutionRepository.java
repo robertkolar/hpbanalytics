@@ -11,7 +11,7 @@ import java.util.List;
  */
 public interface ExecutionRepository extends JpaRepository<Execution, Long>, JpaSpecificationExecutor<Execution> {
 
-    List<Execution> getByReportIdOrderByFillDateAsc(int reportId);
-    List<Execution> getByReportIdAndSymbolAndFillDateAfterOrderByFillDateAsc(int reportId, String symbol, LocalDateTime cutoffDate);
-    List<Execution> getByReportIdAndSymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(int reportId, String symbol, LocalDateTime cutoffDate);
+    List<Execution> findAllByOrderByFillDateAsc();
+    List<Execution> findBySymbolAndFillDateAfterOrderByFillDateAsc(String symbol, LocalDateTime cutoffDate);
+    List<Execution> findBySymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(String symbol, LocalDateTime cutoffDate);
 }

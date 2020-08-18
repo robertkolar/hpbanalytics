@@ -76,12 +76,12 @@ public class IfiCsvGeneratorService {
         nf.setGroupingUsed(false);
     }
 
-    public String generate(int reportId, int year, int endMonth, TradeType tradeType) {
-        log.info("BEGIN IfiCsvGenerator.generate, report=" + reportId + ", year=" + year +  ", endMonth=" + endMonth + ", tradeType=" + tradeType);
+    public String generate(int year, int endMonth, TradeType tradeType) {
+        log.info("BEGIN IfiCsvGenerator.generate year=" + year +  ", endMonth=" + endMonth + ", tradeType=" + tradeType);
 
         LocalDateTime beginDate = LocalDate.ofYearDay(year, 1).atStartOfDay();
         LocalDateTime endDate = YearMonth.of(year, endMonth).atEndOfMonth().plusDays(1).atStartOfDay();
-        List<Trade> trades = tradeRepository.getByReportIdAndTypeAndCloseDateBetweenOrderByOpenDateAsc(reportId, tradeType, beginDate, endDate);
+        List<Trade> trades = tradeRepository.findByTypeAndCloseDateBetweenOrderByOpenDateAsc(tradeType, beginDate, endDate);
 
         log.info("beginDate=" + beginDate + ", endDate=" + endDate + ", trades=" + trades.size());
         StringBuilder sb = new StringBuilder();
@@ -135,7 +135,7 @@ public class IfiCsvGeneratorService {
         }
         sb.append(nf.format(sumPl));
 
-        log.info("END IfiCsvGenerator.generate, report=" + reportId + ", year=" + year + ", tradeType=" + tradeType);
+        log.info("END IfiCsvGenerator.generate year=" + year + ", tradeType=" + tradeType);
         return sb.toString();
     }
 

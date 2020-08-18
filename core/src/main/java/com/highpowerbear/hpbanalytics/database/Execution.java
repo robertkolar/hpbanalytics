@@ -32,7 +32,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
-    private Integer reportId;
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime receivedDate;
     private String comment;
@@ -81,15 +80,6 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     public Execution setId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public Integer getReportId() {
-        return reportId;
-    }
-
-    public Execution setReportId(Integer reportId) {
-        this.reportId = reportId;
         return this;
     }
 

@@ -15,9 +15,8 @@ import java.text.MessageFormat;
  */
 public class DataFilters {
 
-    public static Example<Trade> tradeFilterByExample(int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
+    public static Example<Trade> tradeFilterByExample(TradeType tradeType, SecType secType, Currency currency, String underlying) {
         return Example.of(new Trade()
-                .setReportId(reportId)
                 .setType(tradeType)
                 .setSecType(secType)
                 .setCurrency(currency)

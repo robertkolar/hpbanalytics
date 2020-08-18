@@ -48,9 +48,9 @@ public class StatisticsCalculatorService {
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying, Integer maxPoints) {
 
-        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, reportId, tradeType, secType, currency, underlying));
+        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
             return new ArrayList<>();
         }
@@ -68,30 +68,29 @@ public class StatisticsCalculatorService {
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
-        log.info("BEGIN statistics calculation for report " + reportId + ", interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
+    public void calculateStatistics(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying) {
+        log.info("BEGIN statistics calculation for interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
-        Example<Trade> filter = DataFilters.tradeFilterByExample(reportId, normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
+        Example<Trade> filter = DataFilters.tradeFilterByExample(normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
         List<Statistics> stats = doCalculate(trades, interval);
-        statisticsMap.put(statisticsKey(interval, reportId, tradeType, secType, currency, underlying), stats);
+        statisticsMap.put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);
 
-        log.info("END statistics calculation for report " + reportId + ", interval=" + interval);
+        log.info("END statistics calculation for interval=" + interval);
 
-        messageService.sendWsMessage(WsTopic.STATISTICS, "statistics calculated for report " + reportId);
+        messageService.sendWsMessage(WsTopic.STATISTICS, "statistics calculated");
     }
 
-    private String statisticsKey(StatisticsInterval interval, int reportId, TradeType tradeType, SecType secType, Currency currency, String underlying) {
+    private String statisticsKey(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying) {
 
-        String reportIdKey = String.valueOf(reportId);
         String intervalKey = interval.name();
         String tradeTypeKey = tradeType == null ? "ALL" : tradeType.toString();
         String secTypeKey = secType == null ? "ALL" : secType.toString();
         String currencyKey = currency == null ? "ALL" : currency.toString();
         String underlyingKey = underlying == null ? "ALL" : underlying;
 
-        return reportIdKey + "_" + intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
+        return intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
     }
 
     private <T> T normalizeParam(T param) {

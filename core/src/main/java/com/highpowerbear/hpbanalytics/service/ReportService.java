@@ -56,20 +56,20 @@ public class ReportService {
     }
 
     @Transactional
-    public void analyzeAll(int reportId) {
-        log.info("BEGIN report processing for report " + reportId);
+    public void analyzeAll() {
+        log.info("BEGIN analysis");
 
-        tradeRepository.deleteByReportId(reportId);
-        List<Execution> executions = executionRepository.getByReportIdOrderByFillDateAsc(reportId);
+        tradeRepository.deleteAll();
+        List<Execution> executions = executionRepository.findAllByOrderByFillDateAsc();
 
         if (executions.isEmpty()) {
-            log.info("END report processing for report " + reportId + ", no executions, skipping");
+            log.info("END analysis , no executions, skipping");
             return;
         }
         List<Trade> trades = analyze(executions);
         tradeRepository.saveAll(trades);
 
-        log.info("END report processing for report " + reportId);
+        log.info("END analysis");
     }
 
     @Transactional
@@ -80,10 +80,9 @@ public class ReportService {
             return;
         }
 
-        int reportId = execution.getReportId();
         String symbol = execution.getSymbol();
 
-        List<Trade> tradesAffected = tradeRepository.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
         tradeRepository.deleteAll(tradesAffected); // TODO cascade delete splitExecutions, check if it is already handled
@@ -93,7 +92,7 @@ public class ReportService {
         boolean isCleanCut = (firstSe.getSplitQuantity().equals(firstSe.getExecution().getQuantity()));
         boolean omitFirstSe = (isCleanCut && !executionRepository.existsById(firstSe.getExecution().getId())); // cleanCut is redundant
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateAfterOrderByFillDateAsc(reportId, symbol, firstSe.getExecution().getFillDate());
+        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateAfterOrderByFillDateAsc(symbol, firstSe.getExecution().getFillDate());
         List<Trade> newTrades = analyzeSingleSymbol(executionsToAnalyzeAgain, (omitFirstSe ? null : firstSe));
 
         if (!newTrades.isEmpty()) {
@@ -103,10 +102,9 @@ public class ReportService {
 
     @Transactional
     public void newExecution(Execution execution) {
-        int reportId = execution.getReportId();
         String symbol = execution.getSymbol();
 
-        List<Trade> tradesAffected = tradeRepository.getTradesAffectedByExecution(reportId, execution.getFillDate(), symbol);
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
         log.info("deleting " + tradesAffected.size() + " trades");
@@ -125,9 +123,9 @@ public class ReportService {
             log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + HanUtil.formatLogDate(execution.getFillDate()) + ", " + HanUtil.formatLogDate(firstSe.getExecution().getFillDate()));
 
             if (isNewAfterFirst) {
-                executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateAfterOrderByFillDateAsc(reportId, symbol, firstSe.getExecution().getFillDate());
+                executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateAfterOrderByFillDateAsc(symbol, firstSe.getExecution().getFillDate());
             } else {
-                executionsToAnalyzeAgain = executionRepository.getByReportIdAndSymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(reportId, symbol, execution.getFillDate());
+                executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, execution.getFillDate());
             }
             trades = analyzeSingleSymbol(executionsToAnalyzeAgain, isNewAfterFirst ? firstSe : null);
 
@@ -143,7 +141,6 @@ public class ReportService {
     public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
         newExecution(new Execution()
                 .setReceivedDate(LocalDateTime.now())
-                .setReportId(trade.getReportId())
                 .setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE")
                 .setOrigin("INTERNAL")
                 .setReferenceId("N/A")

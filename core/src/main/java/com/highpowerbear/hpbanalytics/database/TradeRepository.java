@@ -14,17 +14,16 @@ import java.util.List;
  */
 public interface TradeRepository extends JpaRepository<Trade, Long>, JpaSpecificationExecutor<Trade> {
 
-    List<Trade> getByReportIdAndTypeAndCloseDateBetweenOrderByOpenDateAsc(int reportId, TradeType tradeType, LocalDateTime beginDate, LocalDateTime endDate); // TODO check if inclusive, should be
-    void deleteByReportId(int reportId); // TODO cascade delete splitExecutions, check if it is already handled
+    List<Trade> findByTypeAndCloseDateBetweenOrderByOpenDateAsc(TradeType type, LocalDateTime closeDateBegin, LocalDateTime closeDateEnd); // TODO check if inclusive, should be
+    // TODO cascade delete splitExecutions, check if it is already handled by deleteAll()
 
-    @Query("SELECT t FROM Trade t WHERE t.reportId = :reportId AND (t.closeDate >= :fillDate OR t.status = com.highpowerbear.hpbanalytics.enums.TradeStatus.OPEN) AND t.symbol = :symbol ORDER BY t.openDate ASC")
-    List<Trade> getTradesAffectedByExecution(@Param("reportId") int reportId,
-                                             @Param("fillDate") LocalDateTime fillDate,
+    @Query("SELECT t FROM Trade t WHERE (t.closeDate >= :fillDate OR t.status = com.highpowerbear.hpbanalytics.enums.TradeStatus.OPEN) AND t.symbol = :symbol ORDER BY t.openDate ASC")
+    List<Trade> findTradesAffectedByExecution(@Param("fillDate") LocalDateTime fillDate,
                                              @Param("symbol") String symbol);
 
-    @Query("SELECT DISTINCT t.underlying AS u FROM Trade t WHERE t.reportId = :reportId ORDER BY u")
-    List<String> getAllUnderlyings(@Param("reportId") int reportId);
+    @Query("SELECT DISTINCT t.underlying AS u FROM Trade t ORDER BY u")
+    List<String> findAllUnderlyings();
 
-    @Query("SELECT DISTINCT t.underlying AS u FROM Trade t WHERE t.reportId = :reportId AND t.status = com.highpowerbear.hpbanalytics.enums.TradeStatus.OPEN ORDER BY u")
-    List<String> getOpenUnderlyings(@Param("reportId") int reportId);
+    @Query("SELECT DISTINCT t.underlying AS u FROM Trade t WHERE t.status = com.highpowerbear.hpbanalytics.enums.TradeStatus.OPEN ORDER BY u")
+    List<String> findOpenUnderlyings();
 }
