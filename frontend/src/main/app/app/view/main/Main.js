@@ -10,12 +10,9 @@ Ext.define('HanGui.view.main.Main', {
     requires: [
         'HanGui.view.main.MainController',
         'HanGui.view.main.MainModel',
-        'HanGui.view.ordtrack.OrdTrack',
-        'HanGui.view.report.Report',
-        'HanGui.model.ordtrack.IbOrder',
-        'HanGui.model.ordtrack.IbOrderEvent',
-        'HanGui.model.report.Trade',
-        'HanGui.model.report.SplitExecution'
+        'HanGui.view.execution.Execution',
+        'HanGui.view.trade.Trade',
+        'HanGui.view.statistics.Statistics'
     ],
     
     controller: 'main',
@@ -26,12 +23,13 @@ Ext.define('HanGui.view.main.Main', {
         beforerender: 'setGlyphs'
     },
     items: [{
-        xtype: 'han-ordtrack',
-        title: 'Ord Track',
-        reference: 'ordTrackPanel'
+        xtype: 'han-execution',
+        title: 'Executions'
     }, {
-        xtype: 'han-report',
-        title: 'Report',
-        reference: 'reportPanel'
+        xtype: 'han-trade',
+        title: 'Trades'
+    }, {
+        xtype: 'han-statistics',
+        title: 'Statistics'
     }]
 });

@@ -1,15 +1,14 @@
 package com.highpowerbear.hpbanalytics.rest;
 
-import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.*;
 import com.highpowerbear.hpbanalytics.model.DataFilter;
 import com.highpowerbear.hpbanalytics.model.Statistics;
+import com.highpowerbear.hpbanalytics.rest.model.CalculateStatisticsRequest;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
-import com.highpowerbear.hpbanalytics.service.MessageService;
-import com.highpowerbear.hpbanalytics.service.ReportService;
+import com.highpowerbear.hpbanalytics.service.AnalyticsService;
 import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -33,33 +32,21 @@ public class AppRestController {
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
     private final StatisticsCalculatorService statisticsCalculatorService;
-    private final ReportService reportService;
+    private final AnalyticsService analyticsService;
     private final IfiCsvGeneratorService ifiCsvGeneratorService;
-    private final MessageService messageService;
 
     @Autowired
     public AppRestController(ExecutionRepository executionRepository,
                              TradeRepository tradeRepository,
                              StatisticsCalculatorService statisticsCalculatorService,
-                             ReportService reportService,
-                             IfiCsvGeneratorService ifiCsvGeneratorService,
-                             MessageService messageService) {
+                             AnalyticsService analyticsService,
+                             IfiCsvGeneratorService ifiCsvGeneratorService) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
         this.statisticsCalculatorService = statisticsCalculatorService;
-        this.reportService = reportService;
+        this.analyticsService = analyticsService;
         this.ifiCsvGeneratorService = ifiCsvGeneratorService;
-        this.messageService = messageService;
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value = "analyze")
-    public ResponseEntity<?> analyze() {
-
-        reportService.analyzeAll();
-        messageService.sendWsMessage(WsTopic.TRADE, "analysis performed");
-
-        return ResponseEntity.ok().build();
     }
 
     @RequestMapping("execution")
@@ -82,10 +69,7 @@ public class AppRestController {
             @RequestBody Execution execution) {
 
         execution.setId(null);
-
-        reportService.newExecution(execution);
-        messageService.sendWsMessage(WsTopic.EXECUTION, "new execution processed");
-        messageService.sendWsMessage(WsTopic.TRADE, "new execution processed");
+        analyticsService.newExecution(execution);
 
         return ResponseEntity.ok().build();
     }
@@ -98,10 +82,15 @@ public class AppRestController {
         if (execution == null ) {
             return ResponseEntity.notFound().build();
         }
-        reportService.deleteExecution(executionId);
-        messageService.sendWsMessage(WsTopic.EXECUTION, "execution " + executionId + " deleted");
-        messageService.sendWsMessage(WsTopic.TRADE, "execution " + executionId + " deleted");
+        analyticsService.deleteExecution(executionId);
 
+        return ResponseEntity.ok().build();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "trade/analyze")
+    public ResponseEntity<?> analyze() {
+
+        analyticsService.analyzeAll();
         return ResponseEntity.ok().build();
     }
 
@@ -133,25 +122,9 @@ public class AppRestController {
         } else if (!TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-
-        reportService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
-        messageService.sendWsMessage(WsTopic.EXECUTION, "trade " + tradeId + " closed");
-        messageService.sendWsMessage(WsTopic.TRADE, "trade " + tradeId + " closed");
+        analyticsService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
 
         return ResponseEntity.ok().build();
-    }
-
-    @RequestMapping("trade/underlyings")
-    public ResponseEntity<?> getUnderlyings(
-            @RequestParam(required = false, value = "openOnly") boolean openOnly) {
-
-        List<String> underlyings;
-        if (openOnly) {
-            underlyings = tradeRepository.findOpenUnderlyings();
-        } else {
-            underlyings = tradeRepository.findAllUnderlyings();
-        }
-        return ResponseEntity.ok(underlyings);
     }
 
     @RequestMapping("statistics")
@@ -176,16 +149,23 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(statisticsPage, statistics.size()));
     }
 
+    @RequestMapping("statistics/underlyings")
+    public ResponseEntity<?> getUnderlyings(
+            @RequestParam(required = false, value = "openOnly") boolean openOnly) {
+
+        List<String> underlyings;
+        if (openOnly) {
+            underlyings = tradeRepository.findOpenUnderlyings();
+        } else {
+            underlyings = tradeRepository.findAllUnderlyings();
+        }
+        return ResponseEntity.ok(underlyings);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value = "statistics")
-    public ResponseEntity<?> calculateStatistics(
-            @RequestParam("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") SecType secType,
-            @RequestParam(required = false, value = "currency") Currency currency,
-            @RequestParam(required = false, value = "underlying") String underlying) {
+    public ResponseEntity<?> calculateStatistics(@RequestBody CalculateStatisticsRequest r) {
 
-        statisticsCalculatorService.calculateStatistics(interval, tradeType, secType, currency, underlying);
-
+        statisticsCalculatorService.calculateStatistics(r.getInterval(), r.getTradeType(), r.getSecType(), r.getCurrency(), r.getUnderlying());
         return ResponseEntity.ok().build();
     }
 
@@ -202,12 +182,12 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
 
-    @RequestMapping("ifi/years")
+    @RequestMapping("statistics/ifi/years")
     public ResponseEntity<?> getIfiYears() {
         return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
     }
 
-    @RequestMapping("ifi/csv")
+    @RequestMapping("statistics/ifi/csv")
     public ResponseEntity<?> getIfiCsv(
             @RequestParam("year") int year,
             @RequestParam("endMonth") int endMonth,

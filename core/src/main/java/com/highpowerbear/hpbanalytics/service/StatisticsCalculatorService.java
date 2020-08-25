@@ -79,7 +79,7 @@ public class StatisticsCalculatorService {
 
         log.info("END statistics calculation for interval=" + interval);
 
-        messageService.sendWsMessage(WsTopic.STATISTICS, "statistics calculated");
+        messageService.sendWsReloadRequestMessage(WsTopic.STATISTICS);
     }
 
     private String statisticsKey(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying) {
