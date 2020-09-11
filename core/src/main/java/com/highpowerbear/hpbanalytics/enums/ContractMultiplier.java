@@ -12,6 +12,8 @@ public enum ContractMultiplier {
     M2K(5),
     YM(5),
     MYM(0.5),
+    VIX(1000),
+    VXM(100),
     ESTX50(10),
     DAX(5),
     SMI(10),
