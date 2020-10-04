@@ -42,7 +42,7 @@ public class SplitExecution implements Serializable {
     }
 
     public String print() {
-        return (id + ", " + execution.getAction() + ", " + execution.getSymbol() + ", " + splitQuantity + " (" + execution.getQuantity() + ")"+ ", "+ currentPosition + ", execution=" + execution.getId());
+        return (id + ", " + execution.getAction() + ", " + execution.getSymbol() + ", " + splitQuantity + " (" + execution.getQuantity() + ")"+ ", "+ currentPosition + ", executionId=" + execution.getId());
     }
 
     @Override

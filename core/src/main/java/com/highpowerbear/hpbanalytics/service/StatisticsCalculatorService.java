@@ -74,18 +74,17 @@ public class StatisticsCalculatorService {
         log.info("BEGIN statistics calculation for interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
         Example<Trade> filter = DataFilters.tradeFilterByExample(
-                normalizeParam(tradeType, TradeType.class),
-                normalizeParam(secType, Types.SecType.class),
-                normalizeParam(currency, Currency.class),
-                underlying);
+                normalizeEnumParam(tradeType, TradeType.class),
+                normalizeEnumParam(secType, Types.SecType.class),
+                normalizeEnumParam(currency, Currency.class),
+                ALL.equals(underlying) ? null : underlying);
 
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
-        // TODO investigate why no statistics generated
 
         List<Statistics> stats = doCalculate(trades, interval);
         statisticsMap.put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);
 
-        log.info("END statistics calculation for interval=" + interval);
+        log.info("END statistics calculation for interval=" + interval + ", included " + trades.size() + " trades");
 
         messageService.sendWsReloadRequestMessage(WsTopic.STATISTICS);
     }
@@ -101,7 +100,7 @@ public class StatisticsCalculatorService {
         return intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
     }
 
-    private <T extends Enum<T>> T normalizeParam(String param, Class<T> enumType) {
+    private <T extends Enum<T>> T normalizeEnumParam(String param, Class<T> enumType) {
 
         return param == null || ALL.equals(param) ? null : T.valueOf(enumType, param);
     }

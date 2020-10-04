@@ -82,6 +82,7 @@ public class AppRestController {
             @RequestBody Execution execution) {
 
         execution.setId(null);
+        // TODO include multiplier into the GUI form for adding execution
         analyticsService.newExecution(execution);
 
         return ResponseEntity.ok().build();

@@ -21,7 +21,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'id'
     }, {
         text: 'Fill Date',
-        width: 180,
+        width: 160,
         dataIndex: 'fillDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'
@@ -75,7 +75,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         }
     }, {
         text: 'Received Date',
-        width: 180,
+        width: 160,
         dataIndex: 'receivedDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'

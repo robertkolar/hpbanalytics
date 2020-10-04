@@ -11,7 +11,6 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         'Ext.grid.filters.Filters'
     ],
     plugins: 'gridfilters',
-    controller: 'han-trade',
     bind: '{trades}',
     viewConfig: {
         stripeRows: true
@@ -25,7 +24,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         dataIndex: 'id'
     }, {
         text: 'Open Date',
-        width: 180,
+        width: 160,
         dataIndex: 'openDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'
@@ -83,7 +82,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         }
     }, {
         text: 'Close Date',
-        width: 180,
+        width: 160,
         dataIndex: 'closeDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'

@@ -28,5 +28,4 @@ public class HanSettings {
 
     public static final String DB_DATABASE = "hpbanalytics";
     public static final String DB_SCHEMA = "hpbanalytics_new";
-
 }

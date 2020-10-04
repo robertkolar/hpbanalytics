@@ -4,6 +4,7 @@ import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IQueue;
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
+import com.highpowerbear.hpbanalytics.config.WsTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,7 +50,7 @@ public class MessageService {
     }
 
     private void sendWsMessage(String topic, String message) {
-        simpMessagingTemplate.convertAndSend(topic, message);
+        simpMessagingTemplate.convertAndSend(WsTopic.TOPIC_PREFIX + "/" + topic, message);
     }
 
     public void registerExecutionListener(ExecutionListener executionListener) {
