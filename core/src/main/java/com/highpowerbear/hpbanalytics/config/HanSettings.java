@@ -18,8 +18,6 @@ public class HanSettings {
     public static final Currency PORTFOLIO_BASE = Currency.EUR;
     public static final StatisticsPlMethod STATISTICS_PL_METHOD = StatisticsPlMethod.PORTFOLIO_BASE_CLOSE_ONLY;
 
-    public static final String JSON_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    public static final String LOG_DATE_FORMAT = "MM/dd/yyyy HH:mm:ss.SSS";
     public static final String EXCHANGE_RATE_DATE_FORMAT = "yyyy-MM-dd";
     public static final String WS_RELOAD_REQUEST_MESSAGE = "reloadRequest";
 

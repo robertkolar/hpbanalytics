@@ -12,19 +12,12 @@ import javax.validation.constraints.NotNull;
  */
 public class CalculateStatisticsRequest {
 
-    private final StatisticsInterval interval;
-    private final TradeType tradeType;
-    private final Types.SecType secType;
-    private final Currency currency;
-    private final String underlying;
-
-    public CalculateStatisticsRequest(@NotNull StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
-        this.interval = interval;
-        this.tradeType = tradeType;
-        this.secType = secType;
-        this.currency = currency;
-        this.underlying = underlying;
-    }
+    @NotNull
+    private StatisticsInterval interval;
+    private TradeType tradeType;
+    private Types.SecType secType;
+    private Currency currency;
+    private String underlying;
 
     public StatisticsInterval getInterval() {
         return interval;

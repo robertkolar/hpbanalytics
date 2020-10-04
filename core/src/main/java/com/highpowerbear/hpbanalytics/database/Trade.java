@@ -1,26 +1,13 @@
 package com.highpowerbear.hpbanalytics.database;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.OrderBy;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -54,10 +41,8 @@ public class Trade implements Serializable {
     private TradeStatus status;
     private Integer openPosition;
     private BigDecimal avgOpenPrice;
-    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime openDate;
     private BigDecimal avgClosePrice;
-    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -70,7 +55,7 @@ public class Trade implements Serializable {
     }
 
     public String print() {
-        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? HanUtil.formatLogDate(openDate) : "-") + ", " + (closeDate != null ? HanUtil.formatLogDate(closeDate) : "-") + ", " + profitLoss);
+        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? openDate : "-") + ", " + (closeDate != null ? closeDate : "-") + ", " + profitLoss);
     }
 
     @Override

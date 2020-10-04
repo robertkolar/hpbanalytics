@@ -3,7 +3,6 @@ package com.highpowerbear.hpbanalytics.common;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 /**
@@ -11,7 +10,9 @@ import java.time.format.DateTimeFormatter;
  */
 public class HanUtil {
 
-    private static final DateTimeFormatter logDateFormatter = DateTimeFormatter.ofPattern(HanSettings.LOG_DATE_FORMAT);
+    private HanUtil() {
+    }
+
     private static final DateTimeFormatter exchangeRateDateFormatter = DateTimeFormatter.ofPattern(HanSettings.EXCHANGE_RATE_DATE_FORMAT);
 
     public static String toDurationString(long durationSeconds) {
@@ -36,10 +37,6 @@ public class HanUtil {
 
     public static double round2(double number) {
         return round(number, 2);
-    }
-
-    public static String formatLogDate(final LocalDateTime localDateTime) {
-        return localDateTime.format(logDateFormatter);
     }
 
     public static String formatExchangeRateDate(final LocalDate localDate) {

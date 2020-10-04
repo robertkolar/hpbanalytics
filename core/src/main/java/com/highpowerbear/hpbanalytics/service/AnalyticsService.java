@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
-import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
@@ -124,7 +123,7 @@ public class AnalyticsService implements ExecutionListener {
             log.info("firstSe=" + firstSe.print());
 
             boolean isNewAfterFirst = execution.getFillDate().isAfter(firstSe.getExecution().getFillDate());
-            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + HanUtil.formatLogDate(execution.getFillDate()) + ", " + HanUtil.formatLogDate(firstSe.getExecution().getFillDate()));
+            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + execution.getFillDate() + ", " + firstSe.getExecution().getFillDate());
 
             if (isNewAfterFirst) {
                 executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateAfterOrderByFillDateAsc(symbol, firstSe.getExecution().getFillDate());

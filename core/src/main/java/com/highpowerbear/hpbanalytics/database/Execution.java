@@ -1,19 +1,9 @@
 package com.highpowerbear.hpbanalytics.database;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.ib.client.Types;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,11 +21,10 @@ public class Execution implements Serializable, Comparable<Execution> {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
-    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime receivedDate;
     private String comment;
-    private String origin; // in case of IB origin --> IB:ibAccountId, in case of manual addition --> manual
-    private String referenceId; // in case of IB origin --> permId
+    private String origin;
+    private String referenceId;
     @Enumerated(EnumType.STRING)
     private Types.Action action;
     private Integer quantity;
@@ -46,7 +35,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Enumerated(EnumType.STRING)
     private Types.SecType secType;
     private Double multiplier;
-    @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
 
@@ -71,7 +59,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     }
 
     public String print() {
-        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + HanUtil.formatLogDate(fillDate) + ", " + fillPrice);
+        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + fillDate + ", " + fillPrice);
     }
 
     public Long getId() {
