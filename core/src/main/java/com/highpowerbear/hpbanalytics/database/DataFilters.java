@@ -1,9 +1,9 @@
 package com.highpowerbear.hpbanalytics.database;
 
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.DataFilter;
+import com.ib.client.Types;
 import org.springframework.data.domain.Example;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -15,7 +15,7 @@ import java.text.MessageFormat;
  */
 public class DataFilters {
 
-    public static Example<Trade> tradeFilterByExample(TradeType tradeType, SecType secType, Currency currency, String underlying) {
+    public static Example<Trade> tradeFilterByExample(TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
         return Example.of(new Trade()
                 .setType(tradeType)
                 .setSecType(secType)

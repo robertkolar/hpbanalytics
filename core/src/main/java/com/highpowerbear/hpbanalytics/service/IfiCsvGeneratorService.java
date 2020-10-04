@@ -3,10 +3,9 @@ package com.highpowerbear.hpbanalytics.service;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,7 +41,7 @@ public class IfiCsvGeneratorService {
     private final String DL = ",";
     private final String acquireType = "A - nakup";
 
-    private final Map<SecType, String> secTypeMap = new HashMap<>();
+    private final Map<Types.SecType, String> secTypeMap = new HashMap<>();
     private final Map<TradeType, String> tradeTypeMap = new HashMap<>();
 
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
@@ -64,9 +63,10 @@ public class IfiCsvGeneratorService {
 
     @PostConstruct
     private void init() {
-        secTypeMap.put(SecType.FUT, "01 - terminska pogodba");
-        secTypeMap.put(SecType.CFD, "02 - pogodba na razliko");
-        secTypeMap.put(SecType.OPT, "03 - opcija");
+        secTypeMap.put(Types.SecType.FUT, "01 - terminska pogodba");
+        secTypeMap.put(Types.SecType.CFD, "02 - pogodba na razliko");
+        secTypeMap.put(Types.SecType.OPT, "03 - opcija");
+        secTypeMap.put(Types.SecType.FOP, "03 - opcija");
 
         tradeTypeMap.put(TradeType.LONG, "običajni");
         tradeTypeMap.put(TradeType.SHORT, "na kratko");
@@ -95,7 +95,7 @@ public class IfiCsvGeneratorService {
         BigDecimal sumPl = BigDecimal.ZERO;
 
         for (Trade trade : trades) {
-            if (!trade.getSecType().isDerivative()) {
+            if (!isDerivative(trade.getSecType())) {
                 continue;
             }
 
@@ -106,19 +106,19 @@ public class IfiCsvGeneratorService {
             int j = 0;
             for (SplitExecution se : splitExecutions) {
                 j++;
-                if (TradeType.SHORT.equals(tradeType) && Action.SELL.equals(se.getExecution().getAction())) {
+                if (TradeType.SHORT.equals(tradeType) && Types.Action.SELL.equals(se.getExecution().getAction())) {
                     writeTradeShortSplitExecutionSell(sb, se, i, j);
 
-                } else if (TradeType.SHORT.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
+                } else if (TradeType.SHORT.equals(tradeType) && Types.Action.BUY.equals(se.getExecution().getAction())) {
                     BigDecimal pl = writeTradeShortSplitExecutionBuy(sb, se, i, j);
 
                     if (pl != null) {
                         tradePl = pl;
                     }
-                } else if (TradeType.LONG.equals(tradeType) && Action.BUY.equals(se.getExecution().getAction())) {
+                } else if (TradeType.LONG.equals(tradeType) && Types.Action.BUY.equals(se.getExecution().getAction())) {
                     writeTradeLongSplitExecutionBuy(sb, se, i, j);
 
-                } else if (TradeType.LONG.equals(tradeType) && Action.SELL.equals(se.getExecution().getAction())) {
+                } else if (TradeType.LONG.equals(tradeType) && Types.Action.SELL.equals(se.getExecution().getAction())) {
                     BigDecimal pl = writeTradeLongSplitExecutionSell(sb, se, i, j);
                     if (pl != null) {
                         tradePl = pl;
@@ -286,7 +286,7 @@ public class IfiCsvGeneratorService {
 
     private double fillValue(SplitExecution se) {
         BigDecimal contractFillPrice = se.getExecution().getFillPrice();
-        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculatorService.getMultiplier(se.getTrade()));
+        BigDecimal multiplier = BigDecimal.valueOf(se.getExecution().getMultiplier());
 
         return contractFillPrice.multiply(multiplier).doubleValue();
     }
@@ -294,9 +294,21 @@ public class IfiCsvGeneratorService {
     private double fillValueBase(SplitExecution se) {
         BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se));
         BigDecimal contractFillPrice = se.getExecution().getFillPrice();
-        BigDecimal multiplier = BigDecimal.valueOf(tradeCalculatorService.getMultiplier(se.getTrade()));
+        BigDecimal multiplier = BigDecimal.valueOf(se.getExecution().getMultiplier());
 
         return contractFillPrice.divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP).multiply(multiplier).doubleValue();
+    }
+
+    private boolean isDerivative(Types.SecType secType) {
+        switch(secType) {
+            case FUT:
+            case OPT:
+            case FOP:
+            case CFD:
+                return true;
+            default:
+                return false;
+        }
     }
 
     public List<Integer> getIfiYears() {

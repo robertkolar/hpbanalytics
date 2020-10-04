@@ -5,9 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.ib.client.Types;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -47,7 +47,8 @@ public class Trade implements Serializable {
     @Enumerated(EnumType.STRING)
     private Currency currency;
     @Enumerated(EnumType.STRING)
-    private SecType secType;
+    private Types.SecType secType;
+    private Double multiplier;
     private Integer cumulativeQuantity;
     @Enumerated(EnumType.STRING)
     private TradeStatus status;
@@ -132,12 +133,21 @@ public class Trade implements Serializable {
         return this;
     }
 
-    public SecType getSecType() {
+    public Types.SecType getSecType() {
         return secType;
     }
 
-    public Trade setSecType(SecType secType) {
+    public Trade setSecType(Types.SecType secType) {
         this.secType = secType;
+        return this;
+    }
+
+    public Double getMultiplier() {
+        return multiplier;
+    }
+
+    public Trade setMultiplier(Double multiplier) {
+        this.multiplier = multiplier;
         return this;
     }
 

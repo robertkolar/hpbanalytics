@@ -4,6 +4,7 @@ import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.*;
+import com.ib.client.Types;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -39,6 +40,7 @@ public class TradeCalculatorService {
             .setUnderlying(seFirst.getExecution().getUnderlying())
             .setCurrency(seFirst.getExecution().getCurrency())
             .setSecType(seFirst.getExecution().getSecType())
+            .setMultiplier(seFirst.getExecution().getMultiplier())
             .setOpenPosition(seLast.getCurrentPosition());
 
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
@@ -49,12 +51,12 @@ public class TradeCalculatorService {
         for (SplitExecution se : trade.getSplitExecutions()) {
             Execution e = se.getExecution();
 
-            if ((trade.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (trade.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
+            if ((trade.getType() == TradeType.LONG && e.getAction() == Types.Action.BUY) || (trade.getType() == TradeType.SHORT && e.getAction() == Types.Action.SELL)) {
                 cumulativeQuantity += se.getSplitQuantity();
                 cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
             }
             if (trade.getStatus() == TradeStatus.CLOSED) {
-                if ((trade.getType() == TradeType.LONG && e.getAction() == Action.SELL) || (trade.getType() == TradeType.SHORT && e.getAction() == Action.BUY)) {
+                if ((trade.getType() == TradeType.LONG && e.getAction() == Types.Action.SELL) || (trade.getType() == TradeType.SHORT && e.getAction() == Types.Action.BUY)) {
                     cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
                 }
             }
@@ -71,7 +73,7 @@ public class TradeCalculatorService {
                 .setCloseDate(seLast.getExecution().getFillDate());
 
             BigDecimal profitLoss = (TradeType.LONG.equals(trade.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-            profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(trade)));
+            profitLoss = profitLoss.multiply(BigDecimal.valueOf(trade.getMultiplier()));
             trade.setProfitLoss(profitLoss);
         }
     }
@@ -99,16 +101,16 @@ public class TradeCalculatorService {
             BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency()));
             BigDecimal fillPrice = se.getExecution().getFillPrice().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
 
-            if ((t.getType() == TradeType.LONG && e.getAction() == Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Action.SELL)) {
+            if ((t.getType() == TradeType.LONG && e.getAction() == Types.Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Types.Action.SELL)) {
                 cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
 
-            } else if ((t.getType() == TradeType.LONG && e.getAction() == Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Action.BUY)) {
+            } else if ((t.getType() == TradeType.LONG && e.getAction() == Types.Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Types.Action.BUY)) {
                 cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
             }
         }
 
         BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-        profitLoss = profitLoss.multiply(BigDecimal.valueOf(getMultiplier(t)));
+        profitLoss = profitLoss.multiply(BigDecimal.valueOf(t.getMultiplier()));
 
         return profitLoss;
     }
@@ -127,14 +129,6 @@ public class TradeCalculatorService {
         BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(plCalculationDate.toLocalDate(), t.getCurrency()));
 
         return t.getProfitLoss().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
-    }
-
-    public double getMultiplier(Trade t) {
-        switch (t.getSecType()) {
-            case OPT: return ContractMultiplier.getByUnderlying(SecType.OPT, t.getUnderlying());
-            case FUT: return ContractMultiplier.getByUnderlying(SecType.FUT, t.getUnderlying());
-            default: return 1;
-        }
     }
 
     private double getExchangeRate(LocalDate localDate, Currency currency) {

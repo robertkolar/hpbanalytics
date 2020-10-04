@@ -4,10 +4,10 @@ import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.Statistics;
+import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +48,7 @@ public class StatisticsCalculatorService {
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying, Integer maxPoints) {
 
         List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
@@ -68,7 +68,7 @@ public class StatisticsCalculatorService {
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying) {
+    public void calculateStatistics(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
         log.info("BEGIN statistics calculation for interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
         Example<Trade> filter = DataFilters.tradeFilterByExample(normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
@@ -82,7 +82,7 @@ public class StatisticsCalculatorService {
         messageService.sendWsReloadRequestMessage(WsTopic.STATISTICS);
     }
 
-    private String statisticsKey(StatisticsInterval interval, TradeType tradeType, SecType secType, Currency currency, String underlying) {
+    private String statisticsKey(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
 
         String intervalKey = interval.name();
         String tradeTypeKey = tradeType == null ? "ALL" : tradeType.toString();

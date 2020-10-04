@@ -1,12 +1,13 @@
 package com.highpowerbear.hpbanalytics.service;
 
+import com.highpowerbear.dto.ExecutionDTO;
+import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.Action;
-import com.highpowerbear.hpbanalytics.enums.SecType;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,36 +24,34 @@ import java.util.stream.Collectors;
  * Created by robertk on 4/26/2015.
  */
 @Service
-public class AnalyticsService {
+public class AnalyticsService implements ExecutionListener {
     private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
 
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
     private final TradeCalculatorService tradeCalculatorService;
     private final MessageService messageService;
+    private final ExecutionMapper executionMapper;
 
     @Autowired
     public AnalyticsService(ExecutionRepository executionRepository,
                             TradeRepository tradeRepository,
                             TradeCalculatorService tradeCalculatorService,
-                            MessageService messageService) {
+                            MessageService messageService,
+                            ExecutionMapper executionMapper) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
         this.tradeCalculatorService = tradeCalculatorService;
         this.messageService = messageService;
+        this.executionMapper = executionMapper;
+
+        messageService.registerExecutionListener(this);
     }
 
-    // TODO listen
-    public void executionReceived(Execution execution) {
-        execution.setReceivedDate(LocalDateTime.now());
-
-        if (execution.getFillDate() == null) {
-            execution.setFillDate(execution.getReceivedDate());
-        }
-
-        newExecution(execution);
-        messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
+    @Override
+    public void executionReceived(ExecutionDTO dto) {
+        newExecution(executionMapper.dtoToEntity(dto));
     }
 
     @Transactional
@@ -86,7 +85,7 @@ public class AnalyticsService {
         List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
-        tradeRepository.deleteAll(tradesAffected); // TODO cascade delete splitExecutions, check if it is already handled
+        tradeRepository.deleteAll(tradesAffected); // also deletes associated split executions
         executionRepository.deleteById(executionId);
 
         SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
@@ -106,13 +105,14 @@ public class AnalyticsService {
 
     @Transactional
     public void newExecution(Execution execution) {
+        execution.setReceivedDate(LocalDateTime.now());
         String symbol = execution.getSymbol();
 
         List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
         logTradesAffected(execution, tradesAffected);
 
         log.info("deleting " + tradesAffected.size() + " trades");
-        tradeRepository.deleteAll(tradesAffected); // TODO cascade delete splitExecutions, check if it is already handled
+        tradeRepository.deleteAll(tradesAffected); // also deletes associated split executions
 
         execution = executionRepository.save(execution);
 
@@ -147,11 +147,10 @@ public class AnalyticsService {
 
     public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
         newExecution(new Execution()
-                .setReceivedDate(LocalDateTime.now())
-                .setComment(trade.getSecType() == SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE")
+                .setComment(trade.getSecType() == Types.SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE")
                 .setOrigin("INTERNAL")
                 .setReferenceId("N/A")
-                .setAction(trade.getType() == TradeType.LONG ? Action.SELL : Action.BUY)
+                .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
                 .setQuantity(Math.abs(trade.getOpenPosition()))
                 .setSymbol(trade.getSymbol())
                 .setUnderlying(trade.getUnderlying())
@@ -201,7 +200,7 @@ public class AnalyticsService {
             sesSingleSymbol.add(firstSe);
         }
         for (Execution e : executions) {
-            int ePos = (e.getAction() == Action.BUY ? e.getQuantity() : -e.getQuantity());
+            int ePos = (e.getAction() == Types.Action.BUY ? e.getQuantity() : -e.getQuantity());
             int newPos = currentPos + ePos;
 
             if (currentPos < 0 && newPos > 0) {

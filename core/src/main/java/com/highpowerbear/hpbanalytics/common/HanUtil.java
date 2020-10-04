@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.common;
 
+import com.highpowerbear.hpbanalytics.config.HanSettings;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -9,21 +11,8 @@ import java.time.format.DateTimeFormatter;
  */
 public class HanUtil {
 
-    private static final DateTimeFormatter LOG_DATE_FORMATTER = DateTimeFormatter.ofPattern("MM/dd/yyyy HH:mm:ss.SSS");
-    private static final DateTimeFormatter EXCHANGE_RATE_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    private static final DateTimeFormatter IB_DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-
-    public static void waitMilliseconds(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-        } catch (InterruptedException ie) {
-            // Ignore
-        }
-    }
-
-    public static String removeSpace(String source) {
-        return source.replaceAll("\\b\\s+\\b", "");
-    }
+    private static final DateTimeFormatter logDateFormatter = DateTimeFormatter.ofPattern(HanSettings.LOG_DATE_FORMAT);
+    private static final DateTimeFormatter exchangeRateDateFormatter = DateTimeFormatter.ofPattern(HanSettings.EXCHANGE_RATE_DATE_FORMAT);
 
     public static String toDurationString(long durationSeconds) {
         long days = durationSeconds / (24 * 60 * 60);
@@ -49,15 +38,11 @@ public class HanUtil {
         return round(number, 2);
     }
 
-    public static LocalDate fromIbDateString(String ibDateString) {
-        return LocalDate.parse(ibDateString, IB_DATE_FORMATTER);
-    }
-
     public static String formatLogDate(final LocalDateTime localDateTime) {
-        return localDateTime.format(LOG_DATE_FORMATTER);
+        return localDateTime.format(logDateFormatter);
     }
 
     public static String formatExchangeRateDate(final LocalDate localDate) {
-        return localDate.format(EXCHANGE_RATE_DATE_FORMATTER);
+        return localDate.format(exchangeRateDateFormatter);
     }
 }

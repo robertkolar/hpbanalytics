@@ -3,9 +3,8 @@ package com.highpowerbear.hpbanalytics.database;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
-import com.highpowerbear.hpbanalytics.enums.Action;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.SecType;
+import com.ib.client.Types;
 
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -38,14 +37,15 @@ public class Execution implements Serializable, Comparable<Execution> {
     private String origin; // in case of IB origin --> IB:ibAccountId, in case of manual addition --> manual
     private String referenceId; // in case of IB origin --> permId
     @Enumerated(EnumType.STRING)
-    private Action action;
+    private Types.Action action;
     private Integer quantity;
     private String symbol;
     private String underlying;
     @Enumerated(EnumType.STRING)
     private Currency currency;
     @Enumerated(EnumType.STRING)
-    private SecType secType;
+    private Types.SecType secType;
+    private Double multiplier;
     @JsonFormat(pattern = HanSettings.JSON_DATE_FORMAT)
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
@@ -119,21 +119,12 @@ public class Execution implements Serializable, Comparable<Execution> {
         return this;
     }
 
-    public Action getAction() {
+    public Types.Action getAction() {
         return action;
     }
 
-    public Execution setAction(Action action) {
+    public Execution setAction(Types.Action action) {
         this.action = action;
-        return this;
-    }
-
-    public SecType getSecType() {
-        return secType;
-    }
-
-    public Execution setSecType(SecType secType) {
-        this.secType = secType;
         return this;
     }
 
@@ -170,6 +161,24 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     public Execution setCurrency(Currency currency) {
         this.currency = currency;
+        return this;
+    }
+
+    public Types.SecType getSecType() {
+        return secType;
+    }
+
+    public Execution setSecType(Types.SecType secType) {
+        this.secType = secType;
+        return this;
+    }
+
+    public Double getMultiplier() {
+        return multiplier;
+    }
+
+    public Execution setMultiplier(Double multiplier) {
+        this.multiplier = multiplier;
         return this;
     }
 

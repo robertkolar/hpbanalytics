@@ -10,6 +10,7 @@ import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
 import com.highpowerbear.hpbanalytics.service.AnalyticsService;
 import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
+import com.ib.client.Types;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -131,7 +132,7 @@ public class AppRestController {
     public ResponseEntity<?> getStatistics(
             @RequestParam("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "secType") Types.SecType secType,
             @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying,
             @RequestParam("start") int start,
@@ -173,7 +174,7 @@ public class AppRestController {
     public ResponseEntity<?> getCharts(
             @RequestParam("interval") StatisticsInterval interval,
             @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") SecType secType,
+            @RequestParam(required = false, value = "secType") Types.SecType secType,
             @RequestParam(required = false, value = "currency") Currency currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
