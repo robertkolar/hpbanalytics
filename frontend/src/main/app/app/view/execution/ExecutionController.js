@@ -53,12 +53,11 @@ Ext.define('HanGui.view.execution.ExecutionController', {
     },
 
     onAddExecution: function(button, e, options) {
-        var me = this;
+        var me = this,
+            window = Ext.create('HanGui.view.execution.window.ExecutionAddWindow');
 
-        me.lookupReference('executionPanel').add(Ext.create('HanGui.view.execution.window.ExecutionAddWindow', {
-            reference: 'executionAddWindow',
-            title: 'Add New Execution'
-        })).show();
+        me.getView().add(window);
+        window.show();
     },
 
     onSubmitAddExecution: function(button, e, options) {
@@ -80,7 +79,7 @@ Ext.define('HanGui.view.execution.ExecutionController', {
                     symbol: form.getForm().findField('symbol').lastValue,
                     secType: form.getForm().findField('secType').lastValue,
                     fillPrice: form.getForm().findField('fillPrice').lastValue,
-                    fillDate: Ext.Date.format(new Date(form.getForm().findField('fillDate').lastValue), 'Y-m-d H:i:s.u'),
+                    fillDate: Ext.Date.format(new Date(form.getForm().findField('fillDate').lastValue), 'Y-m-d\\TH:i:s.u'),
                     comment: form.getForm().findField('comment').lastValue
                 },
                 success: function(response, opts) {

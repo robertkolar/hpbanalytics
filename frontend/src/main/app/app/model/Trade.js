@@ -10,13 +10,14 @@ Ext.define('HanGui.model.Trade', {
         'underlying',
         'currency',
         'secType',
+        'multiplier',
         'cumulativeQuantity',
         'status',
         'openPosition',
         'avgOpenPrice',
-        {name: 'openDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
+        'openDate',
         'avgClosePrice',
-        {name: 'closeDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
+        'closeDate',
         'duration',
         'profitLoss'
     ]

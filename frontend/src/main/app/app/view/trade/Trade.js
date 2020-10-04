@@ -15,6 +15,7 @@ Ext.define('HanGui.view.trade.Trade', {
     header: false,
     border: false,
     controller: 'han-trade',
+
     viewModel: {
         type: 'han-trade'
     },

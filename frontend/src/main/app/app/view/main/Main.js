@@ -24,12 +24,15 @@ Ext.define('HanGui.view.main.Main', {
     },
     items: [{
         xtype: 'han-execution',
-        title: 'Executions'
+        title: 'Executions',
+        reference: 'executionPanel'
     }, {
         xtype: 'han-trade',
-        title: 'Trades'
+        title: 'Trades',
+        reference: 'tradePanel'
     }, {
         xtype: 'han-statistics',
-        title: 'Statistics'
+        title: 'Statistics',
+        reference: 'statisticsPanel'
     }]
 });

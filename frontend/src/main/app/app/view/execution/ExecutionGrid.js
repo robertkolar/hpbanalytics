@@ -24,11 +24,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 180,
         dataIndex: 'fillDate',
         xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s.u',
-        filter: {
-            type: 'date',
-            dateFormat: 'Y-m-d H:i:s.u'
-        }
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Origin',
         width: 100,
@@ -55,10 +51,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         text: 'Sec',
         width: 60,
         dataIndex: 'secType',
-        filter: {
-            type: 'list',
-            options: ['STK', 'OPT', 'FUT', 'CASH', 'CFD']
-        }
+        filter: 'string'
     }, {
         text: 'Undl',
         width: 80,
@@ -85,7 +78,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 180,
         dataIndex: 'receivedDate',
         xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s.u'
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Comment',
         flex: 1,
@@ -126,6 +119,15 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
                     c.setGlyph(HanGui.common.Glyphs.getGlyph('add'));
                 }
             }
+        }, {
+            xtype: 'tbtext',
+            flex: 1
+        }, {
+            xtype: 'tbtext',
+            html: 'WS status',
+            width: 120,
+            margin: '0 0 0 10',
+            reference: 'wsStatus'
         }]
     }]
 });

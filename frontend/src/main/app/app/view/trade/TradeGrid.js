@@ -28,11 +28,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 180,
         dataIndex: 'openDate',
         xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s.u',
-        filter: {
-            type: 'date',
-            dateFormat: 'Y-m-d H:i:s.u'
-        }
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Type',
         width: 80,
@@ -55,10 +51,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         text: 'Sec',
         width: 80,
         dataIndex: 'secType',
-        filter: {
-            type: 'list',
-            options: ['STK', 'OPT', 'FUT', 'CASH', 'CFD']
-        }
+        filter: 'string'
     }, {
         text: 'Undl',
         width: 80,
@@ -93,7 +86,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 180,
         dataIndex: 'closeDate',
         xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s.u'
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Duration',
         width: 140,
@@ -117,10 +110,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
             metadata.style = 'cursor: pointer; color: white; ' + (val == 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
             return val.toLowerCase();
         },
-        filter: {
-            type: 'list',
-            options: ['open', 'closed']
-        }
+        filter: 'string'
     }, {
         xtype: 'widgetcolumn',
         width : 50,
@@ -148,5 +138,17 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         bind: '{trades}',
         dock: 'bottom',
         displayInfo: true
+    }, {
+        xtype: 'toolbar',
+        items: [{
+            xtype: 'tbtext',
+            flex: 1
+        }, {
+            xtype: 'tbtext',
+            html: 'WS status',
+            width: 120,
+            margin: '0 0 0 10',
+            reference: 'wsStatus'
+        }]
     }]
 });

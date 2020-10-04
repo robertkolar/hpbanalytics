@@ -27,10 +27,10 @@ Ext.define('HanGui.view.trade.SplitExecutionGrid', {
         align: 'right'
     }, {
         text: 'Fill Date',
-        width: 180,
+        width: 160,
         dataIndex: 'fillDate',
         xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s.u'
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Execution',
         flex: 1,

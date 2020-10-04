@@ -329,6 +329,15 @@ Ext.define('HanGui.view.statistics.StatisticsGrid', {
                     c.setGlyph(HanGui.common.Glyphs.getGlyph('download'));
                 }
             }
+        }, {
+            xtype: 'tbtext',
+            flex: 1
+        }, {
+            xtype: 'tbtext',
+            html: 'WS status',
+            width: 120,
+            margin: '0 0 0 10',
+            reference: 'wsStatus'
         }]
     }]
 });

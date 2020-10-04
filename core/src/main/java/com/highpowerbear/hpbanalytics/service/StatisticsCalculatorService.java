@@ -80,6 +80,7 @@ public class StatisticsCalculatorService {
                 underlying);
 
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
+        // TODO investigate why no statistics generated
 
         List<Statistics> stats = doCalculate(trades, interval);
         statisticsMap.put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);

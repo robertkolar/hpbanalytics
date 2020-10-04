@@ -15,6 +15,7 @@ Ext.define('HanGui.view.execution.Execution', {
     header: false,
     border: false,
     controller: 'han-execution',
+
     viewModel: {
         type: 'han-execution'
     },

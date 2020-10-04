@@ -5,7 +5,7 @@ Ext.define('HanGui.model.Statistics', {
     extend: 'HanGui.model.Base',
 
     fields: [
-        {name: 'periodDate', type: 'date', dateFormat: 'Y-m-d H:i:s.u'},
+        'periodDate',
         'numExecs',
         'numOpened',
         'numClosed',

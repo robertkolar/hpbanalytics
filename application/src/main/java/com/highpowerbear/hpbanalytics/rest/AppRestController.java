@@ -1,10 +1,11 @@
 package com.highpowerbear.hpbanalytics.rest;
 
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
-import com.highpowerbear.hpbanalytics.model.DataFilter;
+import com.highpowerbear.hpbanalytics.model.DataFilterItem;
 import com.highpowerbear.hpbanalytics.model.Statistics;
 import com.highpowerbear.hpbanalytics.rest.model.CalculateStatisticsRequest;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
@@ -55,15 +56,16 @@ public class AppRestController {
     public ResponseEntity<?> getFilteredExecutions(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit,
-            @RequestParam(required = false, value = "filter") DataFilter filter) {
+            @RequestParam(required = false, value = "filter") String jsonFilter) {
 
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "fillDate"));
 
         List<Execution> executions;
         long numExecutions;
+        List<DataFilterItem> dataFilterItems = HanUtil.mapDataFilterFromJson(jsonFilter);
 
-        if (filter != null) {
-            Specification<Execution> specification = DataFilters.executionFilterSpecification(filter);
+        if (dataFilterItems != null) {
+            Specification<Execution> specification = DataFilters.executionFilterSpecification(dataFilterItems);
             executions = executionRepository.findAll(specification, pageable).getContent();
             numExecutions = executionRepository.count(specification);
 
@@ -109,14 +111,15 @@ public class AppRestController {
     public ResponseEntity<?> getFilteredTrades(
             @RequestParam("page") int page,
             @RequestParam("limit") int limit,
-            @RequestParam(required = false, value = "filter") DataFilter filter) {
+            @RequestParam(required = false, value = "filter") String jsonFilter) {
 
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "openDate"));
         List<Trade> trades;
         long numTrades;
+        List<DataFilterItem> dataFilterItems = HanUtil.mapDataFilterFromJson(jsonFilter);
 
-        if (filter != null) {
-            Specification<Trade> specification = DataFilters.tradeFilterSpecification(filter);
+        if (dataFilterItems != null) {
+            Specification<Trade> specification = DataFilters.tradeFilterSpecification(dataFilterItems);
             trades = tradeRepository.findAll(specification, pageable).getContent();
             numTrades = tradeRepository.count(specification);
 

@@ -105,7 +105,7 @@ Ext.define('HanGui.view.trade.TradeController', {
                 method: 'PUT',
                 url: urlString,
                 jsonData: {
-                    closeDate: Ext.Date.format(new Date(form.getForm().findField('closeDate').lastValue), 'Y-m-d H:i:s.u'),
+                    closeDate: Ext.Date.format(new Date(form.getForm().findField('closeDate').lastValue), 'Y-m-d\\TH:i:s.u'),
                     closePrice: form.getForm().findField('closePrice').lastValue
                 },
                 success: function (response, opts) {
@@ -125,9 +125,9 @@ Ext.define('HanGui.view.trade.TradeController', {
         }
         var me = this;
 
-        if (!me.splitExecutionsGrid) {
-            me.splitExecutionGrid = Ext.create('HanGui.view.trade.SplitExecutionsGrid');
-            me.splitExecutionWindow = Ext.create('HanGui.view.trade.window.SplitExecutionsWindow');
+        if (!me.splitExecutionGrid) {
+            me.splitExecutionGrid = Ext.create('HanGui.view.trade.SplitExecutionGrid');
+            me.splitExecutionWindow = Ext.create('HanGui.view.trade.window.SplitExecutionWindow');
             me.splitExecutionWindow.add(me.splitExecutionGrid);
         }
         me.splitExecutionGrid.setStore(record.splitExecutions());

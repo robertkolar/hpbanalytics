@@ -15,6 +15,7 @@ Ext.define('HanGui.view.statistics.Statistics', {
     header: false,
     border: false,
     controller: 'han-statistics',
+
     viewModel: {
         type: 'han-statistics'
     },

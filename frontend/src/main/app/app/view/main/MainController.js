@@ -16,8 +16,8 @@ Ext.define('HanGui.view.main.MainController', {
     setGlyphs: function() {
         var me = this;
 
-        me.lookupReference('executionsPanel').setGlyph(HanGui.common.Glyphs.getGlyph('orderedlist'));
-        me.lookupReference('tradesPanel').setGlyph(HanGui.common.Glyphs.getGlyph('money'));
+        me.lookupReference('executionPanel').setGlyph(HanGui.common.Glyphs.getGlyph('orderedlist'));
+        me.lookupReference('tradePanel').setGlyph(HanGui.common.Glyphs.getGlyph('money'));
         me.lookupReference('statisticsPanel').setGlyph(HanGui.common.Glyphs.getGlyph('barchart'));
     }
 });

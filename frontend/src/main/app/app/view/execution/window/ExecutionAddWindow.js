@@ -8,6 +8,8 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
         'HanGui.common.Glyphs',
         'HanGui.view.execution.ExecutionController'
     ],
+    reference: 'executionAddWindow',
+    title: 'Add New Execution',
     layout: 'fit',
     closable: false,
     closeAction: 'destroy',

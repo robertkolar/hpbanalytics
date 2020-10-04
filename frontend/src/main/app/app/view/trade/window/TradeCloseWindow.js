@@ -31,7 +31,7 @@ Ext.define('HanGui.view.trade.window.TradeCloseWindow', {
             reference: 'closeDate',
             fieldLabel: 'Close Date',
             name: 'closeDate',
-            format: 'm/d/Y H:i:s.u'
+            format: 'm/d/Y H:i:s'
         }, {
             xtype: 'numberfield',
             reference: 'closePrice',

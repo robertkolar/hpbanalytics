@@ -228,24 +228,4 @@ public class Trade implements Serializable {
     public Boolean getOpen() {
         return (status == TradeStatus.OPEN);
     }
-
-    @Override
-    public String toString() {
-        return "Trade{" +
-                "id=" + id +
-                ", type=" + type +
-                ", symbol='" + symbol + '\'' +
-                ", underlying='" + underlying + '\'' +
-                ", currency=" + currency +
-                ", secType=" + secType +
-                ", cumulativeQuantity=" + cumulativeQuantity +
-                ", status=" + status +
-                ", openPosition=" + openPosition +
-                ", avgOpenPrice=" + avgOpenPrice +
-                ", openDate=" + openDate +
-                ", avgClosePrice=" + avgClosePrice +
-                ", closeDate=" + closeDate +
-                ", profitLoss=" + profitLoss +
-                '}';
-    }
 }
