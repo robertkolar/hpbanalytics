@@ -26,4 +26,7 @@ public class HanSettings {
     public static final int HAZELCAST_EXECUTION_QUEUE_MAX_SZE = 1000;
     public static final int HAZELCAST_EXECUTION_QUEUE_BACKUP_COUNT = 1;
 
+    public static final String DB_DATABASE = "hpbanalytics";
+    public static final String DB_SCHEMA = "hpbanalytics";
+
 }

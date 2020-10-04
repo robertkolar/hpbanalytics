@@ -1,16 +1,17 @@
 package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.*;
+import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
+import com.highpowerbear.hpbanalytics.enums.TradeStatus;
+import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.DataFilter;
 import com.highpowerbear.hpbanalytics.model.Statistics;
 import com.highpowerbear.hpbanalytics.rest.model.CalculateStatisticsRequest;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.rest.model.GenericList;
-import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
 import com.highpowerbear.hpbanalytics.service.AnalyticsService;
+import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
 import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
-import com.ib.client.Types;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -57,10 +58,19 @@ public class AppRestController {
             @RequestParam(required = false, value = "filter") DataFilter filter) {
 
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "fillDate"));
-        Specification<Execution> specification = DataFilters.executionFilterSpecification(filter);
 
-        List<Execution> executions = executionRepository.findAll(specification, pageable).getContent();
-        long numExecutions = executionRepository.count(specification);
+        List<Execution> executions;
+        long numExecutions;
+
+        if (filter != null) {
+            Specification<Execution> specification = DataFilters.executionFilterSpecification(filter);
+            executions = executionRepository.findAll(specification, pageable).getContent();
+            numExecutions = executionRepository.count(specification);
+
+        } else {
+            executions = executionRepository.findAll(pageable).getContent();
+            numExecutions = executionRepository.count();
+        }
 
         return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
@@ -102,10 +112,18 @@ public class AppRestController {
             @RequestParam(required = false, value = "filter") DataFilter filter) {
 
         Pageable pageable = PageRequest.of(page - 1, limit, Sort.by(Sort.Direction.DESC, "openDate"));
-        Specification<Trade> specification = DataFilters.tradeFilterSpecification(filter);
+        List<Trade> trades;
+        long numTrades;
 
-        List<Trade> trades = tradeRepository.findAll(specification, pageable).getContent();
-        long numTrades = tradeRepository.count(specification);
+        if (filter != null) {
+            Specification<Trade> specification = DataFilters.tradeFilterSpecification(filter);
+            trades = tradeRepository.findAll(specification, pageable).getContent();
+            numTrades = tradeRepository.count(specification);
+
+        } else {
+            trades = tradeRepository.findAll(pageable).getContent();
+            numTrades = tradeRepository.count();
+        }
 
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
@@ -131,9 +149,9 @@ public class AppRestController {
     @RequestMapping("statistics")
     public ResponseEntity<?> getStatistics(
             @RequestParam("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") Types.SecType secType,
-            @RequestParam(required = false, value = "currency") Currency currency,
+            @RequestParam(required = false, value = "tradeType") String tradeType,
+            @RequestParam(required = false, value = "secType") String secType,
+            @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying,
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
@@ -173,9 +191,9 @@ public class AppRestController {
     @RequestMapping("statistics/charts")
     public ResponseEntity<?> getCharts(
             @RequestParam("interval") StatisticsInterval interval,
-            @RequestParam(required = false, value = "tradeType") TradeType tradeType,
-            @RequestParam(required = false, value = "secType") Types.SecType secType,
-            @RequestParam(required = false, value = "currency") Currency currency,
+            @RequestParam(required = false, value = "tradeType") String tradeType,
+            @RequestParam(required = false, value = "secType") String secType,
+            @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
         List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, tradeType, secType, currency, underlying, 120);

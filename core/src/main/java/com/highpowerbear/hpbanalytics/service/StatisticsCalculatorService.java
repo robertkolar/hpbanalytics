@@ -38,6 +38,8 @@ public class StatisticsCalculatorService {
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
+    private final String ALL = "ALL";
+
     @Autowired
     public StatisticsCalculatorService(TradeRepository tradeRepository,
                                        MessageService messageService,
@@ -48,7 +50,7 @@ public class StatisticsCalculatorService {
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
 
         List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
@@ -68,10 +70,15 @@ public class StatisticsCalculatorService {
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
+    public void calculateStatistics(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
         log.info("BEGIN statistics calculation for interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
-        Example<Trade> filter = DataFilters.tradeFilterByExample(normalizeParam(tradeType), normalizeParam(secType), normalizeParam(currency), underlying);
+        Example<Trade> filter = DataFilters.tradeFilterByExample(
+                normalizeParam(tradeType, TradeType.class),
+                normalizeParam(secType, Types.SecType.class),
+                normalizeParam(currency, Currency.class),
+                underlying);
+
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
         List<Statistics> stats = doCalculate(trades, interval);
@@ -82,19 +89,20 @@ public class StatisticsCalculatorService {
         messageService.sendWsReloadRequestMessage(WsTopic.STATISTICS);
     }
 
-    private String statisticsKey(StatisticsInterval interval, TradeType tradeType, Types.SecType secType, Currency currency, String underlying) {
+    private String statisticsKey(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
 
         String intervalKey = interval.name();
-        String tradeTypeKey = tradeType == null ? "ALL" : tradeType.toString();
-        String secTypeKey = secType == null ? "ALL" : secType.toString();
-        String currencyKey = currency == null ? "ALL" : currency.toString();
-        String underlyingKey = underlying == null ? "ALL" : underlying;
+        String tradeTypeKey = tradeType == null || ALL.equals(tradeType) ? ALL : tradeType;
+        String secTypeKey = secType == null || ALL.equals(secType) ? ALL : secType;
+        String currencyKey = currency == null || ALL.equals(currency) ? ALL : currency;
+        String underlyingKey = underlying == null ? ALL : underlying;
 
         return intervalKey + "_" + tradeTypeKey + "_" + secTypeKey + "_" + currencyKey + "_" + underlyingKey;
     }
 
-    private <T> T normalizeParam(T param) {
-        return "ALL".equals(String.valueOf(param)) ? null : param;
+    private <T extends Enum<T>> T normalizeParam(String param, Class<T> enumType) {
+
+        return param == null || ALL.equals(param) ? null : T.valueOf(enumType, param);
     }
 
     private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {

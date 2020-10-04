@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.database;
 
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 
 import javax.persistence.Entity;
@@ -12,7 +13,7 @@ import java.util.Objects;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "exchange_rate", schema = "hpbanalytics", catalog = "hpbanalytics")
+@Table(name = "exchange_rate", schema = HanSettings.DB_SCHEMA, catalog = HanSettings.DB_DATABASE)
 public class ExchangeRate implements Serializable {
     private static final long serialVersionUID = 539031756808205732L;
 
@@ -28,22 +29,31 @@ public class ExchangeRate implements Serializable {
     private Double eurSgd;
 
     public Double getRate(Currency base, Currency transaction) {
-        switch (base) {
-            case EUR:
-                switch (transaction) {
-                    case EUR: return 1d;
-                    case USD: return eurUsd;
-                    case GBP: return eurGbp;
-                    case CHF: return eurChf;
-                    case AUD: return eurAud;
-                    case JPY: return eurJpy;
-                    case KRW: return eurKrw;
-                    case HKD: return eurHkd;
-                    case SGD: return eurSgd;
-                    default: return null;
-                }
-            default: return null;
+        if (base == Currency.EUR) {
+            switch (transaction) {
+                case EUR:
+                    return 1d;
+                case USD:
+                    return eurUsd;
+                case GBP:
+                    return eurGbp;
+                case CHF:
+                    return eurChf;
+                case AUD:
+                    return eurAud;
+                case JPY:
+                    return eurJpy;
+                case KRW:
+                    return eurKrw;
+                case HKD:
+                    return eurHkd;
+                case SGD:
+                    return eurSgd;
+                default:
+                    return null;
+            }
         }
+        return null;
     }
 
     @Override

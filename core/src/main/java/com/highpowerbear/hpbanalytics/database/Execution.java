@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.database;
 
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.ib.client.Types;
 
@@ -13,12 +14,12 @@ import java.util.Objects;
  * Created by robertk on 5/29/2017.
  */
 @Entity
-@Table(name = "execution", schema = "hpbanalytics", catalog = "hpbanalytics")
+@Table(name = "execution", schema = HanSettings.DB_SCHEMA, catalog = HanSettings.DB_DATABASE)
 public class Execution implements Serializable, Comparable<Execution> {
     private static final long serialVersionUID = 2067980957084297540L;
 
     @Id
-    @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = "hpbanalytics", catalog = "hpbanalytics", allocationSize = 1)
+    @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = HanSettings.DB_SCHEMA, catalog = HanSettings.DB_DATABASE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     private LocalDateTime receivedDate;
