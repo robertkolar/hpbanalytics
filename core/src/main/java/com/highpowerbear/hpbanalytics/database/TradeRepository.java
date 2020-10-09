@@ -17,8 +17,7 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, JpaSpecific
     List<Trade> findByTypeAndCloseDateBetweenOrderByOpenDateAsc(TradeType type, LocalDateTime closeDateBegin, LocalDateTime closeDateEnd);
 
     @Query("SELECT t FROM Trade t WHERE (t.closeDate >= :fillDate OR t.status = com.highpowerbear.hpbanalytics.enums.TradeStatus.OPEN) AND t.symbol = :symbol ORDER BY t.openDate ASC")
-    List<Trade> findTradesAffectedByExecution(@Param("fillDate") LocalDateTime fillDate,
-                                             @Param("symbol") String symbol);
+    List<Trade> findTradesAffectedByExecution(@Param("fillDate") LocalDateTime fillDate, @Param("symbol") String symbol);
 
     @Query("SELECT DISTINCT t.underlying AS u FROM Trade t ORDER BY u")
     List<String> findAllUnderlyings();

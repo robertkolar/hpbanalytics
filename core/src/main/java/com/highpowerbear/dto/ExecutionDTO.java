@@ -2,13 +2,16 @@ package com.highpowerbear.dto;
 
 import com.ib.client.Types;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.StringJoiner;
 
 /**
  * Created by robertk on 10/3/2020.
  */
-public class ExecutionDTO {
+public class ExecutionDTO implements Serializable {
+    private static final long serialVersionUID = -7595159006402413521L;
 
     private String origin;
     private String referenceId;
@@ -119,5 +122,22 @@ public class ExecutionDTO {
     public ExecutionDTO setFillPrice(BigDecimal fillPrice) {
         this.fillPrice = fillPrice;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ExecutionDTO.class.getSimpleName() + "[", "]")
+                .add("origin='" + origin + "'")
+                .add("referenceId='" + referenceId + "'")
+                .add("action=" + action)
+                .add("quantity=" + quantity)
+                .add("symbol='" + symbol + "'")
+                .add("underlying='" + underlying + "'")
+                .add("currency='" + currency + "'")
+                .add("secType=" + secType)
+                .add("multiplier=" + multiplier)
+                .add("fillDate=" + fillDate)
+                .add("fillPrice=" + fillPrice)
+                .toString();
     }
 }
