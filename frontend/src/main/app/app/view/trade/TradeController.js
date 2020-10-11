@@ -7,7 +7,7 @@ Ext.define('HanGui.view.trade.TradeController', {
     requires: [
         'HanGui.common.Definitions',
         'HanGui.view.trade.window.TradeCloseWindow',
-        'HanGui.view.trade.window.SplitExecutionWindow'
+        'HanGui.view.trade.window.TradeExecutionWindow'
     ],
 
     alias: 'controller.han-trade',
@@ -58,19 +58,19 @@ Ext.define('HanGui.view.trade.TradeController', {
         });
     },
 
-    onAnalyze: function(button) {
+    onRegenerateAllTrades: function(button) {
         var me = this;
 
         Ext.Msg.show({
-            title:'Perform analysis?',
-            message: 'All trades will be deleted and recreated again',
+            title:'Regenerate all trades?',
+            message: 'All trades will be deleted and regenrated again',
             buttons: Ext.Msg.YESNO,
             icon: Ext.Msg.QUESTION,
             fn: function(btn) {
                 if (btn === 'yes') {
                     Ext.Ajax.request({
                         method: 'POST',
-                        url: HanGui.common.Definitions.urlPrefix + '/trade/analyze'
+                        url: HanGui.common.Definitions.urlPrefix + '/trade/regenerate-all'
                     });
                 }
             }
@@ -119,19 +119,35 @@ Ext.define('HanGui.view.trade.TradeController', {
         this.lookupReference('tradeCloseWindow').close();
     },
 
-    showSplitExecutions: function (view, cell, cellIndex, record, row, rowIndex, e) {
-        if (cellIndex != 15) {
+    showTradeExecutions: function (view, cell, cellIndex, record, row, rowIndex, e) {
+        var me = this,
+            dataIndex = e.position.column.dataIndex;
+
+        if (dataIndex !== 'status') {
             return;
         }
-        var me = this;
 
-        if (!me.splitExecutionGrid) {
-            me.splitExecutionGrid = Ext.create('HanGui.view.trade.SplitExecutionGrid');
-            me.splitExecutionWindow = Ext.create('HanGui.view.trade.window.SplitExecutionWindow');
-            me.splitExecutionWindow.add(me.splitExecutionGrid);
+        if (!me.tradeExecutionGrid) {
+            me.tradeExecutionGrid = Ext.create('HanGui.view.trade.TradeExecutionGrid');
+            me.tradeExecutionWindow = Ext.create('HanGui.view.trade.window.TradeExecutionWindow');
+            me.tradeExecutionWindow.add(me.tradeExecutionGrid);
         }
-        me.splitExecutionGrid.setStore(record.splitExecutions());
-        me.splitExecutionWindow.setTitle("Split Executions for Trade id=" + record.data.id);
-        me.splitExecutionWindow.show();
+        me.tradeExecutionWindow.setTitle("Executions for Trade id=" + record.data.id);
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefix + '/trade/' + record.id + '/executions',
+
+            success: function(response, opts) {
+                var tradeExecutions = response.responseText;
+
+                var tradeExecutionsStore = Ext.create('Ext.data.Store', {
+                    model: 'HanGui.model.Execution',
+                    data: tradeExecutions
+                });
+                me.tradeExecutionGrid.setStore(tradeExecutionsStore);
+                me.tradeExecutionWindow.show();
+            }
+        });
     }
 });

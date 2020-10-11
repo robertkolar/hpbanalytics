@@ -4,8 +4,7 @@
 Ext.define('HanGui.view.trade.TradeModel', {
     extend: 'Ext.app.ViewModel',
     requires: [
-        'HanGui.model.Trade',
-        'HanGui.model.SplitExecution'
+        'HanGui.model.Trade'
     ],
 
     alias: 'viewmodel.han-trade',

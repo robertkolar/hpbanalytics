@@ -24,7 +24,7 @@ public class TradeCalculatorService {
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final ExecutionRepository executionRepository;
-    private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
+    private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>(); // TODO clear cache periodically, eventually move to hazelcast
 
     @Autowired
     public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository,

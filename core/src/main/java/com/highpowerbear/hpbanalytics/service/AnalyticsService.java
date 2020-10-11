@@ -2,13 +2,11 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
-import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.database.TradeRepository;
-import com.highpowerbear.hpbanalytics.enums.ManualCloseReason;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 import org.slf4j.Logger;
@@ -63,7 +61,11 @@ public class AnalyticsService implements ExecutionListener {
     public void regenerateAllTrades() {
         log.info("BEGIN trade regeneration");
 
+        long tradeCount = tradeRepository.count();
+
+        log.info("deleting " + tradeCount + " trades");
         tradeRepository.deleteAll();
+
         List<Execution> executions = executionRepository.findAllByOrderByFillDateAsc();
 
         if (executions.isEmpty()) {
@@ -149,6 +151,7 @@ public class AnalyticsService implements ExecutionListener {
             fillDate = fillDate.plus(1, ChronoUnit.MICROS);
         }
         if (fillDate.isAfter(execution.getFillDate())) {
+            log.info("adjusting fill date to " + fillDate);
             execution.setFillDate(fillDate);
         }
     }
@@ -163,12 +166,12 @@ public class AnalyticsService implements ExecutionListener {
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
 
-    public void manualCloseTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice, ManualCloseReason reason) {
+    public void manualCloseTrade(Trade trade, String executionReference, LocalDateTime closeDate, BigDecimal closePrice) {
         newExecution(new Execution()
-                .setOrigin(HanSettings.EXECUTION_ORIGIN_MANUAL)
-                .setReference(reason.name())
+                .setReference(executionReference)
                 .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
                 .setQuantity(Math.abs(trade.getOpenPosition()))
+                .setConid(trade.getConid())
                 .setSymbol(trade.getSymbol())
                 .setUnderlying(trade.getUnderlying())
                 .setCurrency(trade.getCurrency())

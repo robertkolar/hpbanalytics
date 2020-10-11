@@ -16,18 +16,12 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         stripeRows: true
     },
     listeners: {
-        'cellclick': 'showSplitExecutions'
+        'cellclick': 'showExecutions'
     },
     columns: [{
         text: 'ID',
         width: 60,
         dataIndex: 'id'
-    }, {
-        text: 'Open Date',
-        width: 160,
-        dataIndex: 'openDate',
-        xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s'
     }, {
         text: 'Type',
         width: 80,
@@ -36,6 +30,33 @@ Ext.define('HanGui.view.trade.TradeGrid', {
             metadata.style = (val == 'LONG' ? 'color: blue;' : 'color: brown;');
             return val;
         }
+    }, {
+        text: 'Conid',
+        width: 100,
+        dataIndex: 'conid',
+        align: 'right'
+    }, {
+        text: 'Symbol',
+        width: 180,
+        dataIndex: 'symbol',
+        filter: 'string'
+    }, {
+        text: 'Undl',
+        width: 80,
+        dataIndex: 'underlying'
+    }, {
+        text: 'Cur',
+        width: 80,
+        dataIndex: 'currency'
+    }, {
+        text: 'Sec',
+        width: 80,
+        dataIndex: 'secType'
+    }, {
+        text: 'Mul',
+        width: 60,
+        dataIndex: 'multiplier',
+        align: 'right'
     }, {
         text: 'Qnt',
         width: 80,
@@ -47,24 +68,6 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         dataIndex: 'openPosition',
         align: 'right'
     }, {
-        text: 'Sec',
-        width: 80,
-        dataIndex: 'secType',
-        filter: 'string'
-    }, {
-        text: 'Undl',
-        width: 80,
-        dataIndex: 'underlying'
-    }, {
-        text: 'Symbol',
-        width: 180,
-        dataIndex: 'symbol',
-        filter: 'string'
-    }, {
-        text: 'Cur',
-        width: 80,
-        dataIndex: 'currency'
-    }, {
         text: 'Open',
         width: 100,
         dataIndex: 'avgOpenPrice',
@@ -72,6 +75,12 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         renderer: function(val, metadata, record) {
             return Ext.util.Format.number(val, '0.00###');
         }
+    }, {
+        text: 'Open Date',
+        width: 160,
+        dataIndex: 'openDate',
+        xtype: 'datecolumn',
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Close',
         width: 100,
@@ -100,7 +109,9 @@ Ext.define('HanGui.view.trade.TradeGrid', {
             return Ext.util.Format.number(val, '0.00');
         }
     }, {
-        flex: 1
+        text: 'Execution IDs',
+        flex: 1,
+        dataIndex: 'executionIds'
     }, {
         text: 'Status',
         width: 60,
@@ -108,8 +119,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         renderer: function(val, metadata, record) {
             metadata.style = 'cursor: pointer; color: white; ' + (val == 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
             return val.toLowerCase();
-        },
-        filter: 'string'
+        }
     }, {
         xtype: 'widgetcolumn',
         width : 50,
@@ -140,6 +150,16 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     }, {
         xtype: 'toolbar',
         items: [{
+            xtype: 'button',
+            margin: '0 0 0 10',
+            text: 'Regenerate All',
+            handler: 'onRegenerateAllTrades',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('gear'));
+                }
+            }
+        }, {
             xtype: 'tbtext',
             flex: 1
         }, {

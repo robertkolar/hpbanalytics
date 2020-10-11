@@ -23,7 +23,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     private LocalDateTime receivedDate;
-    private String origin;
     private String reference;
     @Enumerated(EnumType.STRING)
     private Types.Action action;
@@ -74,15 +73,6 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     public Execution setReceivedDate(LocalDateTime receivedDate) {
         this.receivedDate = receivedDate;
-        return this;
-    }
-
-    public String getOrigin() {
-        return origin;
-    }
-
-    public Execution setOrigin(String origin) {
-        this.origin = origin;
         return this;
     }
 

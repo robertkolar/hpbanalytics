@@ -34,6 +34,7 @@ public class StatisticsCalculatorService {
     private final MessageService messageService;
     private final TradeCalculatorService tradeCalculatorService;
 
+    // TODO eventually move to hazelcast
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     private final String ALL = "ALL";

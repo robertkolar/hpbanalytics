@@ -5,7 +5,6 @@ import com.ib.client.Types;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.StringJoiner;
 
 /**
  * Created by robertk on 10/3/2020.
@@ -13,10 +12,10 @@ import java.util.StringJoiner;
 public class ExecutionDTO implements Serializable {
     private static final long serialVersionUID = -7595159006402413521L;
 
-    private String origin;
     private String reference;
     private Types.Action action;
     private Integer quantity;
+    private Integer conid;
     private String symbol;
     private String underlying;
     private String currency;
@@ -24,15 +23,6 @@ public class ExecutionDTO implements Serializable {
     private Double multiplier;
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
-
-    public String getOrigin() {
-        return origin;
-    }
-
-    public ExecutionDTO setOrigin(String origin) {
-        this.origin = origin;
-        return this;
-    }
 
     public String getReference() {
         return reference;
@@ -58,6 +48,15 @@ public class ExecutionDTO implements Serializable {
 
     public ExecutionDTO setQuantity(Integer quantity) {
         this.quantity = quantity;
+        return this;
+    }
+
+    public Integer getConid() {
+        return conid;
+    }
+
+    public ExecutionDTO setConid(Integer conid) {
+        this.conid = conid;
         return this;
     }
 
@@ -127,10 +126,10 @@ public class ExecutionDTO implements Serializable {
     @Override
     public String toString() {
         return "ExecutionDTO{" +
-                "origin='" + origin + '\'' +
-                ", reference='" + reference + '\'' +
+                "reference='" + reference + '\'' +
                 ", action=" + action +
                 ", quantity=" + quantity +
+                ", conid=" + conid +
                 ", symbol='" + symbol + '\'' +
                 ", underlying='" + underlying + '\'' +
                 ", currency='" + currency + '\'' +

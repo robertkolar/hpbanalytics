@@ -30,24 +30,15 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
         },
         items: [{
             xtype: 'textfield',
-            fieldLabel: 'Origin',
-            name: 'origin',
-            minLength: 1,
-            maxLength: 20,
-            value: 'INTERNAL'
-        }, {
-            xtype: 'textfield',
-            fieldLabel: 'Ref ID',
-            name: 'referenceId',
-            minLength: 1,
-            maxLength: 20,
-            value: 'N/A'
+            fieldLabel: 'Reference',
+            name: 'reference',
+            value: 'manual add execution'
         }, {
             xtype: 'combobox',
+            fieldLabel: 'Action',
             name: 'action',
             editable: false,
             queryMode: 'local',
-            fieldLabel: 'Action',
             store: Ext.create('Ext.data.Store', {
                 fields: ['text'],
                 data: [{"text": "BUY"}, {"text": "SELL"}]
@@ -61,18 +52,25 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             minValue: 0,
             value: 100
         }, {
-            xtype: 'textfield',
-            fieldLabel: 'Underlying',
-            name: 'underlying',
-            minLength: 1,
-            maxLength: 10,
-            value: 'SPY'
+            xtype: 'numberfield',
+            fieldLabel: 'Conid',
+            name: 'conid',
+            allowDecimals: false,
+            minValue: 0,
+            value: 123456
         }, {
             xtype: 'textfield',
             fieldLabel: 'Symbol',
             name: 'symbol',
             minLength: 1,
             maxLength: 30,
+            value: 'SPY'
+        }, {
+            xtype: 'textfield',
+            fieldLabel: 'Underlying',
+            name: 'underlying',
+            minLength: 1,
+            maxLength: 10,
             value: 'SPY'
         }, {
             xtype: 'textfield',
@@ -94,6 +92,13 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             value: 'STK'
         }, {
             xtype: 'numberfield',
+            fieldLabel: 'Multiplier',
+            name: 'multiplier',
+            allowDecimals: false,
+            minValue: 1,
+            value: 100
+        }, {
+            xtype: 'numberfield',
             fieldLabel: 'Fill Price',
             name: 'fillPrice',
             decimalPrecision: 5,
@@ -103,7 +108,7 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             xtype: 'datefield',
             fieldLabel: 'Fill Date',
             name: 'fillDate',
-            format: 'm/d/Y H:i:s.u',
+            format: 'm/d/Y H:i:s',
             listeners: {
                 beforerender: function(datefield, eOpts) {
                     datefield.setValue(new Date());

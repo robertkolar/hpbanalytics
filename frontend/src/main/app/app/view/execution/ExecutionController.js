@@ -70,17 +70,16 @@ Ext.define('HanGui.view.execution.ExecutionController', {
                 method: 'POST',
                 url: HanGui.common.Definitions.urlPrefix + '/execution',
                 jsonData: {
-                    origin: form.getForm().findField('origin').lastValue,
-                    referenceId: form.getForm().findField('referenceId').lastValue,
+                    reference: form.getForm().findField('reference').lastValue,
                     action: form.getForm().findField('action').lastValue,
                     quantity: form.getForm().findField('quantity').lastValue,
+                    symbol: form.getForm().findField('symbol').lastValue,
                     underlying: form.getForm().findField('underlying').lastValue,
                     currency: form.getForm().findField('currency').lastValue,
-                    symbol: form.getForm().findField('symbol').lastValue,
                     secType: form.getForm().findField('secType').lastValue,
-                    fillPrice: form.getForm().findField('fillPrice').lastValue,
+                    multiplier: form.getForm().findField('multiplier').lastValue,
                     fillDate: Ext.Date.format(new Date(form.getForm().findField('fillDate').lastValue), 'Y-m-d\\TH:i:s.u'),
-                    comment: form.getForm().findField('comment').lastValue
+                    fillPrice: form.getForm().findField('fillPrice').lastValue
                 },
                 success: function(response, opts) {
                     window.close();

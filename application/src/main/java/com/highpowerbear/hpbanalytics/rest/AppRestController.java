@@ -73,7 +73,6 @@ public class AppRestController {
             executions = executionRepository.findAll(pageable).getContent();
             numExecutions = executionRepository.count();
         }
-
         return ResponseEntity.ok(new GenericList<>(executions, (int) numExecutions));
     }
 
@@ -82,7 +81,6 @@ public class AppRestController {
             @RequestBody Execution execution) {
 
         execution.setId(null);
-        // TODO include multiplier into the GUI form for adding execution
         analyticsService.newExecution(execution);
 
         return ResponseEntity.ok().build();
@@ -96,13 +94,13 @@ public class AppRestController {
         if (execution == null ) {
             return ResponseEntity.notFound().build();
         }
-        analyticsService.deleteExecution(executionId);
 
+        analyticsService.deleteExecution(executionId);
         return ResponseEntity.ok().build();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "trade/regenerate-all")
-    public ResponseEntity<?> recreateAllTrades() {
+    public ResponseEntity<?> regenerateAllTrades() {
 
         analyticsService.regenerateAllTrades();
         return ResponseEntity.ok().build();
@@ -128,8 +126,20 @@ public class AppRestController {
             trades = tradeRepository.findAll(pageable).getContent();
             numTrades = tradeRepository.count();
         }
-
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
+    }
+
+    @RequestMapping("trade/{tradeId}/executions")
+    public ResponseEntity<?> getTradeExecutions(
+            @PathVariable("tradeId") long tradeId) {
+
+        Trade trade = tradeRepository.findById(tradeId).orElse(null);
+        if (trade == null ) {
+            return ResponseEntity.notFound().build();
+        }
+
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+        return ResponseEntity.ok(new GenericList<>(tradeExecutions, tradeExecutions.size()));
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "trade/{tradeId}/close")
@@ -145,8 +155,8 @@ public class AppRestController {
         } else if (!TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-        analyticsService.manualCloseTrade(trade, r.getCloseDate(), r.getClosePrice(), r.getReason());
 
+        analyticsService.manualCloseTrade(trade, r.getExecutionReference(), r.getCloseDate(), r.getClosePrice());
         return ResponseEntity.ok().build();
     }
 

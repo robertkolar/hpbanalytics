@@ -27,6 +27,17 @@ Ext.define('HanGui.view.trade.window.TradeCloseWindow', {
             labelWidth: 80
         },
         items: [{
+            xtype: 'combobox',
+            fieldLabel: 'Reference',
+            name: 'reference',
+            editable: false,
+            queryMode: 'local',
+            store: Ext.create('Ext.data.Store', {
+                fields: ['text'],
+                data: [{"text": "expire"}, {"text": "assign"}, {"text": "manual close trade"}]
+            }),
+            value: 'BUY'
+        }, {
             xtype: 'datefield',
             reference: 'closeDate',
             fieldLabel: 'Close Date',

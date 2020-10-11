@@ -20,19 +20,9 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 60,
         dataIndex: 'id'
     }, {
-        text: 'Fill Date',
-        width: 160,
-        dataIndex: 'fillDate',
-        xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s'
-    }, {
-        text: 'Origin',
-        width: 100,
-        dataIndex: 'origin'
-    }, {
-        text: 'RefID',
-        width: 100,
-        dataIndex: 'referenceId',
+        text: 'Reference',
+        width: 180,
+        dataIndex: 'reference',
         align: 'right'
     }, {
         text: 'Action',
@@ -48,9 +38,14 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'quantity',
         align: 'right'
     }, {
-        text: 'Sec',
-        width: 60,
-        dataIndex: 'secType',
+        text: 'Conid',
+        width: 100,
+        dataIndex: 'conid',
+        align: 'right'
+    }, {
+        text: 'Symbol',
+        width: 180,
+        dataIndex: 'symbol',
         filter: 'string'
     }, {
         text: 'Undl',
@@ -61,10 +56,20 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 60,
         dataIndex: 'currency'
     }, {
-        text: 'Symbol',
-        width: 180,
-        dataIndex: 'symbol',
-        filter: 'string'
+        text: 'Sec',
+        width: 60,
+        dataIndex: 'secType'
+    }, {
+        text: 'Mul',
+        width: 60,
+        dataIndex: 'multiplier',
+        align: 'right'
+    }, {
+        text: 'Fill Date',
+        width: 160,
+        dataIndex: 'fillDate',
+        xtype: 'datecolumn',
+        format: 'm/d/Y H:i:s'
     }, {
         text: 'Fill',
         width: 100,
@@ -79,13 +84,6 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'receivedDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'
-    }, {
-        text: 'Comment',
-        flex: 1,
-        dataIndex: 'comment',
-        renderer: function(val, metadata, record) {
-            return (val ? val.toLowerCase() : val);
-        }
     }, {
         xtype: 'widgetcolumn',
         width : 50,

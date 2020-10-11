@@ -5,18 +5,17 @@ Ext.define('HanGui.model.Execution', {
     extend: 'HanGui.model.Base',
 
     fields: [
-        'receivedDate',
-        'comment',
-        'origin',
-        'referenceId',
+        'reference',
         'action',
         'quantity',
+        'conid',
         'symbol',
         'underlying',
         'currency',
         'secType',
         'multiplier',
         'fillDate',
-        'fillPrice'
+        'fillPrice',
+        'receivedDate'
     ]
 });

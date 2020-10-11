@@ -6,6 +6,7 @@ Ext.define('HanGui.model.Trade', {
 
     fields: [
         'type',
+        'conid',
         'symbol',
         'underlying',
         'currency',
@@ -19,6 +20,7 @@ Ext.define('HanGui.model.Trade', {
         'avgClosePrice',
         'closeDate',
         'duration',
-        'profitLoss'
+        'profitLoss',
+        'executionIds'
     ]
 });
