@@ -233,7 +233,7 @@ public class AnalyticsService implements ExecutionListener {
                 int oldPos = currentPos;
                 currentPos += (execution.getAction() == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
 
-                log.info("associated execution " + execution + ", currentPos=" + currentPos);
+                log.info("associated " + execution + ", currentPos=" + currentPos);
 
                 if (detectReversal(oldPos, currentPos)) {
                     throw new IllegalStateException("execution resulting in reversal trade not permitted " + execution);

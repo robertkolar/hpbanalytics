@@ -103,17 +103,10 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             name: 'fillDate',
             format: 'm/d/Y H:i:s',
             listeners: {
-                beforerender: function(datefield, eOpts) {
+                beforerender: function (datefield, eOpts) {
                     datefield.setValue(new Date());
                 }
             }
-        }, {
-            xtype: 'textfield',
-            fieldLabel: 'Comment',
-            name: 'comment',
-            maxLength: 255,
-            allowBlank: true,
-            value: 'MANUAL'
         }],
         dockedItems: [{
             xtype: 'toolbar',

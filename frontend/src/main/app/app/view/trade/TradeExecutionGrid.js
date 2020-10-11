@@ -37,6 +37,10 @@ Ext.define('HanGui.view.trade.TradeExecutionGrid', {
         width: 60,
         dataIndex: 'currency'
     }, {
+        text: 'Sec',
+        width: 60,
+        dataIndex: 'secType'
+    }, {
         text: 'Mul',
         width: 60,
         dataIndex: 'multiplier',

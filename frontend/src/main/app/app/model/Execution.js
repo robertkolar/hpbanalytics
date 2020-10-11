@@ -5,6 +5,7 @@ Ext.define('HanGui.model.Execution', {
     extend: 'HanGui.model.Base',
 
     fields: [
+        'receivedDate',
         'reference',
         'action',
         'quantity',
@@ -14,7 +15,6 @@ Ext.define('HanGui.model.Execution', {
         'secType',
         'multiplier',
         'fillDate',
-        'fillPrice',
-        'receivedDate'
+        'fillPrice'
     ]
 });

@@ -127,22 +127,23 @@ Ext.define('HanGui.view.trade.TradeController', {
             return;
         }
 
-        var store = Ext.create('Ext.data.Store', {
-            model: 'HanGui.model.Execution'
-        });
-        store.getProxy().setUrl(HanGui.common.Definitions.urlPrefix + '/trade/' + record.id + '/executions');
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefix + '/trade/' + record.id + '/executions',
 
-        var window = Ext.create('HanGui.view.trade.window.TradeExecutionWindow');
-        window.setTitle("Executions for Trade id=" + record.data.id);
+            success: function(response, opts) {
+                var window = Ext.create('HanGui.view.trade.window.TradeExecutionWindow', {
+                    title: "Executions for Trade id=" + record.data.id
+                });
 
-        var grid = Ext.create('HanGui.view.trade.TradeExecutionGrid');
-        grid.setStore(store);
-        window.add(grid);
-        me.getView().add(window);
-
-        store.load(function(records, operation, success) {
-            if (success) {
-                console.log('loaded trade executions for trade ' + record.id);
+                var grid = Ext.create('HanGui.view.trade.TradeExecutionGrid', {
+                    store: Ext.create('Ext.data.Store', {
+                        model: 'HanGui.model.Execution',
+                        data: Ext.decode(response.responseText).items
+                    })
+                });
+                window.add(grid);
+                me.getView().add(window);
                 window.show();
             }
         });

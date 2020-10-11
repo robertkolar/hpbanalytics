@@ -20,6 +20,12 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 60,
         dataIndex: 'id'
     }, {
+        text: 'Received Date',
+        width: 160,
+        dataIndex: 'receivedDate',
+        xtype: 'datecolumn',
+        format: 'm/d/Y H:i:s'
+    }, {
         text: 'Reference',
         width: 180,
         dataIndex: 'reference',
@@ -29,7 +35,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 60,
         dataIndex: 'action',
         renderer: function(val, metadata, record) {
-            metadata.style = (val == 'BUY' ? 'color: blue;' : 'color: brown;');
+            metadata.style = (val === 'BUY' ? 'color: blue;' : 'color: brown;');
             return val;
         }
     }, {
@@ -73,12 +79,6 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         renderer: function(val, metadata, record) {
             return Ext.util.Format.number(val, '0.00###');
         }
-    }, {
-        text: 'Received Date',
-        width: 160,
-        dataIndex: 'receivedDate',
-        xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s'
     }, {
         flex: 1,
         menuDisabled: true

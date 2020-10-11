@@ -151,7 +151,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         items: [{
             xtype: 'button',
             margin: '0 0 0 10',
-            text: 'Regenerate All',
+            text: 'Regenerate',
             handler: 'onRegenerateAllTrades',
             listeners: {
                 beforerender: function(c, eOpts) {

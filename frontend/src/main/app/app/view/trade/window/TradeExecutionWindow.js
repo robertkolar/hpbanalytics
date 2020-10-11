@@ -10,5 +10,5 @@ Ext.define('HanGui.view.trade.window.TradeExecutionWindow', {
     modal: false,
     scrollable: true,
     maximizable: false,
-    width: 810
+    width: 870
 });
