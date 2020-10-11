@@ -12,7 +12,9 @@
     <artifactId>hpbanalytics-core</artifactId>
 
     <properties>
-        <org.mapstruct.version>1.4.0.Final</org.mapstruct.version>
+        <mapstruct.version>1.4.0.Final</mapstruct.version>
+        <hibernate-types.version>2.10.0</hibernate-types.version>
+        <tws-api.version>9.74.01</tws-api.version>
     </properties>
 
     <dependencies>
@@ -47,12 +49,17 @@
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
-            <version>${org.mapstruct.version}</version>
+            <version>${mapstruct.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.vladmihalcea</groupId>
+            <artifactId>hibernate-types-52</artifactId>
+            <version>${hibernate-types.version}</version>
         </dependency>
         <dependency>
             <groupId>com.interactivebrokers</groupId>
             <artifactId>tws-api</artifactId>
-            <version>9.74.01</version>
+            <version>${tws-api.version}</version>
         </dependency>
     </dependencies>
 
@@ -74,7 +81,7 @@
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
-                            <version>${org.mapstruct.version}</version>
+                            <version>${mapstruct.version}</version>
                         </path>
                     </annotationProcessorPaths>
                 </configuration>

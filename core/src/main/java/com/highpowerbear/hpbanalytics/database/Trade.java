@@ -1,12 +1,12 @@
 package com.highpowerbear.hpbanalytics.database;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -30,6 +30,7 @@ public class Trade implements Serializable {
     private Long id;
     @Enumerated(EnumType.STRING)
     private TradeType type;
+    private Integer conid;
     private String symbol;
     private String underlying;
     @Enumerated(EnumType.STRING)
@@ -46,17 +47,16 @@ public class Trade implements Serializable {
     private BigDecimal avgClosePrice;
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
-    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @OrderBy("fillDate ASC")
-    private List<SplitExecution> splitExecutions;
+    @Type(type = "list-array")
+    @Column(name = "execution_ids", columnDefinition = "bigint[]")
+    private List<Long> executionIds;
 
-    @JsonProperty
     public String getDuration() {
         return closeDate != null ? HanUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
     }
 
-    public String print() {
-        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? openDate : "-") + ", " + (closeDate != null ? closeDate : "-") + ", " + profitLoss);
+    public boolean isOpen() {
+        return TradeStatus.OPEN.equals(status);
     }
 
     @Override
@@ -89,6 +89,15 @@ public class Trade implements Serializable {
 
     public Trade setType(TradeType type) {
         this.type = type;
+        return this;
+    }
+
+    public Integer getConid() {
+        return conid;
+    }
+
+    public Trade setConid(Integer conid) {
+        this.conid = conid;
         return this;
     }
 
@@ -209,23 +218,17 @@ public class Trade implements Serializable {
         return this;
     }
 
-    public List<SplitExecution> getSplitExecutions() {
-        return splitExecutions;
+    public List<Long> getExecutionIds() {
+        return executionIds;
     }
 
-    public Trade setSplitExecutions(List<SplitExecution> splitExecutions) {
-        for (SplitExecution se : splitExecutions) {
-            se.setTrade(this);
-        }
-        this.splitExecutions = splitExecutions;
+    public Trade setExecutionIds(List<Long> executionIds) {
+        this.executionIds = executionIds;
         return this;
     }
 
-    public SplitExecution getLastSplitExecution() {
-        return getSplitExecutions().get(getSplitExecutions().size() - 1);
-    }
-    
-    public Boolean getOpen() {
-        return (status == TradeStatus.OPEN);
+    @Override
+    public String toString() {
+        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? openDate : "-") + ", " + (closeDate != null ? closeDate : "-") + ", " + profitLoss);
     }
 }

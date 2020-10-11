@@ -3,8 +3,10 @@ package com.highpowerbear.hpbanalytics.service;
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
-import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.TradeStatus;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
+import com.highpowerbear.hpbanalytics.database.Trade;
+import com.highpowerbear.hpbanalytics.database.TradeRepository;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -54,20 +57,20 @@ public class AnalyticsService implements ExecutionListener {
     }
 
     @Transactional
-    public void analyzeAll() {
-        log.info("BEGIN analysis");
+    public void regenerateAllTrades() {
+        log.info("BEGIN trade regeneration");
 
         tradeRepository.deleteAll();
         List<Execution> executions = executionRepository.findAllByOrderByFillDateAsc();
 
         if (executions.isEmpty()) {
-            log.info("END analysis , no executions, skipping");
+            log.info("END trade regeneration, no executions, skipping");
             return;
         }
-        List<Trade> trades = analyze(executions);
-        tradeRepository.saveAll(trades);
+        List<Trade> regeneratedTades = generateTrades(executions);
+        saveRegeneratedTrades(regeneratedTades);
 
-        log.info("END analysis");
+        log.info("END trade regeneration");
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
 
@@ -78,68 +81,70 @@ public class AnalyticsService implements ExecutionListener {
             log.warn("execution " + executionId + " does not exists, cannot delete");
             return;
         }
+        int conid = execution.getConid();
 
-        String symbol = execution.getSymbol();
-
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), conid);
         logTradesAffected(execution, tradesAffected);
 
-        tradeRepository.deleteAll(tradesAffected); // also deletes associated split executions
-        executionRepository.deleteById(executionId);
+        Trade firstTradeAffected = tradesAffected.get(0);
+        Long firstExecutionId = firstTradeAffected.getExecutionIds().get(0);
+        Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
 
-        SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
-        boolean isCleanCut = (firstSe.getSplitQuantity().equals(firstSe.getExecution().getQuantity()));
-        boolean omitFirstSe = (isCleanCut && !executionRepository.existsById(firstSe.getExecution().getId())); // cleanCut is redundant
+        log.info("deleting " + tradesAffected.size() + " trades");
+        tradeRepository.deleteAll(tradesAffected);
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateAfterOrderByFillDateAsc(symbol, firstSe.getExecution().getFillDate());
-        List<Trade> newTrades = analyzeSingleSymbol(executionsToAnalyzeAgain, (omitFirstSe ? null : firstSe));
+        log.info("deleting execution " + execution);
+        executionRepository.deleteById(executionId); // need to delete before the next query
 
-        if (!newTrades.isEmpty()) {
-            tradeRepository.saveAll(newTrades);
-        }
+        List<Execution> executionsToAnalyzeAgain = executionRepository.findByConidAndFillDateGreaterThanEqualOrderByFillDateAsc(conid, firstExecution.getFillDate());
+        List<Trade> regeneratedTrades = generateTradesSingleConid(executionsToAnalyzeAgain);
 
-        messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
-        messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
+        saveRegeneratedTrades(regeneratedTrades);
     }
 
     @Transactional
     public void newExecution(Execution execution) {
-        execution.setReceivedDate(LocalDateTime.now());
-        String symbol = execution.getSymbol();
+        // TODO prevent that new execution fill date is not equal to any existing execution
 
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), symbol);
+        execution.setReceivedDate(LocalDateTime.now());
+        int conid = execution.getConid();
+
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), conid);
         logTradesAffected(execution, tradesAffected);
 
         log.info("deleting " + tradesAffected.size() + " trades");
-        tradeRepository.deleteAll(tradesAffected); // also deletes associated split executions
+        tradeRepository.deleteAll(tradesAffected);
 
-        execution = executionRepository.save(execution);
+        log.info("saving new execution " + execution);
+        execution = executionRepository.save(execution); // need to save before the next query
 
-        List<Execution> executionsToAnalyzeAgain = new ArrayList<>();
-        List<Trade> trades;
-
-        if (!tradesAffected.isEmpty()) {
-            SplitExecution firstSe = tradesAffected.get(0).getSplitExecutions().get(0);
-            log.info("firstSe=" + firstSe.print());
-
-            boolean isNewAfterFirst = execution.getFillDate().isAfter(firstSe.getExecution().getFillDate());
-            log.info("isNewAfterFirst=" + isNewAfterFirst + ", " + execution.getFillDate() + ", " + firstSe.getExecution().getFillDate());
-
-            if (isNewAfterFirst) {
-                executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateAfterOrderByFillDateAsc(symbol, firstSe.getExecution().getFillDate());
-            } else {
-                executionsToAnalyzeAgain = executionRepository.findBySymbolAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, execution.getFillDate());
-            }
-            trades = analyzeSingleSymbol(executionsToAnalyzeAgain, isNewAfterFirst ? firstSe : null);
-
-        } else {
-            executionsToAnalyzeAgain.add(execution);
-            trades = analyzeSingleSymbol(executionsToAnalyzeAgain, null);
+        if (tradesAffected.isEmpty()) {
+            saveRegeneratedTrades(generateTradesSingleConid(Collections.singletonList(execution)));
+            return;
         }
 
-        log.info("creating " + trades.size() + " trades");
-        tradeRepository.saveAll(trades);
+        Trade firstTradeAffected = tradesAffected.get(0);
 
+        Long firstExecutionId = firstTradeAffected.getExecutionIds().get(0);
+        Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
+
+        LocalDateTime cutoffDate = Stream.of(firstExecution, execution)
+                .map(Execution::getFillDate)
+                .min(LocalDateTime::compareTo)
+                .get();
+
+        List<Execution> executionsToAnalyzeAgain = executionRepository.findByConidAndFillDateGreaterThanEqualOrderByFillDateAsc(conid, cutoffDate);
+        List<Trade> regeneratedTrades = generateTradesSingleConid(executionsToAnalyzeAgain);
+
+        saveRegeneratedTrades(regeneratedTrades);
+    }
+
+    private void saveRegeneratedTrades(List<Trade> trades) {
+        log.info("saving " + trades.size() + " regenerated trades");
+
+        if (!trades.isEmpty()) {
+            tradeRepository.saveAll(trades);
+        }
         messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
@@ -161,131 +166,54 @@ public class AnalyticsService implements ExecutionListener {
         messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
-
-    private List<Trade> analyze(List<Execution> executions) {
-        return createTrades(createSplitExecutions(executions));
-    }
     
-    private List<Trade> analyzeSingleSymbol(List<Execution> executions, SplitExecution firstSplitExecution) {
-        if (firstSplitExecution != null) {
-            firstSplitExecution
-                    .setId(null)
-                    .setTrade(null);
-        }
-        return createTradesSingleSymbol(createSesSingleSymbol(executions, firstSplitExecution));
-    }
-    
-    
-    private List<SplitExecution> createSplitExecutions(List<Execution> executions) {
-        List<SplitExecution> splitExecutions = new ArrayList<>();
-        Set<String> symbols = executions.stream().map(Execution::getSymbol).collect(Collectors.toSet());
-        Map<String, List<Execution>> mapExecutions = new HashMap<>();
-        for (String s : symbols) {
-            mapExecutions.put(s, new ArrayList<>());
-        }
-        for (Execution e : executions) {
-            mapExecutions.get(e.getSymbol()).add(e);
-        }
-        for (String s : symbols) {
-            splitExecutions.addAll(createSesSingleSymbol(mapExecutions.get(s), null));
-        }
-        return splitExecutions;
-    }
-   
-    private List<SplitExecution> createSesSingleSymbol(List<Execution> executions, SplitExecution firstSe) {
-        List<SplitExecution> sesSingleSymbol = new ArrayList<>();
-        int currentPos = (firstSe != null ? firstSe.getCurrentPosition() : 0);
-        if (firstSe != null) {
-            sesSingleSymbol.add(firstSe);
-        }
-        for (Execution e : executions) {
-            int ePos = (e.getAction() == Types.Action.BUY ? e.getQuantity() : -e.getQuantity());
-            int newPos = currentPos + ePos;
-
-            if (currentPos < 0 && newPos > 0) {
-                // split
-                sesSingleSymbol.add(new SplitExecution() // first
-                        .setExecution(e)
-                        .setFillDate(e.getFillDate())
-                        .setSplitQuantity(-currentPos)
-                        .setCurrentPosition(0));
-
-                sesSingleSymbol.add( new SplitExecution() // second
-                        .setExecution(e)
-                        .setFillDate(e.getFillDate())
-                        .setSplitQuantity(newPos)
-                        .setCurrentPosition(newPos));
-
-            } else if (currentPos > 0 && newPos < 0) {
-                // split
-                sesSingleSymbol.add(new SplitExecution() // first
-                        .setExecution(e)
-                        .setFillDate(e.getFillDate())
-                        .setSplitQuantity(currentPos)
-                        .setCurrentPosition(0));
-
-                sesSingleSymbol.add(new SplitExecution() // second
-                        .setExecution(e)
-                        .setFillDate(e.getFillDate())
-                        .setSplitQuantity(-newPos)
-                        .setCurrentPosition(newPos));
-            } else {
-                // normal
-                sesSingleSymbol.add(new SplitExecution()
-                        .setExecution(e)
-                        .setFillDate(e.getFillDate())
-                        .setSplitQuantity(e.getQuantity())
-                        .setCurrentPosition(newPos));
-            }
-            currentPos = newPos;
-        }
-        return sesSingleSymbol;
-    }
-    
-    private List<Trade> createTrades(List<SplitExecution> splitExecutions) {
+    private List<Trade> generateTrades(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
-        Set<String> symbols = splitExecutions.stream().map(se -> se.getExecution().getSymbol()).collect(Collectors.toSet());
-        Map<String, List<SplitExecution>> mapSe = new HashMap<>();
+        Set<Integer> conids = executions.stream().map(Execution::getConid).collect(Collectors.toSet());
+        Map<Integer, List<Execution>> executionsPerConidMap = new HashMap<>(); // conid -> list of executions
 
-        symbols.forEach(s -> mapSe.put(s, new ArrayList<>()));
-        splitExecutions.forEach(se -> mapSe.get(se.getExecution().getSymbol()).add(se));
-        symbols.forEach(s -> trades.addAll(createTradesSingleSymbol(mapSe.get(s))));
+        conids.forEach(conid -> executionsPerConidMap.put(conid, new ArrayList<>()));
+        executions.forEach(execution -> executionsPerConidMap.get(execution.getConid()).add(execution));
+        conids.forEach(conid -> trades.addAll(generateTradesSingleConid(executionsPerConidMap.get(conid))));
 
         return trades;
     }
     
-    private List<Trade> createTradesSingleSymbol(List<SplitExecution> splitExecutions) {
+    private List<Trade> generateTradesSingleConid(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
-        Set<SplitExecution> singleSymbolSet = new LinkedHashSet<>(splitExecutions);
 
-        while (!singleSymbolSet.isEmpty()) {
-            Set<SplitExecution> singleTradeSet = new LinkedHashSet<>();
-            Trade trade = new Trade()
-                    .setStatus(TradeStatus.OPEN);
+        int currentPos = 0;
+        Set<Execution> singleConidSet = new LinkedHashSet<>(executions);
 
-            for (SplitExecution se : singleSymbolSet) {
-                singleTradeSet.add(se);
-                if (se.getCurrentPosition() == 0) {
-                    trade.setStatus(TradeStatus.CLOSED);
+        while (!singleConidSet.isEmpty()) {
+            List<Execution> tradeExecutions = new ArrayList<>();
+            Trade trade = new Trade();
+
+            for (Execution execution : singleConidSet) {
+                tradeExecutions.add(execution);
+
+                currentPos += (execution.getAction() == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
+                if (currentPos== 0) {
                     break;
                 }
             }
-            trade.setSplitExecutions(new ArrayList<>(singleTradeSet));
+            trade.setExecutionIds(tradeExecutions.stream()
+                    .map(Execution::getId)
+                    .collect(Collectors.toList()));
+
             tradeCalculatorService.calculateFields(trade);
             trades.add(trade);
-            singleSymbolSet.removeAll(singleTradeSet);
+            singleConidSet.removeAll(tradeExecutions);
         }
         return trades;
     }
 
     private void logTradesAffected(Execution execution, List<Trade> tradesAffected) {
         StringBuilder sb = new StringBuilder();
-        sb.append("trades affected by execution: ").append(execution.print()).append("\n");
 
-        tradesAffected.forEach(t -> {
-            sb.append("trade: ").append(t.print()).append("\n");
-            t.getSplitExecutions().forEach(se -> sb.append(se.print()).append("\n"));
-        });
+        sb.append("trades affected by execution: ").append(execution).append("\n");
+        tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
+
         log.info(sb.toString());
     }
 }

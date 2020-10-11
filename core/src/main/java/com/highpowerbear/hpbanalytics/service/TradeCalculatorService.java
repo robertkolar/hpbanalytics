@@ -23,56 +23,67 @@ import java.util.Map;
 public class TradeCalculatorService {
 
     private final ExchangeRateRepository exchangeRateRepository;
+    private final ExecutionRepository executionRepository;
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
 
     @Autowired
-    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository) {
+    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository,
+                                  ExecutionRepository executionRepository) {
+
         this.exchangeRateRepository = exchangeRateRepository;
+        this.executionRepository = executionRepository;
     }
 
     public void calculateFields(Trade trade) {
-        SplitExecution seFirst = trade.getSplitExecutions().get(0);
-        SplitExecution seLast = trade.getSplitExecutions().get(trade.getSplitExecutions().size() - 1);
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+
+        Execution firstExecution = tradeExecutions.get(0);
+        Execution lastExecution = tradeExecutions.get(tradeExecutions.size() - 1);
 
         trade
-            .setType(seFirst.getCurrentPosition() > 0 ? TradeType.LONG : TradeType.SHORT)
-            .setSymbol(seFirst.getExecution().getSymbol())
-            .setUnderlying(seFirst.getExecution().getUnderlying())
-            .setCurrency(seFirst.getExecution().getCurrency())
-            .setSecType(seFirst.getExecution().getSecType())
-            .setMultiplier(seFirst.getExecution().getMultiplier())
-            .setOpenPosition(seLast.getCurrentPosition());
+            .setType(firstExecution.getAction() == Types.Action.BUY ? TradeType.LONG : TradeType.SHORT)
+            .setSymbol(firstExecution.getSymbol())
+            .setUnderlying(firstExecution.getUnderlying())
+            .setCurrency(firstExecution.getCurrency())
+            .setSecType(firstExecution.getSecType())
+            .setMultiplier(firstExecution.getMultiplier());
 
+        TradeType tradeType = trade.getType();
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
         BigDecimal cumulativeClosePrice = BigDecimal.ZERO;
-
+        int openPosition = 0;
         int cumulativeQuantity = 0;
 
-        for (SplitExecution se : trade.getSplitExecutions()) {
-            Execution e = se.getExecution();
+        for (Execution execution : tradeExecutions) {
+            Types.Action action = execution.getAction();
+            int quantity = execution.getQuantity();
 
-            if ((trade.getType() == TradeType.LONG && e.getAction() == Types.Action.BUY) || (trade.getType() == TradeType.SHORT && e.getAction() == Types.Action.SELL)) {
-                cumulativeQuantity += se.getSplitQuantity();
-                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
+            openPosition += (action == Types.Action.BUY ? quantity : -quantity);
+
+            if ((tradeType == TradeType.LONG && action == Types.Action.BUY) || (tradeType == TradeType.SHORT && action == Types.Action.SELL)) {
+                cumulativeQuantity += quantity;
+                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(execution.getFillPrice()));
             }
-            if (trade.getStatus() == TradeStatus.CLOSED) {
-                if ((trade.getType() == TradeType.LONG && e.getAction() == Types.Action.SELL) || (trade.getType() == TradeType.SHORT && e.getAction() == Types.Action.BUY)) {
-                    cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(e.getFillPrice()));
-                }
+
+            if ((tradeType == TradeType.LONG && action == Types.Action.SELL) || (tradeType == TradeType.SHORT && action == Types.Action.BUY)) {
+                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(execution.getQuantity())).multiply(execution.getFillPrice());
             }
         }
 
         trade
+            .setOpenPosition(openPosition)
+            .setStatus(openPosition != 0 ? TradeStatus.OPEN : TradeStatus.CLOSED)
             .setCumulativeQuantity(cumulativeQuantity)
-            .setOpenDate(seFirst.getExecution().getFillDate())
+            .setOpenDate(firstExecution.getFillDate())
             .setAvgOpenPrice(cumulativeOpenPrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP));
+
 
         if (trade.getStatus() == TradeStatus.CLOSED) {
             trade
                 .setAvgClosePrice(cumulativeClosePrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP))
-                .setCloseDate(seLast.getExecution().getFillDate());
+                .setCloseDate(lastExecution.getFillDate());
 
-            BigDecimal profitLoss = (TradeType.LONG.equals(trade.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
+            BigDecimal profitLoss = (TradeType.LONG.equals(tradeType) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
             profitLoss = profitLoss.multiply(BigDecimal.valueOf(trade.getMultiplier()));
             trade.setProfitLoss(profitLoss);
         }
@@ -89,28 +100,31 @@ public class TradeCalculatorService {
         }
     }
 
-    public BigDecimal calculatePlPortfolioBaseOpenClose(Trade t) {
-        validateClosed(t);
+    public BigDecimal calculatePlPortfolioBaseOpenClose(Trade trade) {
+        validateClosed(trade);
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
 
+        TradeType tradeType = trade.getType();
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
         BigDecimal cumulativeClosePrice = BigDecimal.ZERO;
 
-        for (SplitExecution se : t.getSplitExecutions()) {
-            Execution e = se.getExecution();
+        for (Execution execution : tradeExecutions) {
+            Types.Action action = execution.getAction();
+            int quantity = execution.getQuantity();
 
-            BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(se.getFillDate().toLocalDate(), e.getCurrency()));
-            BigDecimal fillPrice = se.getExecution().getFillPrice().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
+            BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(execution.getFillDate().toLocalDate(), execution.getCurrency()));
+            BigDecimal fillPrice = execution.getFillPrice().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
 
-            if ((t.getType() == TradeType.LONG && e.getAction() == Types.Action.BUY) || (t.getType() == TradeType.SHORT && e.getAction() == Types.Action.SELL)) {
-                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
+            if ((tradeType == TradeType.LONG && action == Types.Action.BUY) || (tradeType == TradeType.SHORT && action == Types.Action.SELL)) {
+                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
 
-            } else if ((t.getType() == TradeType.LONG && e.getAction() == Types.Action.SELL) || (t.getType() == TradeType.SHORT && e.getAction() == Types.Action.BUY)) {
-                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(se.getSplitQuantity()).multiply(fillPrice));
+            } else if ((tradeType == TradeType.LONG && action == Types.Action.SELL) || (tradeType == TradeType.SHORT && action == Types.Action.BUY)) {
+                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
             }
         }
 
-        BigDecimal profitLoss = (TradeType.LONG.equals(t.getType()) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-        profitLoss = profitLoss.multiply(BigDecimal.valueOf(t.getMultiplier()));
+        BigDecimal profitLoss = (TradeType.LONG.equals(tradeType) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
+        profitLoss = profitLoss.multiply(BigDecimal.valueOf(trade.getMultiplier()));
 
         return profitLoss;
     }

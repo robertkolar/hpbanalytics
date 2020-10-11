@@ -29,6 +29,7 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Enumerated(EnumType.STRING)
     private Types.Action action;
     private Integer quantity;
+    private Integer conid;
     private String symbol;
     private String underlying;
     @Enumerated(EnumType.STRING)
@@ -57,10 +58,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Override
     public int compareTo(Execution other) {
         return fillDate.compareTo(other.fillDate);
-    }
-
-    public String print() {
-        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + fillDate + ", " + fillPrice);
     }
 
     public Long getId() {
@@ -126,6 +123,15 @@ public class Execution implements Serializable, Comparable<Execution> {
         return this;
     }
 
+    public Integer getConid() {
+        return conid;
+    }
+
+    public Execution setConid(Integer conid) {
+        this.conid = conid;
+        return this;
+    }
+
     public String getSymbol() {
         return symbol;
     }
@@ -187,5 +193,10 @@ public class Execution implements Serializable, Comparable<Execution> {
     public Execution setFillPrice(BigDecimal fillPrice) {
         this.fillPrice = fillPrice;
         return this;
+    }
+
+    @Override
+    public String toString() {
+        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + fillDate + ", " + fillPrice);
     }
 }

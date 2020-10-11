@@ -101,10 +101,10 @@ public class AppRestController {
         return ResponseEntity.ok().build();
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "trade/analyze")
-    public ResponseEntity<?> analyze() {
+    @RequestMapping(method = RequestMethod.POST, value = "trade/regenerate-all")
+    public ResponseEntity<?> recreateAllTrades() {
 
-        analyticsService.analyzeAll();
+        analyticsService.regenerateAllTrades();
         return ResponseEntity.ok().build();
     }
 

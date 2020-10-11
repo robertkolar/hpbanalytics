@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -33,6 +30,7 @@ public class StatisticsCalculatorService {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
 
     private final TradeRepository tradeRepository;
+    private final ExecutionRepository executionRepository;
     private final MessageService messageService;
     private final TradeCalculatorService tradeCalculatorService;
 
@@ -42,10 +40,12 @@ public class StatisticsCalculatorService {
 
     @Autowired
     public StatisticsCalculatorService(TradeRepository tradeRepository,
+                                       ExecutionRepository executionRepository,
                                        MessageService messageService,
                                        TradeCalculatorService tradeCalculatorService) {
 
         this.tradeRepository = tradeRepository;
+        this.executionRepository = executionRepository;
         this.messageService = messageService;
         this.tradeCalculatorService = tradeCalculatorService;
     }
@@ -235,10 +235,12 @@ public class StatisticsCalculatorService {
     }
 
     private int getNumberExecutionsForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
+
         return (int) trades.stream()
-                .flatMap(t -> t.getSplitExecutions().stream())
-                .map(SplitExecution::getExecution)
-                .filter(e -> toBeginOfPeriod(e.getFillDate(), interval).isEqual(periodDate))
+                .map(Trade::getExecutionIds)
+                .map(executionRepository::findByIdInOrderByFillDateAsc)
+                .flatMap(Collection::stream)
+                .filter(execution -> toBeginOfPeriod(execution.getFillDate(), interval).isEqual(periodDate))
                 .map(Execution::getId)
                 .distinct()
                 .count();
