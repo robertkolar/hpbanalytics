@@ -23,9 +23,8 @@ public class Execution implements Serializable, Comparable<Execution> {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
     private LocalDateTime receivedDate;
-    private String comment;
     private String origin;
-    private String referenceId;
+    private String reference;
     @Enumerated(EnumType.STRING)
     private Types.Action action;
     private Integer quantity;
@@ -78,15 +77,6 @@ public class Execution implements Serializable, Comparable<Execution> {
         return this;
     }
 
-    public String getComment() {
-        return comment;
-    }
-
-    public Execution setComment(String comment) {
-        this.comment = comment;
-        return this;
-    }
-
     public String getOrigin() {
         return origin;
     }
@@ -97,11 +87,11 @@ public class Execution implements Serializable, Comparable<Execution> {
     }
 
     public String getReferenceId() {
-        return referenceId;
+        return reference;
     }
 
-    public Execution setReferenceId(String referenceId) {
-        this.referenceId = referenceId;
+    public Execution setReference(String reference) {
+        this.reference = reference;
         return this;
     }
 

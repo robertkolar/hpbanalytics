@@ -14,7 +14,7 @@ public class ExecutionDTO implements Serializable {
     private static final long serialVersionUID = -7595159006402413521L;
 
     private String origin;
-    private String referenceId;
+    private String reference;
     private Types.Action action;
     private Integer quantity;
     private String symbol;
@@ -34,12 +34,12 @@ public class ExecutionDTO implements Serializable {
         return this;
     }
 
-    public String getReferenceId() {
-        return referenceId;
+    public String getReference() {
+        return reference;
     }
 
-    public ExecutionDTO setReferenceId(String referenceId) {
-        this.referenceId = referenceId;
+    public ExecutionDTO setReference(String reference) {
+        this.reference = reference;
         return this;
     }
 
@@ -126,18 +126,18 @@ public class ExecutionDTO implements Serializable {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ExecutionDTO.class.getSimpleName() + "[", "]")
-                .add("origin='" + origin + "'")
-                .add("referenceId='" + referenceId + "'")
-                .add("action=" + action)
-                .add("quantity=" + quantity)
-                .add("symbol='" + symbol + "'")
-                .add("underlying='" + underlying + "'")
-                .add("currency='" + currency + "'")
-                .add("secType=" + secType)
-                .add("multiplier=" + multiplier)
-                .add("fillDate=" + fillDate)
-                .add("fillPrice=" + fillPrice)
-                .toString();
+        return "ExecutionDTO{" +
+                "origin='" + origin + '\'' +
+                ", reference='" + reference + '\'' +
+                ", action=" + action +
+                ", quantity=" + quantity +
+                ", symbol='" + symbol + '\'' +
+                ", underlying='" + underlying + '\'' +
+                ", currency='" + currency + '\'' +
+                ", secType=" + secType +
+                ", multiplier=" + multiplier +
+                ", fillDate=" + fillDate +
+                ", fillPrice=" + fillPrice +
+                '}';
     }
 }

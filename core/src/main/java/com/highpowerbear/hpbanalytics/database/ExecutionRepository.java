@@ -14,4 +14,5 @@ public interface ExecutionRepository extends JpaRepository<Execution, Long>, Jpa
     List<Execution> findAllByOrderByFillDateAsc();
     List<Execution> findByConidAndFillDateGreaterThanEqualOrderByFillDateAsc(int conid, LocalDateTime cutoffDate);
     List<Execution> findByIdInOrderByFillDateAsc(List<Long> ids);
+    boolean existsByFillDate(LocalDateTime fillDate);
 }

@@ -133,7 +133,7 @@ public class AppRestController {
     }
 
     @RequestMapping(method = RequestMethod.PUT, value = "trade/{tradeId}/close")
-    public ResponseEntity<?> closeTrade(
+    public ResponseEntity<?> manualCloseTrade(
             @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTradeRequest r) {
 
@@ -145,7 +145,7 @@ public class AppRestController {
         } else if (!TradeStatus.OPEN.equals(trade.getStatus())) {
             return ResponseEntity.badRequest().build();
         }
-        analyticsService.closeTrade(trade, r.getCloseDate(), r.getClosePrice());
+        analyticsService.manualCloseTrade(trade, r.getCloseDate(), r.getClosePrice(), r.getReason());
 
         return ResponseEntity.ok().build();
     }

@@ -2,11 +2,13 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.enums.ManualCloseReason;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 import org.slf4j.Logger;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,9 +107,9 @@ public class AnalyticsService implements ExecutionListener {
 
     @Transactional
     public void newExecution(Execution execution) {
-        // TODO prevent that new execution fill date is not equal to any existing execution
-
+        adjustFillDate(execution);
         execution.setReceivedDate(LocalDateTime.now());
+
         int conid = execution.getConid();
 
         List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), conid);
@@ -139,6 +142,17 @@ public class AnalyticsService implements ExecutionListener {
         saveRegeneratedTrades(regeneratedTrades);
     }
 
+    private void adjustFillDate(Execution execution) {
+        LocalDateTime fillDate = execution.getFillDate();
+
+        while (executionRepository.existsByFillDate(fillDate)) {
+            fillDate = fillDate.plus(1, ChronoUnit.MICROS);
+        }
+        if (fillDate.isAfter(execution.getFillDate())) {
+            execution.setFillDate(fillDate);
+        }
+    }
+
     private void saveRegeneratedTrades(List<Trade> trades) {
         log.info("saving " + trades.size() + " regenerated trades");
 
@@ -149,11 +163,10 @@ public class AnalyticsService implements ExecutionListener {
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
 
-    public void closeTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice) {
+    public void manualCloseTrade(Trade trade, LocalDateTime closeDate, BigDecimal closePrice, ManualCloseReason reason) {
         newExecution(new Execution()
-                .setComment(trade.getSecType() == Types.SecType.OPT && closePrice.compareTo(BigDecimal.ZERO) == 0 ? "EXPIRE" : "CLOSE")
-                .setOrigin("INTERNAL")
-                .setReferenceId("N/A")
+                .setOrigin(HanSettings.EXECUTION_ORIGIN_MANUAL)
+                .setReference(reason.name())
                 .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
                 .setQuantity(Math.abs(trade.getOpenPosition()))
                 .setSymbol(trade.getSymbol())
