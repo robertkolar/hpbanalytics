@@ -27,7 +27,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Enumerated(EnumType.STRING)
     private Types.Action action;
     private Integer quantity;
-    private Integer conid;
     private String symbol;
     private String underlying;
     @Enumerated(EnumType.STRING)
@@ -46,6 +45,10 @@ public class Execution implements Serializable, Comparable<Execution> {
         Execution execution = (Execution) o;
 
         return Objects.equals(id, execution.id);
+    }
+
+    public String getContractIdentifier() {
+        return symbol + "_"+ currency + "_" + multiplier;
     }
 
     @Override
@@ -100,15 +103,6 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     public Execution setQuantity(Integer quantity) {
         this.quantity = quantity;
-        return this;
-    }
-
-    public Integer getConid() {
-        return conid;
-    }
-
-    public Execution setConid(Integer conid) {
-        this.conid = conid;
         return this;
     }
 

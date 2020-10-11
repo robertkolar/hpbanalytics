@@ -33,6 +33,15 @@ Ext.define('HanGui.view.trade.TradeExecutionGrid', {
         dataIndex: 'symbol',
         filter: 'string'
     }, {
+        text: 'Cur',
+        width: 60,
+        dataIndex: 'currency'
+    }, {
+        text: 'Mul',
+        width: 60,
+        dataIndex: 'multiplier',
+        align: 'right'
+    }, {
         text: 'Fill Date',
         width: 160,
         dataIndex: 'fillDate',

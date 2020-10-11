@@ -7,6 +7,7 @@ import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.database.TradeRepository;
+import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 import org.slf4j.Logger;
@@ -86,9 +87,11 @@ public class AnalyticsService implements ExecutionListener {
             log.warn("execution " + executionId + " does not exists, cannot delete");
             return;
         }
-        int conid = execution.getConid();
+        String symbol = execution.getSymbol();
+        Currency currency = execution.getCurrency();
+        double multiplier = execution.getMultiplier();
 
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), conid);
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(symbol, currency, multiplier, execution.getFillDate());
         logTradesAffected(execution, tradesAffected);
 
         Trade firstTradeAffected = tradesAffected.get(0);
@@ -101,8 +104,8 @@ public class AnalyticsService implements ExecutionListener {
         log.info("deleting execution " + execution);
         executionRepository.deleteById(executionId); // need to delete before the next query
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.findByConidAndFillDateGreaterThanEqualOrderByFillDateAsc(conid, firstExecution.getFillDate());
-        List<Trade> regeneratedTrades = generateTradesSingleConid(executionsToAnalyzeAgain);
+        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndCurrencyAndMultiplierAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, currency, multiplier, firstExecution.getFillDate());
+        List<Trade> regeneratedTrades = generateTradesSingleCid(executionsToAnalyzeAgain);
 
         saveRegeneratedTrades(regeneratedTrades);
     }
@@ -112,9 +115,11 @@ public class AnalyticsService implements ExecutionListener {
         adjustFillDate(execution);
         execution.setReceivedDate(LocalDateTime.now());
 
-        int conid = execution.getConid();
+        String symbol = execution.getSymbol();
+        Currency currency = execution.getCurrency();
+        double multiplier = execution.getMultiplier();
 
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(execution.getFillDate(), conid);
+        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(symbol, currency, multiplier, execution.getFillDate());
         logTradesAffected(execution, tradesAffected);
 
         log.info("deleting " + tradesAffected.size() + " trades");
@@ -124,7 +129,7 @@ public class AnalyticsService implements ExecutionListener {
         execution = executionRepository.save(execution); // need to save before the next query
 
         if (tradesAffected.isEmpty()) {
-            saveRegeneratedTrades(generateTradesSingleConid(Collections.singletonList(execution)));
+            saveRegeneratedTrades(generateTradesSingleCid(Collections.singletonList(execution)));
             return;
         }
 
@@ -138,8 +143,8 @@ public class AnalyticsService implements ExecutionListener {
                 .min(LocalDateTime::compareTo)
                 .get();
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.findByConidAndFillDateGreaterThanEqualOrderByFillDateAsc(conid, cutoffDate);
-        List<Trade> regeneratedTrades = generateTradesSingleConid(executionsToAnalyzeAgain);
+        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndCurrencyAndMultiplierAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, currency, multiplier, cutoffDate);
+        List<Trade> regeneratedTrades = generateTradesSingleCid(executionsToAnalyzeAgain);
 
         saveRegeneratedTrades(regeneratedTrades);
     }
@@ -168,14 +173,15 @@ public class AnalyticsService implements ExecutionListener {
 
     public void manualCloseTrade(Trade trade, String executionReference, LocalDateTime closeDate, BigDecimal closePrice) {
         newExecution(new Execution()
+                .setReceivedDate(LocalDateTime.now())
                 .setReference(executionReference)
                 .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
                 .setQuantity(Math.abs(trade.getOpenPosition()))
-                .setConid(trade.getConid())
                 .setSymbol(trade.getSymbol())
                 .setUnderlying(trade.getUnderlying())
                 .setCurrency(trade.getCurrency())
                 .setSecType(trade.getSecType())
+                .setMultiplier(trade.getMultiplier())
                 .setFillDate(closeDate)
                 .setFillPrice(closePrice));
 
@@ -185,31 +191,46 @@ public class AnalyticsService implements ExecutionListener {
     
     private List<Trade> generateTrades(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
-        Set<Integer> conids = executions.stream().map(Execution::getConid).collect(Collectors.toSet());
-        Map<Integer, List<Execution>> executionsPerConidMap = new HashMap<>(); // conid -> list of executions
+        Set<String> cids = executions.stream().map(Execution::getContractIdentifier).collect(Collectors.toSet());
+        Map<String, List<Execution>> executionsPerCidMap = new HashMap<>(); // contract identifier -> list of executions
 
-        conids.forEach(conid -> executionsPerConidMap.put(conid, new ArrayList<>()));
-        executions.forEach(execution -> executionsPerConidMap.get(execution.getConid()).add(execution));
-        conids.forEach(conid -> trades.addAll(generateTradesSingleConid(executionsPerConidMap.get(conid))));
+        cids.forEach(cid -> executionsPerCidMap.put(cid, new ArrayList<>()));
+
+        for (Execution execution : executions) {
+            String cid = execution.getContractIdentifier();
+            List<Execution> executionsPerCid = executionsPerCidMap.get(cid);
+            executionsPerCid.add(execution);
+        }
+
+        for (String cid : cids) {
+            List<Execution> executionsPerCid = executionsPerCidMap.get(cid);
+            List<Trade> generatedTradesPerCid = generateTradesSingleCid(executionsPerCid);
+            trades.addAll(generatedTradesPerCid);
+        }
 
         return trades;
     }
     
-    private List<Trade> generateTradesSingleConid(List<Execution> executions) {
+    private List<Trade> generateTradesSingleCid(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
 
         int currentPos = 0;
-        Set<Execution> singleConidSet = new LinkedHashSet<>(executions);
+        Set<Execution> singleContractSet = new LinkedHashSet<>(executions);
 
-        while (!singleConidSet.isEmpty()) {
+        while (!singleContractSet.isEmpty()) {
             List<Execution> tradeExecutions = new ArrayList<>();
             Trade trade = new Trade();
 
-            for (Execution execution : singleConidSet) {
+            for (Execution execution : singleContractSet) {
                 tradeExecutions.add(execution);
 
+                int oldPos = currentPos;
                 currentPos += (execution.getAction() == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
-                if (currentPos== 0) {
+
+                if (detectReversal(oldPos, currentPos)) {
+                    throw new IllegalStateException("execution resulting in reversal trade not permitted " + execution);
+                }
+                if (currentPos == 0) {
                     break;
                 }
             }
@@ -219,7 +240,7 @@ public class AnalyticsService implements ExecutionListener {
 
             tradeCalculatorService.calculateFields(trade);
             trades.add(trade);
-            singleConidSet.removeAll(tradeExecutions);
+            singleContractSet.removeAll(tradeExecutions);
         }
         return trades;
     }
@@ -231,5 +252,9 @@ public class AnalyticsService implements ExecutionListener {
         tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
 
         log.info(sb.toString());
+    }
+
+    private boolean detectReversal(int oldPos, int currentPos) {
+        return oldPos > 0 && currentPos < 0 || oldPos < 0 && currentPos > 0;
     }
 }

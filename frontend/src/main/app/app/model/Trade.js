@@ -6,12 +6,10 @@ Ext.define('HanGui.model.Trade', {
 
     fields: [
         'type',
-        'conid',
         'symbol',
         'underlying',
         'currency',
         'secType',
-        'multiplier',
         'cumulativeQuantity',
         'status',
         'openPosition',

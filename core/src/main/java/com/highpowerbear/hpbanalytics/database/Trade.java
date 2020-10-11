@@ -30,7 +30,6 @@ public class Trade implements Serializable {
     private Long id;
     @Enumerated(EnumType.STRING)
     private TradeType type;
-    private Integer conid;
     private String symbol;
     private String underlying;
     @Enumerated(EnumType.STRING)
@@ -89,15 +88,6 @@ public class Trade implements Serializable {
 
     public Trade setType(TradeType type) {
         this.type = type;
-        return this;
-    }
-
-    public Integer getConid() {
-        return conid;
-    }
-
-    public Trade setConid(Integer conid) {
-        this.conid = conid;
         return this;
     }
 

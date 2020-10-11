@@ -15,7 +15,6 @@ public class ExecutionDTO implements Serializable {
     private String reference;
     private Types.Action action;
     private Integer quantity;
-    private Integer conid;
     private String symbol;
     private String underlying;
     private String currency;
@@ -48,15 +47,6 @@ public class ExecutionDTO implements Serializable {
 
     public ExecutionDTO setQuantity(Integer quantity) {
         this.quantity = quantity;
-        return this;
-    }
-
-    public Integer getConid() {
-        return conid;
-    }
-
-    public ExecutionDTO setConid(Integer conid) {
-        this.conid = conid;
         return this;
     }
 
@@ -129,7 +119,6 @@ public class ExecutionDTO implements Serializable {
                 "reference='" + reference + '\'' +
                 ", action=" + action +
                 ", quantity=" + quantity +
-                ", conid=" + conid +
                 ", symbol='" + symbol + '\'' +
                 ", underlying='" + underlying + '\'' +
                 ", currency='" + currency + '\'' +

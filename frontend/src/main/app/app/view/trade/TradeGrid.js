@@ -31,11 +31,6 @@ Ext.define('HanGui.view.trade.TradeGrid', {
             return val;
         }
     }, {
-        text: 'Conid',
-        width: 100,
-        dataIndex: 'conid',
-        align: 'right'
-    }, {
         text: 'Symbol',
         width: 180,
         dataIndex: 'symbol',

@@ -8,7 +8,6 @@ Ext.define('HanGui.model.Execution', {
         'reference',
         'action',
         'quantity',
-        'conid',
         'symbol',
         'underlying',
         'currency',

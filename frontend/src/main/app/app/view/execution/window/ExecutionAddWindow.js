@@ -52,13 +52,6 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             minValue: 0,
             value: 100
         }, {
-            xtype: 'numberfield',
-            fieldLabel: 'Conid',
-            name: 'conid',
-            allowDecimals: false,
-            minValue: 0,
-            value: 123456
-        }, {
             xtype: 'textfield',
             fieldLabel: 'Symbol',
             name: 'symbol',
