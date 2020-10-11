@@ -80,6 +80,9 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'
     }, {
+        flex: 1,
+        menuDisabled: true
+    }, {
         xtype: 'widgetcolumn',
         width : 50,
         widget: {

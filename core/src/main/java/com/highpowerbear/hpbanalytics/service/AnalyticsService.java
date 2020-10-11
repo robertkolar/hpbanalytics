@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
@@ -95,7 +96,8 @@ public class AnalyticsService implements ExecutionListener {
         logTradesAffected(execution, tradesAffected);
 
         Trade firstTradeAffected = tradesAffected.get(0);
-        Long firstExecutionId = firstTradeAffected.getExecutionIds().get(0);
+        List<Long> tradeExecutionIds = HanUtil.csvToLongList(firstTradeAffected.getExecutionIds());
+        Long firstExecutionId = tradeExecutionIds.get(0);
         Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
 
         log.info("deleting " + tradesAffected.size() + " trades");
@@ -135,7 +137,8 @@ public class AnalyticsService implements ExecutionListener {
 
         Trade firstTradeAffected = tradesAffected.get(0);
 
-        Long firstExecutionId = firstTradeAffected.getExecutionIds().get(0);
+        List<Long> tradeExecutionIds = HanUtil.csvToLongList(firstTradeAffected.getExecutionIds());
+        Long firstExecutionId = tradeExecutionIds.get(0);
         Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
 
         LocalDateTime cutoffDate = Stream.of(firstExecution, execution)
@@ -172,6 +175,7 @@ public class AnalyticsService implements ExecutionListener {
     }
 
     public void manualCloseTrade(Trade trade, String executionReference, LocalDateTime closeDate, BigDecimal closePrice) {
+        log.info("manually closing trade " + trade);
         newExecution(new Execution()
                 .setReceivedDate(LocalDateTime.now())
                 .setReference(executionReference)
@@ -198,13 +202,15 @@ public class AnalyticsService implements ExecutionListener {
 
         for (Execution execution : executions) {
             String cid = execution.getContractIdentifier();
-            List<Execution> executionsPerCid = executionsPerCidMap.get(cid);
-            executionsPerCid.add(execution);
+            executionsPerCidMap.get(cid).add(execution);
         }
 
         for (String cid : cids) {
             List<Execution> executionsPerCid = executionsPerCidMap.get(cid);
+
+            log.info("generating trades for " + cid);
             List<Trade> generatedTradesPerCid = generateTradesSingleCid(executionsPerCid);
+
             trades.addAll(generatedTradesPerCid);
         }
 
@@ -227,6 +233,8 @@ public class AnalyticsService implements ExecutionListener {
                 int oldPos = currentPos;
                 currentPos += (execution.getAction() == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
 
+                log.info("associated execution " + execution + ", currentPos=" + currentPos);
+
                 if (detectReversal(oldPos, currentPos)) {
                     throw new IllegalStateException("execution resulting in reversal trade not permitted " + execution);
                 }
@@ -236,9 +244,11 @@ public class AnalyticsService implements ExecutionListener {
             }
             trade.setExecutionIds(tradeExecutions.stream()
                     .map(Execution::getId)
-                    .collect(Collectors.toList()));
+                    .map(Object::toString)
+                    .collect(Collectors.joining(", ")));
 
             tradeCalculatorService.calculateFields(trade);
+            log.info("generated trade " + trade);
             trades.add(trade);
             singleContractSet.removeAll(tradeExecutions);
         }

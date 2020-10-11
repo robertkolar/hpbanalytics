@@ -177,8 +177,7 @@ Ext.define('HanGui.view.statistics.StatisticsGrid', {
                     {"abbr": "FOP", "name": "FOP"},
                     {"abbr": "FUT", "name": "FUT"},
                     {"abbr": "CFD", "name": "CFD"},
-                    {"abbr": "STK", "name": "STK"},
-
+                    {"abbr": "STK", "name": "STK"}
                 ]
             }),
             value: 'ALL',

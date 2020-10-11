@@ -19,7 +19,7 @@ Ext.define('HanGui.view.trade.TradeExecutionGrid', {
         width: 60,
         dataIndex: 'action',
         renderer: function(val, metadata, record) {
-            metadata.style = (val == 'BUY' ? 'color: blue;' : 'color: brown;');
+            metadata.style = (val === 'BUY' ? 'color: blue;' : 'color: brown;');
             return val;
         }
     }, {
@@ -43,7 +43,7 @@ Ext.define('HanGui.view.trade.TradeExecutionGrid', {
         align: 'right'
     }, {
         text: 'Fill Date',
-        width: 160,
+        flex: 1,
         dataIndex: 'fillDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'

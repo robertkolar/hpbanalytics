@@ -138,7 +138,7 @@ public class AppRestController {
             return ResponseEntity.notFound().build();
         }
 
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
         return ResponseEntity.ok(new GenericList<>(tradeExecutions, tradeExecutions.size()));
     }
 

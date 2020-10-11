@@ -36,7 +36,7 @@ Ext.define('HanGui.view.trade.window.TradeCloseWindow', {
                 fields: ['text'],
                 data: [{"text": "expire"}, {"text": "assign"}, {"text": "manual close trade"}]
             }),
-            value: 'BUY'
+            value: 'manual close trade'
         }, {
             xtype: 'datefield',
             reference: 'closeDate',

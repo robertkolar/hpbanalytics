@@ -6,14 +6,12 @@ import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
-import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 /**
@@ -46,9 +44,7 @@ public class Trade implements Serializable {
     private BigDecimal avgClosePrice;
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
-    @Type(type = "list-array")
-    @Column(name = "execution_ids", columnDefinition = "bigint[]")
-    private List<Long> executionIds;
+    private String executionIds;
 
     public String getDuration() {
         return closeDate != null ? HanUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
@@ -208,17 +204,26 @@ public class Trade implements Serializable {
         return this;
     }
 
-    public List<Long> getExecutionIds() {
+    public String getExecutionIds() {
         return executionIds;
     }
 
-    public Trade setExecutionIds(List<Long> executionIds) {
+    public Trade setExecutionIds(String executionIds) {
         this.executionIds = executionIds;
         return this;
     }
 
     @Override
     public String toString() {
-        return (id + ", " + type + ", " + status + ", " + symbol + ", " + secType + ", " + (openDate != null ? openDate : "-") + ", " + (closeDate != null ? closeDate : "-") + ", " + profitLoss);
+        return "Trade{" +
+                "id=" + id +
+                ", type=" + type +
+                ", symbol='" + symbol + '\'' +
+                ", secType=" + secType +
+                ", openDate=" + openDate +
+                ", closeDate=" + closeDate +
+                ", profitLoss=" + profitLoss +
+                ", executionIds='" + executionIds + '\'' +
+                '}';
     }
 }

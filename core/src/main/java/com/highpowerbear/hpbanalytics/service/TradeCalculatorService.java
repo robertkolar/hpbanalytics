@@ -35,7 +35,7 @@ public class TradeCalculatorService {
     }
 
     public void calculateFields(Trade trade) {
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
 
         Execution firstExecution = tradeExecutions.get(0);
         Execution lastExecution = tradeExecutions.get(tradeExecutions.size() - 1);
@@ -57,34 +57,38 @@ public class TradeCalculatorService {
         for (Execution execution : tradeExecutions) {
             Types.Action action = execution.getAction();
             int quantity = execution.getQuantity();
+            BigDecimal fillPrice = execution.getFillPrice();
 
             openPosition += (action == Types.Action.BUY ? quantity : -quantity);
 
             if ((tradeType == TradeType.LONG && action == Types.Action.BUY) || (tradeType == TradeType.SHORT && action == Types.Action.SELL)) {
                 cumulativeQuantity += quantity;
-                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(execution.getFillPrice()));
+                cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
             }
 
             if ((tradeType == TradeType.LONG && action == Types.Action.SELL) || (tradeType == TradeType.SHORT && action == Types.Action.BUY)) {
-                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(execution.getQuantity())).multiply(execution.getFillPrice());
+                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(quantity)).multiply(fillPrice);
             }
         }
+
+        BigDecimal avgOpenPrice = cumulativeOpenPrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP);
 
         trade
             .setOpenPosition(openPosition)
             .setStatus(openPosition != 0 ? TradeStatus.OPEN : TradeStatus.CLOSED)
             .setCumulativeQuantity(cumulativeQuantity)
             .setOpenDate(firstExecution.getFillDate())
-            .setAvgOpenPrice(cumulativeOpenPrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP));
-
+            .setAvgOpenPrice(avgOpenPrice);
 
         if (trade.getStatus() == TradeStatus.CLOSED) {
+            BigDecimal avgClosePrice = cumulativeClosePrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP);
+
             trade
-                .setAvgClosePrice(cumulativeClosePrice.divide(BigDecimal.valueOf(cumulativeQuantity), RoundingMode.HALF_UP))
+                .setAvgClosePrice(avgClosePrice)
                 .setCloseDate(lastExecution.getFillDate());
 
-            BigDecimal profitLoss = (TradeType.LONG.equals(tradeType) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
-            profitLoss = profitLoss.multiply(BigDecimal.valueOf(trade.getMultiplier()));
+            BigDecimal cumulativePriceDiff = (TradeType.LONG.equals(tradeType) ? cumulativeClosePrice.subtract(cumulativeOpenPrice) : cumulativeOpenPrice.subtract(cumulativeClosePrice));
+            BigDecimal profitLoss = cumulativePriceDiff.multiply(BigDecimal.valueOf(trade.getMultiplier()));
             trade.setProfitLoss(profitLoss);
         }
     }
@@ -102,7 +106,7 @@ public class TradeCalculatorService {
 
     public BigDecimal calculatePlPortfolioBaseOpenClose(Trade trade) {
         validateClosed(trade);
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
 
         TradeType tradeType = trade.getType();
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;

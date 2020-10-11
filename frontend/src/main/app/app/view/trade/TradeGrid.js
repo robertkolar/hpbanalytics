@@ -16,7 +16,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         stripeRows: true
     },
     listeners: {
-        'cellclick': 'showExecutions'
+        'cellclick': 'showTradeExecutions'
     },
     columns: [{
         text: 'ID',
@@ -27,7 +27,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 80,
         dataIndex: 'type',
         renderer: function(val, metadata, record) {
-            metadata.style = (val == 'LONG' ? 'color: blue;' : 'color: brown;');
+            metadata.style = (val === 'LONG' ? 'color: blue;' : 'color: brown;');
             return val;
         }
     }, {
@@ -106,13 +106,17 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     }, {
         text: 'Execution IDs',
         flex: 1,
-        dataIndex: 'executionIds'
+        dataIndex: 'executionIds',
+        renderer: function(val, metadata, record) {
+            metadata.style = 'cursor: pointer;';
+            return val;
+        }
     }, {
         text: 'Status',
         width: 60,
         dataIndex: 'status',
         renderer: function(val, metadata, record) {
-            metadata.style = 'cursor: pointer; color: white; ' + (val == 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
+            metadata.style = 'color: white; ' + (val === 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
             return val.toLowerCase();
         }
     }, {

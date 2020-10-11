@@ -239,7 +239,7 @@ public class StatisticsCalculatorService {
 
         return (int) trades.stream()
                 .map(Trade::getExecutionIds)
-                .map(executionRepository::findByIdInOrderByFillDateAsc)
+                .map(executionIds -> executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(executionIds)))
                 .flatMap(Collection::stream)
                 .filter(execution -> toBeginOfPeriod(execution.getFillDate(), interval).isEqual(periodDate))
                 .map(Execution::getId)

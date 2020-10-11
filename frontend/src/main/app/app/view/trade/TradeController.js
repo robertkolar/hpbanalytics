@@ -7,7 +7,8 @@ Ext.define('HanGui.view.trade.TradeController', {
     requires: [
         'HanGui.common.Definitions',
         'HanGui.view.trade.window.TradeCloseWindow',
-        'HanGui.view.trade.window.TradeExecutionWindow'
+        'HanGui.view.trade.window.TradeExecutionWindow',
+        'HanGui.view.trade.TradeExecutionGrid'
     ],
 
     alias: 'controller.han-trade',
@@ -120,33 +121,29 @@ Ext.define('HanGui.view.trade.TradeController', {
     },
 
     showTradeExecutions: function (view, cell, cellIndex, record, row, rowIndex, e) {
-        var me = this,
-            dataIndex = e.position.column.dataIndex;
+        var me = this;
 
-        if (dataIndex !== 'status') {
+        if (e.position.column.dataIndex !== 'executionIds') {
             return;
         }
 
-        if (!me.tradeExecutionGrid) {
-            me.tradeExecutionGrid = Ext.create('HanGui.view.trade.TradeExecutionGrid');
-            me.tradeExecutionWindow = Ext.create('HanGui.view.trade.window.TradeExecutionWindow');
-            me.tradeExecutionWindow.add(me.tradeExecutionGrid);
-        }
-        me.tradeExecutionWindow.setTitle("Executions for Trade id=" + record.data.id);
+        var store = Ext.create('Ext.data.Store', {
+            model: 'HanGui.model.Execution'
+        });
+        store.getProxy().setUrl(HanGui.common.Definitions.urlPrefix + '/trade/' + record.id + '/executions');
 
-        Ext.Ajax.request({
-            method: 'GET',
-            url: HanGui.common.Definitions.urlPrefix + '/trade/' + record.id + '/executions',
+        var window = Ext.create('HanGui.view.trade.window.TradeExecutionWindow');
+        window.setTitle("Executions for Trade id=" + record.data.id);
 
-            success: function(response, opts) {
-                var tradeExecutions = response.responseText;
+        var grid = Ext.create('HanGui.view.trade.TradeExecutionGrid');
+        grid.setStore(store);
+        window.add(grid);
+        me.getView().add(window);
 
-                var tradeExecutionsStore = Ext.create('Ext.data.Store', {
-                    model: 'HanGui.model.Execution',
-                    data: tradeExecutions
-                });
-                me.tradeExecutionGrid.setStore(tradeExecutionsStore);
-                me.tradeExecutionWindow.show();
+        store.load(function(records, operation, success) {
+            if (success) {
+                console.log('loaded trade executions for trade ' + record.id);
+                window.show();
             }
         });
     }

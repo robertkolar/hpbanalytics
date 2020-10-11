@@ -13,7 +13,6 @@
 
     <properties>
         <mapstruct.version>1.4.0.Final</mapstruct.version>
-        <hibernate-types.version>2.10.0</hibernate-types.version>
         <tws-api.version>9.74.01</tws-api.version>
     </properties>
 
@@ -50,11 +49,6 @@
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.vladmihalcea</groupId>
-            <artifactId>hibernate-types-52</artifactId>
-            <version>${hibernate-types.version}</version>
         </dependency>
         <dependency>
             <groupId>com.interactivebrokers</groupId>

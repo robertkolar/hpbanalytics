@@ -19,10 +19,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -105,7 +102,7 @@ public class IfiCsvGeneratorService {
             BigDecimal tradePl = BigDecimal.ZERO;
             tCount++;
             writeTrade(sb, trade, tCount);
-            List<Execution> executions = executionRepository.findByIdInOrderByFillDateAsc(trade.getExecutionIds());
+            List<Execution> executions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
             int eCount = 0;
             int currentPos = 0;
             for (Execution execution : executions) {

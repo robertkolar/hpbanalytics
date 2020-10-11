@@ -37,6 +37,10 @@ public class Execution implements Serializable, Comparable<Execution> {
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
 
+    public String getContractIdentifier() {
+        return symbol + "_" + currency + "_" + secType + "_" + String.valueOf(multiplier).replace(".", "_");
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -45,10 +49,6 @@ public class Execution implements Serializable, Comparable<Execution> {
         Execution execution = (Execution) o;
 
         return Objects.equals(id, execution.id);
-    }
-
-    public String getContractIdentifier() {
-        return symbol + "_"+ currency + "_" + multiplier;
     }
 
     @Override
@@ -79,7 +79,7 @@ public class Execution implements Serializable, Comparable<Execution> {
         return this;
     }
 
-    public String getReferenceId() {
+    public String getReference() {
         return reference;
     }
 
@@ -171,6 +171,13 @@ public class Execution implements Serializable, Comparable<Execution> {
 
     @Override
     public String toString() {
-        return (id + ", " + action + ", " + quantity + ", " + symbol + ", " + fillDate + ", " + fillPrice);
+        return "Execution{" +
+                "id=" + id +
+                ", action=" + action +
+                ", quantity=" + quantity +
+                ", symbol='" + symbol + '\'' +
+                ", fillDate=" + fillDate +
+                ", fillPrice=" + fillPrice +
+                '}';
     }
 }
