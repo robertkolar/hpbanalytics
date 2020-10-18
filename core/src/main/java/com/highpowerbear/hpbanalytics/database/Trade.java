@@ -12,7 +12,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -44,7 +47,9 @@ public class Trade implements Serializable {
     private BigDecimal avgClosePrice;
     private LocalDateTime closeDate;
     private BigDecimal profitLoss;
-    private String executionIds;
+    @OneToMany(mappedBy = "trade", fetch = FetchType.EAGER)
+    @OrderBy("fillDate ASC")
+    private List<Execution> executions = new ArrayList<>();
 
     public String getDuration() {
         return closeDate != null ? HanUtil.toDurationString(Duration.between(openDate, closeDate).getSeconds()) : "";
@@ -204,13 +209,20 @@ public class Trade implements Serializable {
         return this;
     }
 
-    public String getExecutionIds() {
-        return executionIds;
+    public List<Execution> getExecutions() {
+        return executions;
     }
 
-    public Trade setExecutionIds(String executionIds) {
-        this.executionIds = executionIds;
+    public Trade setExecutions(List<Execution> executions) {
+        this.executions = executions;
         return this;
+    }
+
+    public String getExecutionIds() {
+        return executions.stream()
+                .map(Execution::getId)
+                .map(Object::toString)
+                .collect(Collectors.joining(", "));
     }
 
     @Override
@@ -223,7 +235,7 @@ public class Trade implements Serializable {
                 ", openDate=" + openDate +
                 ", closeDate=" + closeDate +
                 ", profitLoss=" + profitLoss +
-                ", executionIds='" + executionIds + '\'' +
+                ", executionIds=" + getExecutionIds() +
                 '}';
     }
 }

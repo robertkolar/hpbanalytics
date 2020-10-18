@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.rest;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeStatus;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.DataFilterItem;
@@ -21,6 +20,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -129,19 +129,6 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
 
-    @RequestMapping("trade/{tradeId}/executions")
-    public ResponseEntity<?> getTradeExecutions(
-            @PathVariable("tradeId") long tradeId) {
-
-        Trade trade = tradeRepository.findById(tradeId).orElse(null);
-        if (trade == null ) {
-            return ResponseEntity.notFound().build();
-        }
-
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
-        return ResponseEntity.ok(new GenericList<>(tradeExecutions, tradeExecutions.size()));
-    }
-
     @RequestMapping(method = RequestMethod.PUT, value = "trade/{tradeId}/close")
     public ResponseEntity<?> manualCloseTrade(
             @PathVariable("tradeId") long tradeId,
@@ -162,7 +149,7 @@ public class AppRestController {
 
     @RequestMapping("statistics")
     public ResponseEntity<?> getStatistics(
-            @RequestParam("interval") StatisticsInterval interval,
+            @RequestParam("interval") ChronoUnit interval,
             @RequestParam(required = false, value = "tradeType") String tradeType,
             @RequestParam(required = false, value = "secType") String secType,
             @RequestParam(required = false, value = "currency") String currency,
@@ -204,7 +191,7 @@ public class AppRestController {
 
     @RequestMapping("statistics/charts")
     public ResponseEntity<?> getCharts(
-            @RequestParam("interval") StatisticsInterval interval,
+            @RequestParam("interval") ChronoUnit interval,
             @RequestParam(required = false, value = "tradeType") String tradeType,
             @RequestParam(required = false, value = "secType") String secType,
             @RequestParam(required = false, value = "currency") String currency,

@@ -2,8 +2,13 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.database.*;
-import com.highpowerbear.hpbanalytics.enums.*;
+import com.highpowerbear.hpbanalytics.database.ExchangeRate;
+import com.highpowerbear.hpbanalytics.database.ExchangeRateRepository;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.Trade;
+import com.highpowerbear.hpbanalytics.enums.Currency;
+import com.highpowerbear.hpbanalytics.enums.TradeStatus;
+import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,22 +28,17 @@ import java.util.Map;
 public class TradeCalculatorService {
 
     private final ExchangeRateRepository exchangeRateRepository;
-    private final ExecutionRepository executionRepository;
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>(); // TODO clear cache periodically, eventually move to hazelcast
 
     @Autowired
-    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository,
-                                  ExecutionRepository executionRepository) {
-
+    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository) {
         this.exchangeRateRepository = exchangeRateRepository;
-        this.executionRepository = executionRepository;
     }
 
     public void calculateFields(Trade trade) {
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
 
-        Execution firstExecution = tradeExecutions.get(0);
-        Execution lastExecution = tradeExecutions.get(tradeExecutions.size() - 1);
+        Execution firstExecution = trade.getExecutions().get(0);
+        Execution lastExecution = trade.getExecutions().get(trade.getExecutions().size() - 1);
 
         trade
             .setType(firstExecution.getAction() == Types.Action.BUY ? TradeType.LONG : TradeType.SHORT)
@@ -54,7 +54,7 @@ public class TradeCalculatorService {
         int openPosition = 0;
         int cumulativeQuantity = 0;
 
-        for (Execution execution : tradeExecutions) {
+        for (Execution execution : trade.getExecutions()) {
             Types.Action action = execution.getAction();
             int quantity = execution.getQuantity();
             BigDecimal fillPrice = execution.getFillPrice();
@@ -64,10 +64,9 @@ public class TradeCalculatorService {
             if ((tradeType == TradeType.LONG && action == Types.Action.BUY) || (tradeType == TradeType.SHORT && action == Types.Action.SELL)) {
                 cumulativeQuantity += quantity;
                 cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
-            }
 
-            if ((tradeType == TradeType.LONG && action == Types.Action.SELL) || (tradeType == TradeType.SHORT && action == Types.Action.BUY)) {
-                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(quantity)).multiply(fillPrice);
+            } else if ((tradeType == TradeType.LONG && action == Types.Action.SELL) || (tradeType == TradeType.SHORT && action == Types.Action.BUY)) {
+                cumulativeClosePrice = cumulativeClosePrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
             }
         }
 
@@ -106,13 +105,12 @@ public class TradeCalculatorService {
 
     public BigDecimal calculatePlPortfolioBaseOpenClose(Trade trade) {
         validateClosed(trade);
-        List<Execution> tradeExecutions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
 
         TradeType tradeType = trade.getType();
         BigDecimal cumulativeOpenPrice = BigDecimal.ZERO;
         BigDecimal cumulativeClosePrice = BigDecimal.ZERO;
 
-        for (Execution execution : tradeExecutions) {
+        for (Execution execution : trade.getExecutions()) {
             Types.Action action = execution.getAction();
             int quantity = execution.getQuantity();
 

@@ -19,7 +19,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -32,7 +35,6 @@ public class IfiCsvGeneratorService {
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final TradeRepository tradeRepository;
-    private final ExecutionRepository executionRepository;
     private final TradeCalculatorService tradeCalculatorService;
 
     private final String NL = "\n";
@@ -50,12 +52,10 @@ public class IfiCsvGeneratorService {
     @Autowired
     public IfiCsvGeneratorService(ExchangeRateRepository exchangeRateRepository,
                                   TradeRepository tradeRepository,
-                                  ExecutionRepository executionRepository,
                                   TradeCalculatorService tradeCalculatorService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.tradeRepository = tradeRepository;
-        this.executionRepository = executionRepository;
         this.tradeCalculatorService = tradeCalculatorService;
 
         ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
@@ -102,10 +102,9 @@ public class IfiCsvGeneratorService {
             BigDecimal tradePl = BigDecimal.ZERO;
             tCount++;
             writeTrade(sb, trade, tCount);
-            List<Execution> executions = executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(trade.getExecutionIds()));
             int eCount = 0;
             int currentPos = 0;
-            for (Execution execution : executions) {
+            for (Execution execution : trade.getExecutions()) {
                 Types.Action action = execution.getAction();
                 currentPos += (action == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
                 eCount++;

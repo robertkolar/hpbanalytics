@@ -11,8 +11,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Created by robertk on 5/29/2017.
@@ -68,12 +66,5 @@ public class HanUtil {
             return null;
         }
         return dataFilterItems;
-    }
-
-    public static List<Long> csvToLongList(String csv) {
-        return Stream.of(csv.split(","))
-                .map(String::trim)
-                .map(Long::parseLong)
-                .collect(Collectors.toList());
     }
 }

@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.database;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.ib.client.Types;
@@ -15,7 +16,7 @@ import java.util.Objects;
  */
 @Entity
 @Table(name = "execution", schema = HanSettings.DB_SCHEMA, catalog = HanSettings.DB_DATABASE)
-public class Execution implements Serializable, Comparable<Execution> {
+public class Execution implements Serializable {
     private static final long serialVersionUID = 2067980957084297540L;
 
     @Id
@@ -36,6 +37,9 @@ public class Execution implements Serializable, Comparable<Execution> {
     private Double multiplier;
     private LocalDateTime fillDate;
     private BigDecimal fillPrice;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Trade trade;
 
     public String getContractIdentifier() {
         return symbol + "_" + currency + "_" + secType + "_" + String.valueOf(multiplier).replace(".", "_");
@@ -54,11 +58,6 @@ public class Execution implements Serializable, Comparable<Execution> {
     @Override
     public int hashCode() {
         return id != null ? id.hashCode() : 0;
-    }
-
-    @Override
-    public int compareTo(Execution other) {
-        return fillDate.compareTo(other.fillDate);
     }
 
     public Long getId() {
@@ -169,6 +168,19 @@ public class Execution implements Serializable, Comparable<Execution> {
         return this;
     }
 
+    public Trade getTrade() {
+        return trade;
+    }
+
+    public Execution setTrade(Trade trade) {
+        this.trade = trade;
+        return this;
+    }
+
+    public Long getTradeId() {
+        return trade != null ? trade.getId() : null;
+    }
+
     @Override
     public String toString() {
         return "Execution{" +
@@ -178,6 +190,7 @@ public class Execution implements Serializable, Comparable<Execution> {
                 ", symbol='" + symbol + '\'' +
                 ", fillDate=" + fillDate +
                 ", fillPrice=" + fillPrice +
+                ", tradeId=" + getTradeId() +
                 '}';
     }
 }

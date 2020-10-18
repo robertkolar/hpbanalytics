@@ -2,7 +2,6 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
-import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
@@ -64,8 +63,9 @@ public class AnalyticsService implements ExecutionListener {
         log.info("BEGIN trade regeneration");
 
         long tradeCount = tradeRepository.count();
+        int numExec = executionRepository.disassociateAllExecutions();
 
-        log.info("deleting " + tradeCount + " trades");
+        log.info("disassociated " + numExec + " executions, deleting " + tradeCount + " trades");
         tradeRepository.deleteAll();
 
         List<Execution> executions = executionRepository.findAllByOrderByFillDateAsc();
@@ -96,8 +96,7 @@ public class AnalyticsService implements ExecutionListener {
         logTradesAffected(execution, tradesAffected);
 
         Trade firstTradeAffected = tradesAffected.get(0);
-        List<Long> tradeExecutionIds = HanUtil.csvToLongList(firstTradeAffected.getExecutionIds());
-        Long firstExecutionId = tradeExecutionIds.get(0);
+        Long firstExecutionId = firstTradeAffected.getExecutions().get(0).getId();
         Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
 
         log.info("deleting " + tradesAffected.size() + " trades");
@@ -136,9 +135,7 @@ public class AnalyticsService implements ExecutionListener {
         }
 
         Trade firstTradeAffected = tradesAffected.get(0);
-
-        List<Long> tradeExecutionIds = HanUtil.csvToLongList(firstTradeAffected.getExecutionIds());
-        Long firstExecutionId = tradeExecutionIds.get(0);
+        Long firstExecutionId = firstTradeAffected.getExecutions().get(0).getId();
         Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
 
         LocalDateTime cutoffDate = Stream.of(firstExecution, execution)
@@ -169,6 +166,7 @@ public class AnalyticsService implements ExecutionListener {
 
         if (!trades.isEmpty()) {
             tradeRepository.saveAll(trades);
+            trades.forEach(trade -> executionRepository.saveAll(trade.getExecutions()));
         }
         messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
@@ -224,11 +222,11 @@ public class AnalyticsService implements ExecutionListener {
         Set<Execution> singleContractSet = new LinkedHashSet<>(executions);
 
         while (!singleContractSet.isEmpty()) {
-            List<Execution> tradeExecutions = new ArrayList<>();
             Trade trade = new Trade();
 
             for (Execution execution : singleContractSet) {
-                tradeExecutions.add(execution);
+                trade.getExecutions().add(execution);
+                execution.setTrade(trade);
 
                 int oldPos = currentPos;
                 currentPos += (execution.getAction() == Types.Action.BUY ? execution.getQuantity() : -execution.getQuantity());
@@ -242,15 +240,11 @@ public class AnalyticsService implements ExecutionListener {
                     break;
                 }
             }
-            trade.setExecutionIds(tradeExecutions.stream()
-                    .map(Execution::getId)
-                    .map(Object::toString)
-                    .collect(Collectors.joining(", ")));
 
             tradeCalculatorService.calculateFields(trade);
             log.info("generated trade " + trade);
             trades.add(trade);
-            singleContractSet.removeAll(tradeExecutions);
+            singleContractSet.removeAll(trade.getExecutions());
         }
         return trades;
     }

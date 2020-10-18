@@ -1,8 +1,7 @@
 package com.highpowerbear.hpbanalytics.rest.model;
 
-import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
-
 import javax.validation.constraints.NotNull;
+import java.time.temporal.ChronoUnit;
 
 /**
  * Created by robertk on 8/25/2020.
@@ -10,13 +9,13 @@ import javax.validation.constraints.NotNull;
 public class CalculateStatisticsRequest {
 
     @NotNull
-    private StatisticsInterval interval;
+    private ChronoUnit interval;
     private String tradeType;
     private String secType;
     private String currency;
     private String underlying;
 
-    public StatisticsInterval getInterval() {
+    public ChronoUnit getInterval() {
         return interval;
     }
 

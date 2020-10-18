@@ -135,7 +135,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         },
         onWidgetAttach: function(col, widget, rec) {
             widget.show();
-            if ("OPEN" != rec.data.status) {
+            if ("OPEN" !== rec.data.status) {
                 widget.hide();
             }
         }

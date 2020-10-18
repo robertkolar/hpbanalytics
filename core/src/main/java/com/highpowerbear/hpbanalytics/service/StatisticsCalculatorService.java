@@ -4,7 +4,6 @@ import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.StatisticsInterval;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.highpowerbear.hpbanalytics.model.Statistics;
 import com.ib.client.Types;
@@ -19,6 +18,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -30,28 +30,24 @@ public class StatisticsCalculatorService {
     private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
 
     private final TradeRepository tradeRepository;
-    private final ExecutionRepository executionRepository;
     private final MessageService messageService;
     private final TradeCalculatorService tradeCalculatorService;
 
-    // TODO eventually move to hazelcast
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     private final String ALL = "ALL";
 
     @Autowired
     public StatisticsCalculatorService(TradeRepository tradeRepository,
-                                       ExecutionRepository executionRepository,
                                        MessageService messageService,
                                        TradeCalculatorService tradeCalculatorService) {
 
         this.tradeRepository = tradeRepository;
-        this.executionRepository = executionRepository;
         this.messageService = messageService;
         this.tradeCalculatorService = tradeCalculatorService;
     }
 
-    public List<Statistics> getStatistics(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
+    public List<Statistics> getStatistics(ChronoUnit interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
 
         List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
@@ -63,15 +59,12 @@ public class StatisticsCalculatorService {
         if (maxPoints == null || size < maxPoints) {
             maxPoints = size;
         }
-
         int firstIndex = size - maxPoints;
-        // copy because reverse will be performed on it
-
-        return new ArrayList<>(statisticsList.subList(firstIndex, size));
+        return new ArrayList<>(statisticsList.subList(firstIndex, size)); // copy because reverse will be performed on it
     }
 
     @Async("taskExecutor")
-    public void calculateStatistics(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+    public void calculateStatistics(ChronoUnit interval, String tradeType, String secType, String currency, String underlying) {
         log.info("BEGIN statistics calculation for interval=" + interval + ", tradeType=" + tradeType + ", secType=" + secType + ", currency=" + currency + ", undl=" + underlying);
 
         Example<Trade> filter = DataFilters.tradeFilterByExample(
@@ -82,6 +75,7 @@ public class StatisticsCalculatorService {
 
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
+        log.info("found " + trades.size() + " trades matching the filter criteria, calculating statistics...");
         List<Statistics> stats = doCalculate(trades, interval);
         statisticsMap.put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);
 
@@ -90,7 +84,7 @@ public class StatisticsCalculatorService {
         messageService.sendWsReloadRequestMessage(WsTopic.STATISTICS);
     }
 
-    private String statisticsKey(StatisticsInterval interval, String tradeType, String secType, String currency, String underlying) {
+    private String statisticsKey(ChronoUnit interval, String tradeType, String secType, String currency, String underlying) {
 
         String intervalKey = interval.name();
         String tradeTypeKey = tradeType == null || ALL.equals(tradeType) ? ALL : tradeType;
@@ -106,18 +100,15 @@ public class StatisticsCalculatorService {
         return param == null || ALL.equals(param) ? null : T.valueOf(enumType, param);
     }
 
-    private List<Statistics> doCalculate(List<Trade> trades, StatisticsInterval interval) {
+    private List<Statistics> doCalculate(List<Trade> trades, ChronoUnit interval) {
         List<Statistics> stats = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
             return stats;
         }
 
-        LocalDateTime firstDate = getFirstDate(trades);
-        LocalDateTime lastDate = getLastDate(trades);
-
-        LocalDateTime firstPeriodDate = toBeginOfPeriod(firstDate, interval);
-        LocalDateTime lastPeriodDate = toBeginOfPeriod(lastDate, interval);
+        LocalDateTime firstPeriodDate = toBeginOfPeriod(firstDate(trades), interval);
+        LocalDateTime lastPeriodDate = toBeginOfPeriod(lastDate(trades), interval);
         LocalDateTime periodDate = firstPeriodDate;
 
         BigDecimal cumulProfitLoss = BigDecimal.ZERO;
@@ -179,31 +170,19 @@ public class StatisticsCalculatorService {
                     cumulProfitLoss
             );
             stats.add(s);
-
-            if (StatisticsInterval.DAY.equals(interval)) {
-                periodDate = periodDate.plusDays(1);
-
-            } else if (StatisticsInterval.MONTH.equals(interval)) {
-                periodDate = periodDate.plusMonths(1);
-
-            } else if (StatisticsInterval.YEAR.equals(interval)) {
-                periodDate = periodDate.plusYears(1);
-            }
+            periodDate = periodDate.plus(1, interval);
         }
         return stats;
     }
 
-    private LocalDateTime getFirstDate(List<Trade> trades) {
-        LocalDateTime firstDateOpened = trades.get(0).getOpenDate();
-        for (Trade t: trades) {
-            if (t.getOpenDate().isBefore(firstDateOpened)) {
-                firstDateOpened = t.getOpenDate();
-            }
-        }
-        return firstDateOpened;
+    private LocalDateTime firstDate(List<Trade> trades) {
+        return Objects.requireNonNull(trades.stream()
+                .map(Trade::getOpenDate)
+                .min(LocalDateTime::compareTo)
+                .orElse(null));
     }
 
-    private LocalDateTime getLastDate(List<Trade> trades) {
+    private LocalDateTime lastDate(List<Trade> trades) {
         LocalDateTime lastDate;
         LocalDateTime lastDateOpened = trades.get(0).getOpenDate();
         LocalDateTime lastDateClosed = trades.get(0).getCloseDate();
@@ -222,39 +201,39 @@ public class StatisticsCalculatorService {
         return lastDate;
     }
 
-    private List<Trade> getTradesOpenedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
+    private List<Trade> getTradesOpenedForPeriod(List<Trade> trades, LocalDateTime periodDate, ChronoUnit interval) {
         return trades.stream()
                 .filter(t -> toBeginOfPeriod(t.getOpenDate(), interval).isEqual(periodDate))
                 .collect(Collectors.toList());
     }
 
-    private List<Trade> getTradesClosedForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
+    private List<Trade> getTradesClosedForPeriod(List<Trade> trades, LocalDateTime periodDate, ChronoUnit interval) {
         return trades.stream()
                 .filter(t -> t.getCloseDate() != null)
                 .filter(t -> toBeginOfPeriod(t.getCloseDate(), interval).isEqual(periodDate))
                 .collect(Collectors.toList());
     }
 
-    private int getNumberExecutionsForPeriod(List<Trade> trades, LocalDateTime periodDate, StatisticsInterval interval) {
-
+    private int getNumberExecutionsForPeriod(List<Trade> trades, LocalDateTime periodDate, ChronoUnit interval) {
         return (int) trades.stream()
-                .map(Trade::getExecutionIds)
-                .map(executionIds -> executionRepository.findByIdInOrderByFillDateAsc(HanUtil.csvToLongList(executionIds)))
-                .flatMap(Collection::stream)
-                .filter(execution -> toBeginOfPeriod(execution.getFillDate(), interval).isEqual(periodDate))
+                .flatMap(t -> t.getExecutions().stream())
+                .filter(e -> toBeginOfPeriod(e.getFillDate(), interval).isEqual(periodDate))
                 .map(Execution::getId)
                 .distinct()
                 .count();
     }
 
-    private LocalDateTime toBeginOfPeriod(LocalDateTime localDateTime, StatisticsInterval interval) {
+    private LocalDateTime toBeginOfPeriod(LocalDateTime localDateTime, ChronoUnit interval) {
         LocalDate localDate = localDateTime.toLocalDate();
 
-        if (StatisticsInterval.YEAR.equals(interval)) {
+        if (ChronoUnit.YEARS.equals(interval)) {
             localDate = localDate.withDayOfYear(1);
 
-        } else if (StatisticsInterval.MONTH.equals(interval)) {
+        } else if (ChronoUnit.MONTHS.equals(interval)) {
             localDate = localDate.withDayOfMonth(1);
+
+        } else if (!ChronoUnit.DAYS.equals(interval)) {
+            throw new IllegalStateException("unsupported statistics interval " + interval);
         }
 
         return localDate.atStartOfDay();

@@ -127,12 +127,12 @@ Ext.define('HanGui.view.statistics.StatisticsGrid', {
             store: Ext.create('Ext.data.Store', {
                 fields: ['abbr', 'name'],
                 data: [
-                    {"abbr": "DAY", "name": "Daily"},
-                    {"abbr": "MONTH", "name": "Monthly"},
-                    {"abbr": "YEAR", "name": "Yearly"}
+                    {"abbr": "DAYS", "name": "Daily"},
+                    {"abbr": "MONTHS", "name": "Monthly"},
+                    {"abbr": "YEARS", "name": "Yearly"}
                 ]
             }),
-            value: 'MONTH',
+            value: 'MONTHS',
             listeners: {
                 change: 'reloadStatisticsAndCharts'
             }
