@@ -32,7 +32,7 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             xtype: 'textfield',
             fieldLabel: 'Reference',
             name: 'reference',
-            value: 'manual add execution'
+            value: 'manual add'
         }, {
             xtype: 'combobox',
             fieldLabel: 'Action',

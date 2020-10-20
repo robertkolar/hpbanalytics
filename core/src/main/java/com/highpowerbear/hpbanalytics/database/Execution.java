@@ -23,7 +23,6 @@ public class Execution implements Serializable {
     @SequenceGenerator(name="execution_generator", sequenceName = "execution_seq", schema = HanSettings.DB_SCHEMA, catalog = HanSettings.DB_DATABASE, allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "execution_generator")
     private Long id;
-    private LocalDateTime receivedDate;
     private String reference;
     @Enumerated(EnumType.STRING)
     private Types.Action action;
@@ -66,15 +65,6 @@ public class Execution implements Serializable {
 
     public Execution setId(Long id) {
         this.id = id;
-        return this;
-    }
-
-    public LocalDateTime getReceivedDate() {
-        return receivedDate;
-    }
-
-    public Execution setReceivedDate(LocalDateTime receivedDate) {
-        this.receivedDate = receivedDate;
         return this;
     }
 

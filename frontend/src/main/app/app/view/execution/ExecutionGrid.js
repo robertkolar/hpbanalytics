@@ -20,14 +20,14 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         width: 60,
         dataIndex: 'id'
     }, {
-        text: 'Received Date',
+        text: 'Fill Date',
         width: 160,
-        dataIndex: 'receivedDate',
+        dataIndex: 'fillDate',
         xtype: 'datecolumn',
         format: 'm/d/Y H:i:s'
     }, {
         text: 'Reference',
-        width: 180,
+        width: 100,
         dataIndex: 'reference',
         align: 'right'
     }, {
@@ -66,13 +66,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'multiplier',
         align: 'right'
     }, {
-        text: 'Fill Date',
-        width: 160,
-        dataIndex: 'fillDate',
-        xtype: 'datecolumn',
-        format: 'm/d/Y H:i:s'
-    }, {
-        text: 'Fill',
+        text: 'Price',
         width: 100,
         dataIndex: 'fillPrice',
         align: 'right',

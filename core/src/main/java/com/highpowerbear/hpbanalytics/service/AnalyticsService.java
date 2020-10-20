@@ -114,7 +114,6 @@ public class AnalyticsService implements ExecutionListener {
     @Transactional
     public void newExecution(Execution execution) {
         adjustFillDate(execution);
-        execution.setReceivedDate(LocalDateTime.now());
 
         String symbol = execution.getSymbol();
         Currency currency = execution.getCurrency();
@@ -175,7 +174,6 @@ public class AnalyticsService implements ExecutionListener {
     public void manualCloseTrade(Trade trade, String executionReference, LocalDateTime closeDate, BigDecimal closePrice) {
         log.info("manually closing trade " + trade);
         newExecution(new Execution()
-                .setReceivedDate(LocalDateTime.now())
                 .setReference(executionReference)
                 .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
                 .setQuantity(Math.abs(trade.getOpenPosition()))
@@ -252,9 +250,13 @@ public class AnalyticsService implements ExecutionListener {
     private void logTradesAffected(Execution execution, List<Trade> tradesAffected) {
         StringBuilder sb = new StringBuilder();
 
+        if (tradesAffected.isEmpty()) {
+            sb.append("no ");
+        }
         sb.append("trades affected by execution: ").append(execution).append("\n");
-        tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
-
+        if (!tradesAffected.isEmpty()) {
+            tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
+        }
         log.info(sb.toString());
     }
 
