@@ -67,4 +67,8 @@ public class HanUtil {
         }
         return dataFilterItems;
     }
+
+    public static String removeWhiteSpaces(String input) {
+        return input.replaceAll("\\s", "");
+    }
 }

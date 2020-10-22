@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
@@ -55,7 +56,10 @@ public class AnalyticsService implements ExecutionListener {
 
     @Override
     public void executionReceived(ExecutionDTO dto) {
-        newExecution(executionMapper.dtoToEntity(dto));
+        Execution execution = executionMapper.dtoToEntity(dto);
+        execution.setSymbol(HanUtil.removeWhiteSpaces(execution.getSymbol()));
+
+        newExecution(execution);
     }
 
     @Transactional
