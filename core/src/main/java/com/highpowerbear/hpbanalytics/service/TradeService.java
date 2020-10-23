@@ -25,13 +25,13 @@ import java.util.Map;
  * Created by robertk on 12/25/2017.
  */
 @Service
-public class TradeCalculatorService {
+public class TradeService {
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>(); // TODO clear cache periodically, eventually move to hazelcast
 
     @Autowired
-    public TradeCalculatorService(ExchangeRateRepository exchangeRateRepository) {
+    public TradeService(ExchangeRateRepository exchangeRateRepository) {
         this.exchangeRateRepository = exchangeRateRepository;
     }
 

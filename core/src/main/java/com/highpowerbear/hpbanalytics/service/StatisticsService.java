@@ -26,25 +26,25 @@ import java.util.stream.Collectors;
  * Created by robertk on 4/26/2015.
  */
 @Service
-public class StatisticsCalculatorService {
-    private static final Logger log = LoggerFactory.getLogger(StatisticsCalculatorService.class);
+public class StatisticsService {
+    private static final Logger log = LoggerFactory.getLogger(StatisticsService.class);
 
     private final TradeRepository tradeRepository;
     private final MessageService messageService;
-    private final TradeCalculatorService tradeCalculatorService;
+    private final TradeService tradeService;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     private final String ALL = "ALL";
 
     @Autowired
-    public StatisticsCalculatorService(TradeRepository tradeRepository,
-                                       MessageService messageService,
-                                       TradeCalculatorService tradeCalculatorService) {
+    public StatisticsService(TradeRepository tradeRepository,
+                             MessageService messageService,
+                             TradeService tradeService) {
 
         this.tradeRepository = tradeRepository;
         this.messageService = messageService;
-        this.tradeCalculatorService = tradeCalculatorService;
+        this.tradeService = tradeService;
     }
 
     public List<Statistics> getStatistics(ChronoUnit interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
@@ -131,7 +131,7 @@ public class StatisticsCalculatorService {
             BigDecimal profitLoss;
 
             for (Trade t : tradesClosedForPeriod) {
-                BigDecimal pl = tradeCalculatorService.calculatePlPortfolioBase(t);
+                BigDecimal pl = tradeService.calculatePlPortfolioBase(t);
 
                 if (pl.doubleValue() >= 0) {
                     numWinners++;

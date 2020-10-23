@@ -17,7 +17,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
     },
     columns: [{
         text: 'ID',
-        width: 60,
+        width: 80,
         dataIndex: 'id'
     }, {
         text: 'Fill Date',
@@ -73,6 +73,11 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         renderer: function(val, metadata, record) {
             return Ext.util.Format.number(val, '0.00###');
         }
+    }, {
+        text: 'Trade ID',
+        width: 100,
+        dataIndex: 'tradeId',
+        align: 'right'
     }, {
         flex: 1,
         menuDisabled: true

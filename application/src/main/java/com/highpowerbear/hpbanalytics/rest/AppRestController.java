@@ -10,8 +10,9 @@ import com.highpowerbear.hpbanalytics.rest.model.CalculateStatisticsRequest;
 import com.highpowerbear.hpbanalytics.rest.model.CloseTradeRequest;
 import com.highpowerbear.hpbanalytics.rest.model.GenericList;
 import com.highpowerbear.hpbanalytics.service.AnalyticsService;
-import com.highpowerbear.hpbanalytics.service.IfiCsvGeneratorService;
-import com.highpowerbear.hpbanalytics.service.StatisticsCalculatorService;
+import com.highpowerbear.hpbanalytics.service.TaxReportService;
+import com.highpowerbear.hpbanalytics.service.StatisticsService;
+import com.ib.client.Types;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -34,22 +35,22 @@ public class AppRestController {
 
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
-    private final StatisticsCalculatorService statisticsCalculatorService;
+    private final StatisticsService statisticsService;
     private final AnalyticsService analyticsService;
-    private final IfiCsvGeneratorService ifiCsvGeneratorService;
+    private final TaxReportService taxReportService;
 
     @Autowired
     public AppRestController(ExecutionRepository executionRepository,
                              TradeRepository tradeRepository,
-                             StatisticsCalculatorService statisticsCalculatorService,
+                             StatisticsService statisticsService,
                              AnalyticsService analyticsService,
-                             IfiCsvGeneratorService ifiCsvGeneratorService) {
+                             TaxReportService taxReportService) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
-        this.statisticsCalculatorService = statisticsCalculatorService;
+        this.statisticsService = statisticsService;
         this.analyticsService = analyticsService;
-        this.ifiCsvGeneratorService = ifiCsvGeneratorService;
+        this.taxReportService = taxReportService;
     }
 
     @RequestMapping("execution")
@@ -77,11 +78,11 @@ public class AppRestController {
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "execution")
-    public ResponseEntity<?> createExecution(
+    public ResponseEntity<?> addExecution(
             @RequestBody Execution execution) {
 
         execution.setId(null);
-        analyticsService.newExecution(execution);
+        analyticsService.addExecution(execution);
 
         return ResponseEntity.ok().build();
     }
@@ -143,7 +144,19 @@ public class AppRestController {
             return ResponseEntity.badRequest().build();
         }
 
-        analyticsService.manualCloseTrade(trade, r.getExecutionReference(), r.getCloseDate(), r.getClosePrice());
+        Execution execution = new Execution()
+                .setReference(r.getExecutionReference())
+                .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
+                .setQuantity(Math.abs(trade.getOpenPosition()))
+                .setSymbol(trade.getSymbol())
+                .setUnderlying(trade.getUnderlying())
+                .setCurrency(trade.getCurrency())
+                .setSecType(trade.getSecType())
+                .setMultiplier(trade.getMultiplier())
+                .setFillDate(r.getCloseDate())
+                .setFillPrice(r.getClosePrice());
+
+        analyticsService.addExecution(execution);
         return ResponseEntity.ok().build();
     }
 
@@ -157,7 +170,7 @@ public class AppRestController {
             @RequestParam("start") int start,
             @RequestParam("limit") int limit) {
 
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, tradeType, secType, currency, underlying, null);
+        List<Statistics> statistics = statisticsService.getStatistics(interval, tradeType, secType, currency, underlying, null);
         Collections.reverse(statistics);
         List<Statistics> statisticsPage = new ArrayList<>();
 
@@ -185,7 +198,7 @@ public class AppRestController {
     @RequestMapping(method = RequestMethod.POST, value = "statistics")
     public ResponseEntity<?> calculateStatistics(@RequestBody CalculateStatisticsRequest r) {
 
-        statisticsCalculatorService.calculateStatistics(r.getInterval(), r.getTradeType(), r.getSecType(), r.getCurrency(), r.getUnderlying());
+        statisticsService.calculateStatistics(r.getInterval(), r.getTradeType(), r.getSecType(), r.getCurrency(), r.getUnderlying());
         return ResponseEntity.ok().build();
     }
 
@@ -197,14 +210,14 @@ public class AppRestController {
             @RequestParam(required = false, value = "currency") String currency,
             @RequestParam(required = false, value = "underlying") String underlying) {
 
-        List<Statistics> statistics = statisticsCalculatorService.getStatistics(interval, tradeType, secType, currency, underlying, 120);
+        List<Statistics> statistics = statisticsService.getStatistics(interval, tradeType, secType, currency, underlying, 120);
 
         return ResponseEntity.ok(new GenericList<>(statistics, statistics.size()));
     }
 
     @RequestMapping("statistics/ifi/years")
     public ResponseEntity<?> getIfiYears() {
-        return ResponseEntity.ok(ifiCsvGeneratorService.getIfiYears());
+        return ResponseEntity.ok(taxReportService.getIfiYears());
     }
 
     @RequestMapping("statistics/ifi/csv")
@@ -213,6 +226,6 @@ public class AppRestController {
             @RequestParam("endMonth") int endMonth,
             @RequestParam("tradeType") TradeType tradeType) {
 
-        return ResponseEntity.ok(ifiCsvGeneratorService.generate(year, endMonth, tradeType));
+        return ResponseEntity.ok(taxReportService.generate(year, endMonth, tradeType));
     }
 }

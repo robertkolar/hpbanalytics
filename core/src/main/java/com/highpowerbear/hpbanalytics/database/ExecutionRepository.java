@@ -1,10 +1,12 @@
 package com.highpowerbear.hpbanalytics.database;
 
 import com.highpowerbear.hpbanalytics.enums.Currency;
+import com.ib.client.Types;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -15,8 +17,15 @@ import java.util.List;
 public interface ExecutionRepository extends JpaRepository<Execution, Long>, JpaSpecificationExecutor<Execution> {
 
     List<Execution> findAllByOrderByFillDateAsc();
-    List<Execution> findBySymbolAndCurrencyAndMultiplierAndFillDateGreaterThanEqualOrderByFillDateAsc(String symbol, Currency currency, double multiplier, LocalDateTime cutoffDate);
     boolean existsByFillDate(LocalDateTime fillDate);
+
+    @Query("SELECT e FROM Execution e WHERE e.symbol = :symbol AND e.currency = :currency AND e.secType = :secType AND e.multiplier = :multiplier AND e.fillDate >= :cutoffDate ORDER BY e.fillDate ASC")
+    List<Execution> findExecutionsToAnalyzeAgain(
+            @Param("symbol") String symbol,
+            @Param("currency") Currency currency,
+            @Param("secType") Types.SecType secType,
+            @Param("multiplier") double multiplier,
+            @Param("cutoffDate") LocalDateTime cutoffDate);
 
     @Modifying
     @Query("update Execution e set e.trade = null")

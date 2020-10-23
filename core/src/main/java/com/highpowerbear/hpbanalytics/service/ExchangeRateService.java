@@ -20,8 +20,8 @@ import java.time.LocalDate;
  * Created by robertk on 10/10/2016.
  */
 @Service
-public class ExchangeRateRetrieverService {
-    private static final Logger log = LoggerFactory.getLogger(ExchangeRateRetrieverService.class);
+public class ExchangeRateService {
+    private static final Logger log = LoggerFactory.getLogger(ExchangeRateService.class);
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final ApplicationProperties applicationProperties;
@@ -29,8 +29,8 @@ public class ExchangeRateRetrieverService {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
-    public ExchangeRateRetrieverService(ExchangeRateRepository exchangeRateRepository,
-                                        ApplicationProperties applicationProperties) {
+    public ExchangeRateService(ExchangeRateRepository exchangeRateRepository,
+                               ApplicationProperties applicationProperties) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.applicationProperties = applicationProperties;

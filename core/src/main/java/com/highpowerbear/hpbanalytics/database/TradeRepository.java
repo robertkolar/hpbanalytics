@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.database;
 
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.ib.client.Types;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -17,10 +18,11 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, JpaSpecific
 
     List<Trade> findByTypeAndCloseDateBetweenOrderByOpenDateAsc(TradeType type, LocalDateTime closeDateBegin, LocalDateTime closeDateEnd);
 
-    @Query("SELECT t FROM Trade t WHERE  t.symbol = :symbol AND t.currency = :currency AND t.multiplier = :multiplier AND (t.closeDate >= :fillDate OR t.openPosition <> 0) ORDER BY t.openDate ASC")
+    @Query("SELECT t FROM Trade t WHERE  t.symbol = :symbol AND t.currency = :currency AND t.secType = :secType AND t.multiplier = :multiplier AND (t.closeDate >= :fillDate OR t.openPosition <> 0) ORDER BY t.openDate ASC")
     List<Trade> findTradesAffectedByExecution(
             @Param("symbol") String symbol,
             @Param("currency") Currency currency,
+            @Param("secType") Types.SecType secType,
             @Param("multiplier") double multiplier,
             @Param("fillDate") LocalDateTime fillDate);
 

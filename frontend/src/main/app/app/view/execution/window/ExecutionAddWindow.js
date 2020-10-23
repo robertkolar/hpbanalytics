@@ -50,14 +50,14 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             name: 'quantity',
             allowDecimals: false,
             minValue: 0,
-            value: 100
+            value: 1
         }, {
             xtype: 'textfield',
             fieldLabel: 'Symbol',
             name: 'symbol',
             minLength: 1,
             maxLength: 30,
-            value: 'SPY'
+            value: 'SPY201002P00336000'
         }, {
             xtype: 'textfield',
             fieldLabel: 'Underlying',
@@ -80,9 +80,9 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             fieldLabel: 'Sec Type',
             store: Ext.create('Ext.data.Store', {
                 fields: ['text'],
-                data: [{"text": "STK"}, {"text": "OPT"}, {"text": "FUT"}, {"text": "CASH"}, {"text": "CFD"}]
+                data: [{"text": "OPT"}, {"text": "FOP"}, {"text": "FUT"}, {"text": "CFD"}, {"text": "STK"}]
             }),
-            value: 'STK'
+            value: 'OPT'
         }, {
             xtype: 'numberfield',
             fieldLabel: 'Multiplier',

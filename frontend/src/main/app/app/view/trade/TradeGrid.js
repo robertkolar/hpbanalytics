@@ -20,7 +20,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     },
     columns: [{
         text: 'ID',
-        width: 60,
+        width: 80,
         dataIndex: 'id'
     }, {
         text: 'Type',

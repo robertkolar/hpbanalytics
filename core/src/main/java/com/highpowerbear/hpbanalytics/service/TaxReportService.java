@@ -30,12 +30,12 @@ import java.util.stream.IntStream;
  * Created by robertk on 10/10/2016.
  */
 @Service
-public class IfiCsvGeneratorService {
-    private static final Logger log = LoggerFactory.getLogger(IfiCsvGeneratorService.class);
+public class TaxReportService {
+    private static final Logger log = LoggerFactory.getLogger(TaxReportService.class);
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final TradeRepository tradeRepository;
-    private final TradeCalculatorService tradeCalculatorService;
+    private final TradeService tradeService;
 
     private final String NL = "\n";
     private final String DL = ",";
@@ -50,13 +50,13 @@ public class IfiCsvGeneratorService {
     private final List<Integer> ifiYears;
 
     @Autowired
-    public IfiCsvGeneratorService(ExchangeRateRepository exchangeRateRepository,
-                                  TradeRepository tradeRepository,
-                                  TradeCalculatorService tradeCalculatorService) {
+    public TaxReportService(ExchangeRateRepository exchangeRateRepository,
+                            TradeRepository tradeRepository,
+                            TradeService tradeService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.tradeRepository = tradeRepository;
-        this.tradeCalculatorService = tradeCalculatorService;
+        this.tradeService = tradeService;
 
         ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
     }
@@ -218,7 +218,7 @@ public class IfiCsvGeneratorService {
 
         BigDecimal profitLoss = null;
         if (currentPos == 0) {
-            profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(trade);
+            profitLoss = tradeService.calculatePlPortfolioBaseOpenClose(trade);
             sb.append(nf.format(profitLoss.doubleValue()));
         }
 
@@ -254,7 +254,7 @@ public class IfiCsvGeneratorService {
 
         BigDecimal profitLoss = null;
         if (currentPos == 0) {
-            profitLoss = tradeCalculatorService.calculatePlPortfolioBaseOpenClose(trade);
+            profitLoss = tradeService.calculatePlPortfolioBaseOpenClose(trade);
             sb.append(nf.format(profitLoss.doubleValue()));
         }
         sb.append(NL);

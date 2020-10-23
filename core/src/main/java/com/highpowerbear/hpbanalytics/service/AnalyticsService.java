@@ -1,15 +1,11 @@
 package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.dto.ExecutionDTO;
-import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
-import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.database.TradeRepository;
-import com.highpowerbear.hpbanalytics.enums.Currency;
-import com.highpowerbear.hpbanalytics.enums.TradeType;
+import com.highpowerbear.hpbanalytics.model.ExecutionContract;
 import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -29,37 +24,24 @@ import java.util.stream.Stream;
  * Created by robertk on 4/26/2015.
  */
 @Service
-public class AnalyticsService implements ExecutionListener {
+public class AnalyticsService {
     private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
 
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
-    private final TradeCalculatorService tradeCalculatorService;
+    private final TradeService tradeService;
     private final MessageService messageService;
-    private final ExecutionMapper executionMapper;
 
     @Autowired
     public AnalyticsService(ExecutionRepository executionRepository,
                             TradeRepository tradeRepository,
-                            TradeCalculatorService tradeCalculatorService,
-                            MessageService messageService,
-                            ExecutionMapper executionMapper) {
+                            TradeService tradeService,
+                            MessageService messageService) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
-        this.tradeCalculatorService = tradeCalculatorService;
+        this.tradeService = tradeService;
         this.messageService = messageService;
-        this.executionMapper = executionMapper;
-
-        messageService.registerExecutionListener(this);
-    }
-
-    @Override
-    public void executionReceived(ExecutionDTO dto) {
-        Execution execution = executionMapper.dtoToEntity(dto);
-        execution.setSymbol(HanUtil.removeWhiteSpaces(execution.getSymbol()));
-
-        newExecution(execution);
     }
 
     @Transactional
@@ -87,71 +69,89 @@ public class AnalyticsService implements ExecutionListener {
 
     @Transactional
     public void deleteExecution(long executionId) {
+        log.info("received request to delete execution " + executionId);
+
         Execution execution = executionRepository.findById(executionId).orElse(null);
         if (execution == null) {
             log.warn("execution " + executionId + " does not exists, cannot delete");
             return;
         }
-        String symbol = execution.getSymbol();
-        Currency currency = execution.getCurrency();
-        double multiplier = execution.getMultiplier();
 
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(symbol, currency, multiplier, execution.getFillDate());
-        logTradesAffected(execution, tradesAffected);
-
-        Trade firstTradeAffected = tradesAffected.get(0);
-        Long firstExecutionId = firstTradeAffected.getExecutions().get(0).getId();
-        Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
-
-        log.info("deleting " + tradesAffected.size() + " trades");
-        tradeRepository.deleteAll(tradesAffected);
+        ExecutionContract ec = ExecutionContract.forExecution(execution);
+        List<Trade> tradesAffected = deleteTradesAffected(ec);
 
         log.info("deleting execution " + execution);
-        executionRepository.deleteById(executionId); // need to delete before the next query
+        executionRepository.delete(execution);
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndCurrencyAndMultiplierAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, currency, multiplier, firstExecution.getFillDate());
-        List<Trade> regeneratedTrades = generateTradesSingleCid(executionsToAnalyzeAgain);
+        Trade firstTradeAffected = tradesAffected.get(0);
+        Execution firstExecution = firstTradeAffected.getExecutions().get(0);
 
+        List<Execution> executionsToAnalyzeAgain = executionRepository
+                .findExecutionsToAnalyzeAgain(ec.symbol(), ec.currency(), ec.secType(), ec.multiplier(), firstExecution.getFillDate());
+
+        List<Trade> regeneratedTrades = generateTradesSingleContract(executionsToAnalyzeAgain);
         saveRegeneratedTrades(regeneratedTrades);
     }
 
     @Transactional
-    public void newExecution(Execution execution) {
+    public void addExecution(Execution execution) {
+        log.info("received request to add new execution for symbol " + execution.getSymbol());
         adjustFillDate(execution);
 
-        String symbol = execution.getSymbol();
-        Currency currency = execution.getCurrency();
-        double multiplier = execution.getMultiplier();
-
-        List<Trade> tradesAffected = tradeRepository.findTradesAffectedByExecution(symbol, currency, multiplier, execution.getFillDate());
-        logTradesAffected(execution, tradesAffected);
-
-        log.info("deleting " + tradesAffected.size() + " trades");
-        tradeRepository.deleteAll(tradesAffected);
+        ExecutionContract ec = ExecutionContract.forExecution(execution);
+        List<Trade> tradesAffected = deleteTradesAffected(ec);
 
         log.info("saving new execution " + execution);
-        execution = executionRepository.save(execution); // need to save before the next query
+        execution = executionRepository.save(execution);
 
         if (tradesAffected.isEmpty()) {
-            saveRegeneratedTrades(generateTradesSingleCid(Collections.singletonList(execution)));
+            List<Trade> regeneratedTrades = generateTradesSingleContract(Collections.singletonList(execution));
+            saveRegeneratedTrades(regeneratedTrades);
             return;
         }
 
         Trade firstTradeAffected = tradesAffected.get(0);
-        Long firstExecutionId = firstTradeAffected.getExecutions().get(0).getId();
-        Execution firstExecution = Objects.requireNonNull(executionRepository.findById(firstExecutionId).orElse(null));
+        Execution firstExecution = firstTradeAffected.getExecutions().get(0);
 
         LocalDateTime cutoffDate = Stream.of(firstExecution, execution)
                 .map(Execution::getFillDate)
                 .min(LocalDateTime::compareTo)
                 .get();
 
-        List<Execution> executionsToAnalyzeAgain = executionRepository.findBySymbolAndCurrencyAndMultiplierAndFillDateGreaterThanEqualOrderByFillDateAsc(symbol, currency, multiplier, cutoffDate);
-        List<Trade> regeneratedTrades = generateTradesSingleCid(executionsToAnalyzeAgain);
+        List<Execution> executionsToAnalyzeAgain = executionRepository
+                .findExecutionsToAnalyzeAgain(ec.symbol(), ec.currency(), ec.secType(), ec.multiplier(), cutoffDate);
 
+        List<Trade> regeneratedTrades = generateTradesSingleContract(executionsToAnalyzeAgain);
         saveRegeneratedTrades(regeneratedTrades);
     }
 
+    private List<Trade> deleteTradesAffected(ExecutionContract ec) {
+        List<Trade> tradesAffected = tradeRepository
+                .findTradesAffectedByExecution(ec.symbol(), ec.currency(), ec.secType(), ec.multiplier(), ec.execution().getFillDate());
+
+        if (tradesAffected.isEmpty()) {
+            log.info("no trades affected");
+            return tradesAffected;
+        }
+
+        StringBuilder sb = new StringBuilder("trades affected:\n");
+        tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
+        log.info(sb.toString());
+
+        for (Trade trade : tradesAffected) {
+            List<Execution> tradeExecutions = trade.getExecutions();
+
+            for (Execution te : tradeExecutions) {
+                te.setTrade(null); // save handled by transaction
+                log.info("disassociated execution " + te.getId());
+            }
+        }
+        log.info("deleting " + tradesAffected.size() + " trades");
+        tradeRepository.deleteAll(tradesAffected);
+
+        return tradesAffected;
+    }
+    
     private void adjustFillDate(Execution execution) {
         LocalDateTime fillDate = execution.getFillDate();
 
@@ -168,40 +168,21 @@ public class AnalyticsService implements ExecutionListener {
         log.info("saving " + trades.size() + " regenerated trades");
 
         if (!trades.isEmpty()) {
-            tradeRepository.saveAll(trades);
-            trades.forEach(trade -> executionRepository.saveAll(trade.getExecutions()));
+            tradeRepository.saveAll(trades); // executions update handled by transaction
         }
-        messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
-        messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
-    }
-
-    public void manualCloseTrade(Trade trade, String executionReference, LocalDateTime closeDate, BigDecimal closePrice) {
-        log.info("manually closing trade " + trade);
-        newExecution(new Execution()
-                .setReference(executionReference)
-                .setAction(trade.getType() == TradeType.LONG ? Types.Action.SELL : Types.Action.BUY)
-                .setQuantity(Math.abs(trade.getOpenPosition()))
-                .setSymbol(trade.getSymbol())
-                .setUnderlying(trade.getUnderlying())
-                .setCurrency(trade.getCurrency())
-                .setSecType(trade.getSecType())
-                .setMultiplier(trade.getMultiplier())
-                .setFillDate(closeDate)
-                .setFillPrice(closePrice));
-
         messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
     
     private List<Trade> generateTrades(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
-        Set<String> cids = executions.stream().map(Execution::getContractIdentifier).collect(Collectors.toSet());
+        Set<String> cids = executions.stream().map(ExecutionContract::cid).collect(Collectors.toSet());
         Map<String, List<Execution>> executionsPerCidMap = new HashMap<>(); // contract identifier -> list of executions
 
         cids.forEach(cid -> executionsPerCidMap.put(cid, new ArrayList<>()));
 
         for (Execution execution : executions) {
-            String cid = execution.getContractIdentifier();
+            String cid = ExecutionContract.cid(execution);
             executionsPerCidMap.get(cid).add(execution);
         }
 
@@ -209,7 +190,7 @@ public class AnalyticsService implements ExecutionListener {
             List<Execution> executionsPerCid = executionsPerCidMap.get(cid);
 
             log.info("generating trades for " + cid);
-            List<Trade> generatedTradesPerCid = generateTradesSingleCid(executionsPerCid);
+            List<Trade> generatedTradesPerCid = generateTradesSingleContract(executionsPerCid);
 
             trades.addAll(generatedTradesPerCid);
         }
@@ -217,7 +198,7 @@ public class AnalyticsService implements ExecutionListener {
         return trades;
     }
     
-    private List<Trade> generateTradesSingleCid(List<Execution> executions) {
+    private List<Trade> generateTradesSingleContract(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
 
         int currentPos = 0;
@@ -243,25 +224,12 @@ public class AnalyticsService implements ExecutionListener {
                 }
             }
 
-            tradeCalculatorService.calculateFields(trade);
+            tradeService.calculateFields(trade);
             log.info("generated trade " + trade);
             trades.add(trade);
             singleContractSet.removeAll(trade.getExecutions());
         }
         return trades;
-    }
-
-    private void logTradesAffected(Execution execution, List<Trade> tradesAffected) {
-        StringBuilder sb = new StringBuilder();
-
-        if (tradesAffected.isEmpty()) {
-            sb.append("no ");
-        }
-        sb.append("trades affected by execution: ").append(execution).append("\n");
-        if (!tradesAffected.isEmpty()) {
-            tradesAffected.forEach(trade -> sb.append(trade).append("\n"));
-        }
-        log.info(sb.toString());
     }
 
     private boolean detectReversal(int oldPos, int currentPos) {

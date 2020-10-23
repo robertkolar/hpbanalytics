@@ -2,9 +2,7 @@ package com.highpowerbear.hpbanalytics.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -13,12 +11,6 @@ import java.util.concurrent.ScheduledExecutorService;
  */
 @Configuration
 public class ExecutorConfig {
-
-    @Bean
-    @Primary
-    public ExecutorService executorService() {
-        return Executors.newCachedThreadPool();
-    }
 
     @Bean
     public ScheduledExecutorService scheduledExecutorService() {

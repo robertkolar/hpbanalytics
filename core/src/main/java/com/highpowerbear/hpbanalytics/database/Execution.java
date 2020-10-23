@@ -40,10 +40,6 @@ public class Execution implements Serializable {
     @JsonIgnore
     private Trade trade;
 
-    public String getContractIdentifier() {
-        return symbol + "_" + currency + "_" + secType + "_" + String.valueOf(multiplier).replace(".", "_");
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -175,11 +171,17 @@ public class Execution implements Serializable {
     public String toString() {
         return "Execution{" +
                 "id=" + id +
+                ", reference='" + reference + '\'' +
                 ", action=" + action +
                 ", quantity=" + quantity +
                 ", symbol='" + symbol + '\'' +
+                ", underlying='" + underlying + '\'' +
+                ", currency=" + currency +
+                ", secType=" + secType +
+                ", multiplier=" + multiplier +
                 ", fillDate=" + fillDate +
                 ", fillPrice=" + fillPrice +
+                ", trade=" + trade +
                 ", tradeId=" + getTradeId() +
                 '}';
     }
