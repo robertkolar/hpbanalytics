@@ -103,9 +103,10 @@ Ext.define('HanGui.view.trade.TradeController', {
 
         if (form && form.isValid()) {
             Ext.Ajax.request({
-                method: 'PUT',
+                method: 'POST',
                 url: urlString,
                 jsonData: {
+                    executionReference: form.getForm().findField('executionReference').lastValue,
                     closeDate: Ext.Date.format(new Date(form.getForm().findField('closeDate').lastValue), 'Y-m-d\\TH:i:s.u'),
                     closePrice: form.getForm().findField('closePrice').lastValue
                 },

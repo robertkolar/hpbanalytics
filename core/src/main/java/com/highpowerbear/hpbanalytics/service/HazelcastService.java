@@ -1,7 +1,7 @@
 package com.highpowerbear.hpbanalytics.service;
 
-import com.hazelcast.core.HazelcastException;
 import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IQueue;
 import com.highpowerbear.dto.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
@@ -48,10 +48,13 @@ public class HazelcastService {
 
     public void startHazelcastConsumer() {
 
-        log.info("starting hazelcast consumer");
-        IQueue<ExecutionDTO> queue = hanHazelcastInstance.getQueue(HanSettings.HAZELCAST_EXECUTION_QUEUE_NAME);
+        final int delay = HanSettings.HAZELCAST_CONSUMER_START_DELAY_SECONDS;
+        log.info("starting hazelcast consumer in " + delay + " seconds");
 
         executorService.schedule(() -> {
+            IQueue<ExecutionDTO> queue = hanHazelcastInstance.getQueue(HanSettings.HAZELCAST_EXECUTION_QUEUE_NAME);
+            log.info("hazelcast consumer ready");
+
             while (hazelcastConsumerRunning.get()) {
                 try {
                     ExecutionDTO dto = queue.take();
@@ -61,13 +64,17 @@ public class HazelcastService {
                     log.info("consumed execution from the hazelcast queue " + execution);
                     analyticsService.addExecution(execution);
 
+                } catch (HazelcastInstanceNotActiveException he) {
+                    log.error(he.getMessage() + " ... stopping hazelcast consumer task");
+                    hazelcastConsumerRunning.set(false);
+
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    log.error("hazelcast consumer task exception caught: " + e.getMessage());
                 }
             }
             log.info("hazelcast consumer task exit");
 
-        }, HanSettings.HAZELCAST_CONSUMER_START_DELAY_SECONDS, TimeUnit.SECONDS);
+        }, delay, TimeUnit.SECONDS);
     }
 
     private void shutdown() {

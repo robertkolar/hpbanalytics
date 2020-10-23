@@ -130,7 +130,7 @@ public class AppRestController {
         return ResponseEntity.ok(new GenericList<>(trades, (int) numTrades));
     }
 
-    @RequestMapping(method = RequestMethod.PUT, value = "trade/{tradeId}/close")
+    @RequestMapping(method = RequestMethod.POST, value = "trade/{tradeId}/close")
     public ResponseEntity<?> manualCloseTrade(
             @PathVariable("tradeId") long tradeId,
             @RequestBody CloseTradeRequest r) {

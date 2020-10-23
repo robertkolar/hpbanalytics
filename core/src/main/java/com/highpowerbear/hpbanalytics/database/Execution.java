@@ -167,6 +167,10 @@ public class Execution implements Serializable {
         return trade != null ? trade.getId() : null;
     }
 
+    public String getTradeExecutionIds() {
+        return trade != null ? trade.getExecutionIds() : null;
+    }
+
     @Override
     public String toString() {
         return "Execution{" +
@@ -181,8 +185,8 @@ public class Execution implements Serializable {
                 ", multiplier=" + multiplier +
                 ", fillDate=" + fillDate +
                 ", fillPrice=" + fillPrice +
-                ", trade=" + trade +
                 ", tradeId=" + getTradeId() +
+                ", tradeExecutionIds=" + getTradeExecutionIds() +
                 '}';
     }
 }
