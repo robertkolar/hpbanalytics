@@ -1,6 +1,7 @@
 package com.highpowerbear.hpbanalytics.database;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.ib.client.Types;
@@ -152,6 +153,10 @@ public class Execution implements Serializable {
     public Execution setFillPrice(BigDecimal fillPrice) {
         this.fillPrice = fillPrice;
         return this;
+    }
+
+    public Double getValue() {
+        return HanUtil.round(fillPrice.doubleValue() * multiplier * (double) quantity, HanSettings.DECIMAL_SCALE);
     }
 
     public Trade getTrade() {

@@ -110,5 +110,14 @@ Ext.define('HanGui.view.execution.ExecutionController', {
                 }
             }
         });
+    },
+
+    actionRenderer: function(val, metadata, record) {
+        metadata.style = (val === 'BUY' ? 'color: blue;' : 'color: brown;');
+        return val;
+    },
+
+    priceRenderer: function(val, metadata, record) {
+        return Ext.util.Format.number(val, '0.00###');
     }
 });

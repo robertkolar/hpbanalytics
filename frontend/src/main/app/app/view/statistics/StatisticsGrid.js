@@ -90,19 +90,13 @@ Ext.define('HanGui.view.statistics.StatisticsGrid', {
         width: 100,
         dataIndex: 'profitLoss',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            metadata.style = val < 0 ? 'color: red;' : 'color: green;';
-            return Ext.util.Format.number(val, '0.00');
-        }
+        renderer: 'profitLossRenderer'
     }, {
         text: 'Cumul PL',
         width: 100,
         dataIndex: 'cumulProfitLoss',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            metadata.style = val < 0 ? 'color: red;' : 'color: green;';
-            return Ext.util.Format.number(val, '0.00');
-        }
+        renderer: 'profitLossRenderer'
     }, {
         flex: 1
     }],

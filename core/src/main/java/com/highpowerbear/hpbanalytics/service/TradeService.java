@@ -28,7 +28,7 @@ import java.util.Map;
 public class TradeService {
 
     private final ExchangeRateRepository exchangeRateRepository;
-    private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>(); // TODO clear cache periodically, eventually move to hazelcast
+    private final Map<String, ExchangeRate> exchangeRateMap = new LinkedHashMap<>();
 
     @Autowired
     public TradeService(ExchangeRateRepository exchangeRateRepository) {
@@ -115,7 +115,7 @@ public class TradeService {
             int quantity = execution.getQuantity();
 
             BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(execution.getFillDate().toLocalDate(), execution.getCurrency()));
-            BigDecimal fillPrice = execution.getFillPrice().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
+            BigDecimal fillPrice = execution.getFillPrice().divide(exchangeRate, HanSettings.DECIMAL_SCALE, RoundingMode.HALF_UP);
 
             if ((tradeType == TradeType.LONG && action == Types.Action.BUY) || (tradeType == TradeType.SHORT && action == Types.Action.SELL)) {
                 cumulativeOpenPrice = cumulativeOpenPrice.add(BigDecimal.valueOf(quantity).multiply(fillPrice));
@@ -144,7 +144,7 @@ public class TradeService {
         LocalDateTime plCalculationDate = current ? LocalDateTime.now() : t.getCloseDate();
         BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(plCalculationDate.toLocalDate(), t.getCurrency()));
 
-        return t.getProfitLoss().divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP);
+        return t.getProfitLoss().divide(exchangeRate, HanSettings.DECIMAL_SCALE, RoundingMode.HALF_UP);
     }
 
     private double getExchangeRate(LocalDate localDate, Currency currency) {

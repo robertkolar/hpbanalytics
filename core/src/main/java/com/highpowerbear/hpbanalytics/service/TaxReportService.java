@@ -71,8 +71,8 @@ public class TaxReportService {
         tradeTypeMap.put(TradeType.LONG, "običajni");
         tradeTypeMap.put(TradeType.SHORT, "na kratko");
 
-        nf.setMinimumFractionDigits(HanSettings.PL_SCALE);
-        nf.setMaximumFractionDigits(HanSettings.PL_SCALE);
+        nf.setMinimumFractionDigits(HanSettings.DECIMAL_SCALE);
+        nf.setMaximumFractionDigits(HanSettings.DECIMAL_SCALE);
         nf.setGroupingUsed(false);
     }
 
@@ -291,7 +291,7 @@ public class TaxReportService {
         BigDecimal contractFillPrice = execution.getFillPrice();
         BigDecimal multiplier = BigDecimal.valueOf(execution.getMultiplier());
 
-        return contractFillPrice.divide(exchangeRate, HanSettings.PL_SCALE, RoundingMode.HALF_UP).multiply(multiplier).doubleValue();
+        return contractFillPrice.divide(exchangeRate, HanSettings.DECIMAL_SCALE, RoundingMode.HALF_UP).multiply(multiplier).doubleValue();
     }
 
     private boolean isDerivative(Types.SecType secType) {

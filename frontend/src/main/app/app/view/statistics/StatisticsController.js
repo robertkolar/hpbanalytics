@@ -271,5 +271,10 @@ Ext.define('HanGui.view.statistics.StatisticsController', {
         } else {
             chartsContainer.setVisible(false);
         }
+    },
+
+    profitLossRenderer: function(val, metadata, record) {
+        metadata.style = val < 0 ? 'color: red;' : 'color: green;';
+        return Ext.util.Format.number(val, '0.00');
     }
 });

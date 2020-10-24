@@ -12,7 +12,7 @@ public class HanSettings {
     }
 
     public static final int IFI_START_YEAR = 2016;
-    public static final int PL_SCALE = 5;
+    public static final int DECIMAL_SCALE = 5;
     public static final int SCHEDULED_THREAD_POOL_SIZE = 10;
 
     public static final Currency PORTFOLIO_BASE = Currency.EUR;

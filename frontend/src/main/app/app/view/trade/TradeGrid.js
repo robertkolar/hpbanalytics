@@ -26,10 +26,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         text: 'Type',
         width: 80,
         dataIndex: 'type',
-        renderer: function(val, metadata, record) {
-            metadata.style = (val === 'LONG' ? 'color: blue;' : 'color: brown;');
-            return val;
-        }
+        renderer: 'tradeTypeRenderer'
     }, {
         text: 'Symbol',
         width: 180,
@@ -71,9 +68,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 100,
         dataIndex: 'avgOpenPrice',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            return Ext.util.Format.number(val, '0.00###');
-        }
+        renderer: 'priceRenderer'
     }, {
         text: 'Open Date',
         width: 160,
@@ -85,9 +80,7 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 100,
         dataIndex: 'avgClosePrice',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            return Ext.util.Format.number(val, '0.00###');
-        }
+        renderer: 'priceRenderer'
     }, {
         text: 'Close Date',
         width: 160,
@@ -103,26 +96,17 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         width: 100,
         dataIndex: 'profitLoss',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            metadata.style = val < 0 ? 'color: red;' : 'color: green;';
-            return Ext.util.Format.number(val, '0.00');
-        }
+        renderer: 'profitLossRenderer'
     }, {
         text: 'Execution IDs',
         flex: 1,
         dataIndex: 'executionIds',
-        renderer: function(val, metadata, record) {
-            metadata.style = 'cursor: pointer;';
-            return val;
-        }
+        renderer: 'pointerRenderer'
     }, {
         text: 'Status',
         width: 60,
         dataIndex: 'status',
-        renderer: function(val, metadata, record) {
-            metadata.style = 'color: white; ' + (val === 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
-            return val.toLowerCase();
-        },
+        renderer: 'tradeStatusRenderer',
         filter: {
             type: 'list',
             options: ['OPEN', 'CLOSED']

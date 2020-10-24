@@ -34,10 +34,7 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         text: 'Action',
         width: 60,
         dataIndex: 'action',
-        renderer: function(val, metadata, record) {
-            metadata.style = (val === 'BUY' ? 'color: blue;' : 'color: brown;');
-            return val;
-        }
+        renderer: 'actionRenderer'
     }, {
         text: 'Qnt',
         width: 80,
@@ -70,13 +67,17 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'multiplier',
         align: 'right'
     }, {
-        text: 'Price',
+        text: 'Fill',
         width: 100,
         dataIndex: 'fillPrice',
         align: 'right',
-        renderer: function(val, metadata, record) {
-            return Ext.util.Format.number(val, '0.00###');
-        }
+        renderer: 'priceRenderer'
+    }, {
+        text: 'Value',
+        width: 120,
+        dataIndex: 'value',
+        align: 'right',
+        renderer: 'priceRenderer'
     }, {
         text: 'Trade ID',
         width: 100,

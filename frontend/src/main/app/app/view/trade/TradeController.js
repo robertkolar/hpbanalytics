@@ -137,5 +137,34 @@ Ext.define('HanGui.view.trade.TradeController', {
         window.add(grid);
         me.getView().add(window);
         window.show();
-    }
+    },
+
+    actionRenderer: function(val, metadata, record) {
+        metadata.style = (val === 'BUY' ? 'color: blue;' : 'color: brown;');
+        return val;
+    },
+
+    priceRenderer: function(val, metadata, record) {
+        return Ext.util.Format.number(val, '0.00###');
+    },
+
+    tradeTypeRenderer: function(val, metadata, record) {
+        metadata.style = (val === 'LONG' ? 'color: blue;' : 'color: brown;');
+        return val;
+    },
+
+    profitLossRenderer: function(val, metadata, record) {
+        metadata.style = val < 0 ? 'color: red;' : 'color: green;';
+        return Ext.util.Format.number(val, '0.00');
+    },
+
+    pointerRenderer: function(val, metadata, record) {
+        metadata.style = 'cursor: pointer;';
+        return val;
+    },
+
+    tradeStatusRenderer: function(val, metadata, record) {
+        metadata.style = 'color: white; ' + (val === 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
+        return val.toLowerCase();
+    },
 });
