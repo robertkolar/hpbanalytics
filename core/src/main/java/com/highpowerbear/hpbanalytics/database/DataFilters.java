@@ -37,7 +37,7 @@ public class DataFilters {
         return (root, query, builder) -> build(root, builder, dataFilterItems);
     }
 
-    private static <T> Predicate build(Root<T> root, CriteriaBuilder builder, List<DataFilterItem> dataFilterItems) {
+    private static <R> Predicate build(Root<R> root, CriteriaBuilder builder, List<DataFilterItem> dataFilterItems) {
         List<Predicate> predicates = new ArrayList<>();
 
         for (DataFilterItem item : dataFilterItems) {
@@ -51,15 +51,25 @@ public class DataFilters {
                     break;
 
                 case IN:
-                    if (field.equals("secType")) {
-                        CriteriaBuilder.In<Types.SecType> inPredicate = builder.in(root.get(field));
-                        item.getValues().forEach(value -> inPredicate.value(Types.SecType.valueOf(value)));
-                        predicates.add(inPredicate);
-
-                    } else if (field.equals("status")) {
-                        CriteriaBuilder.In<TradeStatus> inPredicate = builder.in(root.get(field));
-                        item.getValues().forEach(value -> inPredicate.value(TradeStatus.valueOf(value)));
-                        predicates.add(inPredicate);
+                    switch (field) {
+                        case "currency": {
+                            CriteriaBuilder.In<Currency> inPredicate = builder.in(root.get(field));
+                            item.getValues().forEach(value -> inPredicate.value(Currency.valueOf(value)));
+                            predicates.add(inPredicate);
+                            break;
+                        }
+                        case "secType": {
+                            CriteriaBuilder.In<Types.SecType> inPredicate = builder.in(root.get(field));
+                            item.getValues().forEach(value -> inPredicate.value(Types.SecType.valueOf(value)));
+                            predicates.add(inPredicate);
+                            break;
+                        }
+                        case "status": {
+                            CriteriaBuilder.In<TradeStatus> inPredicate = builder.in(root.get(field));
+                            item.getValues().forEach(value -> inPredicate.value(TradeStatus.valueOf(value)));
+                            predicates.add(inPredicate);
+                            break;
+                        }
                     }
                     break;
             }

@@ -52,14 +52,18 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
     }, {
         text: 'Cur',
         width: 60,
-        dataIndex: 'currency'
+        dataIndex: 'currency',
+        filter: {
+            type: 'list',
+            options: HanGui.common.Definitions.currencies
+        }
     }, {
         text: 'Sec',
         width: 60,
         dataIndex: 'secType',
         filter: {
             type: 'list',
-            options: ['OPT', 'FOP', 'FUT', 'CFD', 'STK']
+            options: HanGui.common.Definitions.secTypes
         }
     }, {
         text: 'Mul',

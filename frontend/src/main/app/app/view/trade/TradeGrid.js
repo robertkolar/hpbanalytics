@@ -39,14 +39,18 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     }, {
         text: 'Cur',
         width: 80,
-        dataIndex: 'currency'
+        dataIndex: 'currency',
+        filter: {
+            type: 'list',
+            options: HanGui.common.Definitions.currencies
+        }
     }, {
         text: 'Sec',
         width: 80,
         dataIndex: 'secType',
         filter: {
             type: 'list',
-            options: ['OPT', 'FOP', 'FUT', 'CFD', 'STK']
+            options: HanGui.common.Definitions.secTypes
         }
     }, {
         text: 'Mul',
