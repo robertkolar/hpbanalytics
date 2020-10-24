@@ -59,7 +59,11 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
     }, {
         text: 'Sec',
         width: 60,
-        dataIndex: 'secType'
+        dataIndex: 'secType',
+        filter: {
+            type: 'list',
+            options: ['OPT', 'FOP', 'FUT', 'CFD', 'STK']
+        }
     }, {
         text: 'Mul',
         width: 60,

@@ -46,7 +46,11 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     }, {
         text: 'Sec',
         width: 80,
-        dataIndex: 'secType'
+        dataIndex: 'secType',
+        filter: {
+            type: 'list',
+            options: ['OPT', 'FOP', 'FUT', 'CFD', 'STK']
+        }
     }, {
         text: 'Mul',
         width: 60,
@@ -118,6 +122,10 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         renderer: function(val, metadata, record) {
             metadata.style = 'color: white; ' + (val === 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
             return val.toLowerCase();
+        },
+        filter: {
+            type: 'list',
+            options: ['OPEN', 'CLOSED']
         }
     }, {
         xtype: 'widgetcolumn',

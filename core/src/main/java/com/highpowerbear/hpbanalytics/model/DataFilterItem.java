@@ -1,13 +1,35 @@
 package com.highpowerbear.hpbanalytics.model;
 
+import com.fasterxml.jackson.annotation.JsonSetter;
+import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by robertk on 10/4/2020.
  */
 public class DataFilterItem {
 
-    private String operator;
-    private String value;
     private String property;
+    private String operator;
+
+    private String value;
+    private final List<String> values = new ArrayList<>();
+
+    @JsonSetter("value")
+    public void setValueNode(JsonNode valueNode) {
+        if (valueNode.isTextual()) {
+            value = valueNode.asText();
+
+        } else if (valueNode.isArray()) {
+            valueNode.forEach(item -> values.add(item.asText()));
+        }
+    }
+
+    public String getProperty() {
+        return property;
+    }
 
     public String getOperator() {
         return operator;
@@ -17,7 +39,7 @@ public class DataFilterItem {
         return value;
     }
 
-    public String getProperty() {
-        return property;
+    public List<String> getValues() {
+        return values;
     }
 }
