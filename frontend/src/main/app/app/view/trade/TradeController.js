@@ -166,5 +166,5 @@ Ext.define('HanGui.view.trade.TradeController', {
     tradeStatusRenderer: function(val, metadata, record) {
         metadata.style = 'color: white; ' + (val === 'OPEN' ? 'background-color: green;' : 'background-color: brown;');
         return val.toLowerCase();
-    },
+    }
 });

@@ -64,7 +64,6 @@ public class AnalyticsService {
         saveRegeneratedTrades(regeneratedTades);
 
         log.info("END trade regeneration");
-        messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
 
     @Transactional

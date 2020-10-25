@@ -35,7 +35,8 @@ Ext.define('HanGui.view.trade.TradeGrid', {
     }, {
         text: 'Undl',
         width: 80,
-        dataIndex: 'underlying'
+        dataIndex: 'underlying',
+        filter: 'string'
     }, {
         text: 'Cur',
         width: 80,
@@ -56,7 +57,8 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         text: 'Mul',
         width: 60,
         dataIndex: 'multiplier',
-        align: 'right'
+        align: 'right',
+        filter: 'number'
     }, {
         text: 'Qnt',
         width: 80,

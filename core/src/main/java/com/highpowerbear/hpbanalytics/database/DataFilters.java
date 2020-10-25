@@ -38,7 +38,8 @@ public class DataFilters {
     }
 
     private static <R> Predicate build(Root<R> root, CriteriaBuilder builder, List<DataFilterItem> dataFilterItems) {
-        List<Predicate> predicates = new ArrayList<>();
+        List<Predicate> outerAndPredicates = new ArrayList<>();
+        List<Predicate> innerOrPredicates = new ArrayList<>();
 
         for (DataFilterItem item : dataFilterItems) {
             DataFilterOperator operator = DataFilterOperator.valueOf(item.getOperator().toUpperCase());
@@ -46,34 +47,56 @@ public class DataFilters {
 
             switch (operator) {
                 case LIKE:
-                    String likeStr = MessageFormat.format("%{0}%", item.getValue());
-                    predicates.add(builder.like(root.get(field), likeStr));
+                    switch (field) {
+                        case "symbol":
+                        case "underlying":
+                            String likeStr = MessageFormat.format("%{0}%", item.getValue());
+                            outerAndPredicates.add(builder.like(root.get(field), likeStr));
+                            break;
+                    }
                     break;
-
+                case EQ:
+                    if ("multiplier".equals(field)) {
+                        outerAndPredicates.add(builder.equal(root.get(field), builder.literal(item.getDoubleValue())));
+                    }
+                    break;
+                case LT:
+                    if ("multiplier".equals(field)) {
+                        innerOrPredicates.add(builder.lessThan(root.get(field), builder.literal(item.getDoubleValue())));
+                    }
+                    break;
+                case GT:
+                    if ("multiplier".equals(field)) {
+                        innerOrPredicates.add(builder.greaterThan(root.get(field), builder.literal(item.getDoubleValue())));
+                    }
+                    break;
                 case IN:
                     switch (field) {
                         case "currency": {
                             CriteriaBuilder.In<Currency> inPredicate = builder.in(root.get(field));
                             item.getValues().forEach(value -> inPredicate.value(Currency.valueOf(value)));
-                            predicates.add(inPredicate);
+                            outerAndPredicates.add(inPredicate);
                             break;
                         }
                         case "secType": {
                             CriteriaBuilder.In<Types.SecType> inPredicate = builder.in(root.get(field));
                             item.getValues().forEach(value -> inPredicate.value(Types.SecType.valueOf(value)));
-                            predicates.add(inPredicate);
+                            outerAndPredicates.add(inPredicate);
                             break;
                         }
                         case "status": {
                             CriteriaBuilder.In<TradeStatus> inPredicate = builder.in(root.get(field));
                             item.getValues().forEach(value -> inPredicate.value(TradeStatus.valueOf(value)));
-                            predicates.add(inPredicate);
+                            outerAndPredicates.add(inPredicate);
                             break;
                         }
                     }
                     break;
             }
         }
-        return builder.and(predicates.toArray(new Predicate[0]));
+        if (!innerOrPredicates.isEmpty()) {
+            outerAndPredicates.add(builder.or(innerOrPredicates.toArray(new Predicate[0])));
+        }
+        return builder.and(outerAndPredicates.toArray(new Predicate[0]));
     }
 }

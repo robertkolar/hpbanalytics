@@ -48,7 +48,8 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
     }, {
         text: 'Undl',
         width: 80,
-        dataIndex: 'underlying'
+        dataIndex: 'underlying',
+        filter: 'string'
     }, {
         text: 'Cur',
         width: 60,
@@ -69,7 +70,8 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         text: 'Mul',
         width: 60,
         dataIndex: 'multiplier',
-        align: 'right'
+        align: 'right',
+        filter: 'number'
     }, {
         text: 'Fill',
         width: 100,

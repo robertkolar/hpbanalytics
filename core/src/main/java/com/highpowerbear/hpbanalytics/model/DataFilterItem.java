@@ -15,12 +15,16 @@ public class DataFilterItem {
     private String operator;
 
     private String value;
+    private Double doubleValue;
     private final List<String> values = new ArrayList<>();
 
     @JsonSetter("value")
     public void setValueNode(JsonNode valueNode) {
         if (valueNode.isTextual()) {
             value = valueNode.asText();
+
+        } else if (valueNode.isNumber()) {
+            doubleValue = valueNode.asDouble();
 
         } else if (valueNode.isArray()) {
             valueNode.forEach(item -> values.add(item.asText()));
@@ -37,6 +41,10 @@ public class DataFilterItem {
 
     public String getValue() {
         return value;
+    }
+
+    public Double getDoubleValue() {
+        return doubleValue;
     }
 
     public List<String> getValues() {
