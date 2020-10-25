@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.ApplicationProperties;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.database.ExchangeRate;
 import com.highpowerbear.hpbanalytics.database.ExchangeRateRepository;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -13,32 +14,37 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import javax.annotation.PostConstruct;
 import java.time.LocalDate;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by robertk on 10/10/2016.
  */
 @Service
-public class ExchangeRateService {
+public class ExchangeRateService implements InitializingService {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateService.class);
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final ApplicationProperties applicationProperties;
+    private final ScheduledExecutorService executorService;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
     @Autowired
     public ExchangeRateService(ExchangeRateRepository exchangeRateRepository,
-                               ApplicationProperties applicationProperties) {
+                               ApplicationProperties applicationProperties,
+                               ScheduledExecutorService executorService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.applicationProperties = applicationProperties;
+        this.executorService = executorService;
     }
 
-    @PostConstruct
-    private void init() {
-        retrieveExchangeRates();
+    @Override
+    public void initialize() {
+        log.info("initializing ExchangeRateService");
+        executorService.schedule(this::retrieveExchangeRates, HanSettings.EXCHANGE_RATE_RETRIEVAL_DELAY_SECONDS, TimeUnit.SECONDS);
     }
 
     @Scheduled(cron="0 0 6 * * *")

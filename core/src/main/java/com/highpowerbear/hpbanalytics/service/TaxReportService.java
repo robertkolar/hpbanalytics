@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
@@ -47,7 +46,7 @@ public class TaxReportService {
     private final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("MM/dd/yyyy");
     private final NumberFormat nf = NumberFormat.getInstance(Locale.US);
 
-    private final List<Integer> ifiYears;
+    private List<Integer> ifiYears;
 
     @Autowired
     public TaxReportService(ExchangeRateRepository exchangeRateRepository,
@@ -58,11 +57,12 @@ public class TaxReportService {
         this.tradeRepository = tradeRepository;
         this.tradeService = tradeService;
 
-        ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
+        setup();
     }
 
-    @PostConstruct
-    private void init() {
+    private void setup() {
+        ifiYears = IntStream.rangeClosed(HanSettings.IFI_START_YEAR, LocalDate.now().getYear()).boxed().collect(Collectors.toList());
+
         secTypeMap.put(Types.SecType.FUT, "01 - terminska pogodba");
         secTypeMap.put(Types.SecType.CFD, "02 - pogodba na razliko");
         secTypeMap.put(Types.SecType.OPT, "03 - opcija");
