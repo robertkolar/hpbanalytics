@@ -21,6 +21,7 @@ Ext.define('HanGui.view.trade.TradeController', {
         if (trades) {
             trades.getProxy().setUrl(HanGui.common.Definitions.urlPrefix + '/trade');
             me.loadTrades();
+            me.refreshTradeStatistics();
         }
 
         var socket  = new SockJS('/websocket');
@@ -36,6 +37,7 @@ Ext.define('HanGui.view.trade.TradeController', {
             stompClient.subscribe('/topic/trade', function(message) {
                 if (message.body.startsWith('reloadRequest')) {
                     trades.reload();
+                    me.refreshTradeStatistics();
                 }
             });
 
@@ -74,6 +76,24 @@ Ext.define('HanGui.view.trade.TradeController', {
                         url: HanGui.common.Definitions.urlPrefix + '/trade/regenerate-all'
                     });
                 }
+            }
+        });
+    },
+
+    refreshTradeStatistics: function() {
+        var me = this,
+            tradeStatisticsField = me.lookupReference('tradeStatistics');
+
+        Ext.Ajax.request({
+            method: 'GET',
+            url: HanGui.common.Definitions.urlPrefix + '/trade/statistics',
+
+            success: function(response) {
+                var tradeStatistics = Ext.decode(response.responseText);
+                var text = 'All trades-undls: ' + tradeStatistics.numAllTrades + '-' + tradeStatistics.numAllUnderlyings +
+                    ', Open trades-undls: ' + tradeStatistics.numOpenTrades + '-' + tradeStatistics.numOpenUnderlyings;
+
+                tradeStatisticsField.update(text);
             }
         });
     },

@@ -31,4 +31,13 @@ public interface TradeRepository extends JpaRepository<Trade, Long>, JpaSpecific
 
     @Query("SELECT DISTINCT t.underlying AS u FROM Trade t WHERE t.openPosition <> 0 ORDER BY u")
     List<String> findOpenUnderlyings();
+
+    @Query("SELECT COUNT(t) FROM Trade t WHERE t.openPosition <> 0")
+    long countOpenTrades();
+
+    @Query("SELECT COUNT(DISTINCT t.underlying) AS u FROM Trade t")
+    long countAllUnderlyings();
+
+    @Query("SELECT COUNT(DISTINCT t.underlying) AS u FROM Trade t WHERE t.openPosition <> 0")
+    long countOpenUnderlyings();
 }

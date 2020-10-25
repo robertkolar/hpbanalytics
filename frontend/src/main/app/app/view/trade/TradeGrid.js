@@ -157,6 +157,21 @@ Ext.define('HanGui.view.trade.TradeGrid', {
                 }
             }
         }, {
+            xtype: 'button',
+            margin: '0 0 0 20',
+            text: '',
+            handler: 'refreshTradeStatistics',
+            listeners: {
+                beforerender: function(c, eOpts) {
+                    c.setGlyph(HanGui.common.Glyphs.getGlyph('refresh'));
+                }
+            }
+        }, {
+            xtype: 'tbtext',
+            width: 600,
+            margin: '0 0 0 10',
+            reference: 'tradeStatistics'
+        }, {
             xtype: 'tbtext',
             flex: 1
         }, {

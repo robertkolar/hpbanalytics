@@ -6,6 +6,7 @@ import com.highpowerbear.hpbanalytics.database.ExecutionRepository;
 import com.highpowerbear.hpbanalytics.database.Trade;
 import com.highpowerbear.hpbanalytics.database.TradeRepository;
 import com.highpowerbear.hpbanalytics.model.ExecutionContract;
+import com.highpowerbear.hpbanalytics.model.TradeStatistics;
 import com.ib.client.Types;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,8 @@ public class AnalyticsService {
     private final TradeService tradeService;
     private final MessageService messageService;
 
+    private final TradeStatistics tradeStatistics = new TradeStatistics();
+
     @Autowired
     public AnalyticsService(ExecutionRepository executionRepository,
                             TradeRepository tradeRepository,
@@ -42,6 +45,8 @@ public class AnalyticsService {
         this.tradeRepository = tradeRepository;
         this.tradeService = tradeService;
         this.messageService = messageService;
+
+        updateTradeStatistics();
     }
 
     @Transactional
@@ -124,6 +129,10 @@ public class AnalyticsService {
         saveRegeneratedTrades(regeneratedTrades);
     }
 
+    public TradeStatistics getTradeStatistics() {
+        return tradeStatistics;
+    }
+
     private List<Trade> deleteTradesAffected(ExecutionContract ec) {
         List<Trade> tradesAffected = tradeRepository
                 .findTradesAffectedByExecution(ec.symbol(), ec.currency(), ec.secType(), ec.multiplier(), ec.execution().getFillDate());
@@ -169,10 +178,20 @@ public class AnalyticsService {
         if (!trades.isEmpty()) {
             tradeRepository.saveAll(trades); // executions update handled by transaction
         }
+
+        updateTradeStatistics();
         messageService.sendWsReloadRequestMessage(WsTopic.EXECUTION);
         messageService.sendWsReloadRequestMessage(WsTopic.TRADE);
     }
-    
+
+    private void updateTradeStatistics() {
+        tradeStatistics
+                .setNumAllTrades(tradeRepository.count())
+                .setNumAllUnderlyings(tradeRepository.countAllUnderlyings())
+                .setNumOpenTrades(tradeRepository.countOpenTrades())
+                .setNumOpenUnderlyings(tradeRepository.countOpenUnderlyings());
+    }
+
     private List<Trade> generateTrades(List<Execution> executions) {
         List<Trade> trades = new ArrayList<>();
         Set<String> cids = executions.stream().map(ExecutionContract::cid).collect(Collectors.toSet());
