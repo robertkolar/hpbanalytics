@@ -28,23 +28,15 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         dataIndex: 'type',
         renderer: 'tradeTypeRenderer'
     }, {
-        text: 'Symbol',
-        width: 180,
-        dataIndex: 'symbol',
-        filter: 'string'
-    }, {
         text: 'Undl',
         width: 80,
         dataIndex: 'underlying',
         filter: 'string'
     }, {
-        text: 'Cur',
-        width: 80,
-        dataIndex: 'currency',
-        filter: {
-            type: 'list',
-            options: HanGui.common.Definitions.currencies
-        }
+        text: 'Symbol',
+        width: 180,
+        dataIndex: 'symbol',
+        filter: 'string'
     }, {
         text: 'Sec',
         width: 80,
@@ -52,6 +44,14 @@ Ext.define('HanGui.view.trade.TradeGrid', {
         filter: {
             type: 'list',
             options: HanGui.common.Definitions.secTypes
+        }
+    }, {
+        text: 'Cur',
+        width: 80,
+        dataIndex: 'currency',
+        filter: {
+            type: 'list',
+            options: HanGui.common.Definitions.currencies
         }
     }, {
         text: 'Mul',

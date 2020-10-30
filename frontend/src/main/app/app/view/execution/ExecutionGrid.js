@@ -41,23 +41,15 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         dataIndex: 'quantity',
         align: 'right'
     }, {
-        text: 'Symbol',
-        width: 180,
-        dataIndex: 'symbol',
-        filter: 'string'
-    }, {
         text: 'Undl',
         width: 80,
         dataIndex: 'underlying',
         filter: 'string'
     }, {
-        text: 'Cur',
-        width: 60,
-        dataIndex: 'currency',
-        filter: {
-            type: 'list',
-            options: HanGui.common.Definitions.currencies
-        }
+        text: 'Symbol',
+        width: 180,
+        dataIndex: 'symbol',
+        filter: 'string'
     }, {
         text: 'Sec',
         width: 60,
@@ -65,6 +57,14 @@ Ext.define('HanGui.view.execution.ExecutionGrid', {
         filter: {
             type: 'list',
             options: HanGui.common.Definitions.secTypes
+        }
+    }, {
+        text: 'Cur',
+        width: 60,
+        dataIndex: 'currency',
+        filter: {
+            type: 'list',
+            options: HanGui.common.Definitions.currencies
         }
     }, {
         text: 'Mul',

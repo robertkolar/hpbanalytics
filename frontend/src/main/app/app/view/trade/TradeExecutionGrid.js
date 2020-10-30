@@ -30,13 +30,13 @@ Ext.define('HanGui.view.trade.TradeExecutionGrid', {
         dataIndex: 'symbol',
         filter: 'string'
     }, {
-        text: 'Cur',
-        width: 60,
-        dataIndex: 'currency'
-    }, {
         text: 'Sec',
         width: 60,
         dataIndex: 'secType'
+    }, {
+        text: 'Cur',
+        width: 60,
+        dataIndex: 'currency'
     }, {
         text: 'Mul',
         width: 60,
