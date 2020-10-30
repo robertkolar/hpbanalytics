@@ -53,13 +53,6 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             value: 1
         }, {
             xtype: 'textfield',
-            fieldLabel: 'Symbol',
-            name: 'symbol',
-            minLength: 1,
-            maxLength: 30,
-            value: 'SPY201002P00336000'
-        }, {
-            xtype: 'textfield',
             fieldLabel: 'Underlying',
             name: 'underlying',
             minLength: 1,
@@ -67,11 +60,11 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
             value: 'SPY'
         }, {
             xtype: 'textfield',
-            fieldLabel: 'Currency',
-            name: 'currency',
+            fieldLabel: 'Symbol',
+            name: 'symbol',
             minLength: 1,
-            maxLength: 10,
-            value: 'USD'
+            maxLength: 30,
+            value: 'SPY201002P00336000'
         }, {
             xtype: 'combobox',
             name: 'secType',
@@ -83,6 +76,13 @@ Ext.define('HanGui.view.execution.window.ExecutionAddWindow', {
                 data: [{"text": "OPT"}, {"text": "FOP"}, {"text": "FUT"}, {"text": "CFD"}, {"text": "STK"}]
             }),
             value: 'OPT'
+        }, {
+            xtype: 'textfield',
+            fieldLabel: 'Currency',
+            name: 'currency',
+            minLength: 1,
+            maxLength: 10,
+            value: 'USD'
         }, {
             xtype: 'numberfield',
             fieldLabel: 'Multiplier',
