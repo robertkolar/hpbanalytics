@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * Created by robertk on 10/23/2020.
  */
 @Service
-public class HazelcastService implements InitializingService {
-    private static final Logger log = LoggerFactory.getLogger(HazelcastService.class);
+public class ExecutionListenerService implements InitializingService {
+    private static final Logger log = LoggerFactory.getLogger(ExecutionListenerService.class);
 
     private final HazelcastInstance hanHazelcastInstance;
     private final ScheduledExecutorService executorService;
@@ -32,10 +32,10 @@ public class HazelcastService implements InitializingService {
     private final AtomicBoolean hazelcastConsumerRunning = new AtomicBoolean(true);
 
     @Autowired
-    public HazelcastService(HazelcastInstance hanHazelcastInstance,
-                            ScheduledExecutorService executorService,
-                            ExecutionMapper executionMapper,
-                            AnalyticsService analyticsService) {
+    public ExecutionListenerService(HazelcastInstance hanHazelcastInstance,
+                                    ScheduledExecutorService executorService,
+                                    ExecutionMapper executionMapper,
+                                    AnalyticsService analyticsService) {
 
         this.hanHazelcastInstance = hanHazelcastInstance;
         this.executorService = executorService;

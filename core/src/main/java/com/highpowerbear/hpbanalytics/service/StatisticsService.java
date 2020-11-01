@@ -31,7 +31,7 @@ public class StatisticsService {
 
     private final TradeRepository tradeRepository;
     private final MessageService messageService;
-    private final TradeService tradeService;
+    private final TradeCalculationService tradeCalculationService;
 
     private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
@@ -40,11 +40,11 @@ public class StatisticsService {
     @Autowired
     public StatisticsService(TradeRepository tradeRepository,
                              MessageService messageService,
-                             TradeService tradeService) {
+                             TradeCalculationService tradeCalculationService) {
 
         this.tradeRepository = tradeRepository;
         this.messageService = messageService;
-        this.tradeService = tradeService;
+        this.tradeCalculationService = tradeCalculationService;
     }
 
     public List<Statistics> getStatistics(ChronoUnit interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
@@ -130,8 +130,8 @@ public class StatisticsService {
             BigDecimal bigLoser = BigDecimal.ZERO;
             BigDecimal profitLoss;
 
-            for (Trade t : tradesClosedForPeriod) {
-                BigDecimal pl = tradeService.calculatePlPortfolioBase(t);
+            for (Trade trade : tradesClosedForPeriod) {
+                BigDecimal pl = tradeCalculationService.calculatePlPortfolioBaseCloseOnly(trade);
 
                 if (pl.doubleValue() >= 0) {
                     numWinners++;

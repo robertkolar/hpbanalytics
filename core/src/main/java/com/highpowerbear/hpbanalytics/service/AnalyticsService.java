@@ -30,7 +30,7 @@ public class AnalyticsService {
 
     private final ExecutionRepository executionRepository;
     private final TradeRepository tradeRepository;
-    private final TradeService tradeService;
+    private final TradeCalculationService tradeCalculationService;
     private final MessageService messageService;
 
     private final TradeStatistics tradeStatistics = new TradeStatistics();
@@ -38,12 +38,12 @@ public class AnalyticsService {
     @Autowired
     public AnalyticsService(ExecutionRepository executionRepository,
                             TradeRepository tradeRepository,
-                            TradeService tradeService,
+                            TradeCalculationService tradeCalculationService,
                             MessageService messageService) {
 
         this.executionRepository = executionRepository;
         this.tradeRepository = tradeRepository;
-        this.tradeService = tradeService;
+        this.tradeCalculationService = tradeCalculationService;
         this.messageService = messageService;
 
         updateTradeStatistics();
@@ -242,7 +242,7 @@ public class AnalyticsService {
                 }
             }
 
-            tradeService.calculateFields(trade);
+            tradeCalculationService.calculateFields(trade);
             log.info("generated trade " + trade);
             trades.add(trade);
             singleContractSet.removeAll(trade.getExecutions());

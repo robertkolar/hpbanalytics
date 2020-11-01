@@ -1,8 +1,9 @@
 package com.highpowerbear.hpbanalytics.service;
 
-import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
-import com.highpowerbear.hpbanalytics.database.*;
+import com.highpowerbear.hpbanalytics.database.Execution;
+import com.highpowerbear.hpbanalytics.database.Trade;
+import com.highpowerbear.hpbanalytics.database.TradeRepository;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.enums.TradeType;
 import com.ib.client.Types;
@@ -32,9 +33,9 @@ import java.util.stream.IntStream;
 public class TaxReportService {
     private static final Logger log = LoggerFactory.getLogger(TaxReportService.class);
 
-    private final ExchangeRateRepository exchangeRateRepository;
+    private final ExchangeRateService exchangeRateService;
     private final TradeRepository tradeRepository;
-    private final TradeService tradeService;
+    private final TradeCalculationService tradeCalculationService;
 
     private final String NL = "\n";
     private final String DL = ",";
@@ -49,13 +50,13 @@ public class TaxReportService {
     private List<Integer> ifiYears;
 
     @Autowired
-    public TaxReportService(ExchangeRateRepository exchangeRateRepository,
+    public TaxReportService(ExchangeRateService exchangeRateService,
                             TradeRepository tradeRepository,
-                            TradeService tradeService) {
+                            TradeCalculationService tradeCalculationService) {
 
-        this.exchangeRateRepository = exchangeRateRepository;
+        this.exchangeRateService = exchangeRateService;
         this.tradeRepository = tradeRepository;
-        this.tradeService = tradeService;
+        this.tradeCalculationService = tradeCalculationService;
 
         setup();
     }
@@ -218,7 +219,7 @@ public class TaxReportService {
 
         BigDecimal profitLoss = null;
         if (currentPos == 0) {
-            profitLoss = tradeService.calculatePlPortfolioBaseOpenClose(trade);
+            profitLoss = tradeCalculationService.calculatePlPortfolioBaseOpenClose(trade);
             sb.append(nf.format(profitLoss.doubleValue()));
         }
 
@@ -254,29 +255,12 @@ public class TaxReportService {
 
         BigDecimal profitLoss = null;
         if (currentPos == 0) {
-            profitLoss = tradeService.calculatePlPortfolioBaseOpenClose(trade);
+            profitLoss = tradeCalculationService.calculatePlPortfolioBaseOpenClose(trade);
             sb.append(nf.format(profitLoss.doubleValue()));
         }
         sb.append(NL);
 
         return profitLoss;
-    }
-
-    private double getExchangeRate(Execution execution) {
-        String date = HanUtil.formatExchangeRateDate(execution.getFillDate().toLocalDate());
-        ExchangeRate exchangeRate = exchangeRateRepository.findById(date).orElse(null);
-
-        if (exchangeRate == null) {
-            String previousDate = HanUtil.formatExchangeRateDate(execution.getFillDate().plusDays(-1).toLocalDate());
-            exchangeRate = exchangeRateRepository.findById(previousDate).orElse(null);
-
-            if (exchangeRate == null) {
-                throw new IllegalStateException("exchange rate not available for " + date + " or " + previousDate);
-            }
-        }
-        Currency currency = execution.getCurrency();
-
-        return exchangeRate.getRate(HanSettings.PORTFOLIO_BASE, currency);
     }
 
     private double fillValue(Execution execution) {
@@ -287,7 +271,10 @@ public class TaxReportService {
     }
 
     private double fillValueBase(Execution execution) {
-        BigDecimal exchangeRate = BigDecimal.valueOf(getExchangeRate(execution));
+        LocalDate date = execution.getFillDate().toLocalDate();
+        Currency currency = execution.getCurrency();
+
+        BigDecimal exchangeRate = exchangeRateService.getExchangeRate(date, currency);
         BigDecimal contractFillPrice = execution.getFillPrice();
         BigDecimal multiplier = BigDecimal.valueOf(execution.getMultiplier());
 

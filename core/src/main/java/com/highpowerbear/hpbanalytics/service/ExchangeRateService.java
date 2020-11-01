@@ -1,5 +1,7 @@
 package com.highpowerbear.hpbanalytics.service;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.ApplicationProperties;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
@@ -10,10 +12,10 @@ import com.highpowerbear.hpbanalytics.model.ExchangeRates;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +24,11 @@ import java.util.concurrent.TimeUnit;
  * Created by robertk on 10/10/2016.
  */
 @Service
-public class ExchangeRateService implements InitializingService {
+public class ExchangeRateService implements InitializingService, ScheduledTaskPerformer {
     private static final Logger log = LoggerFactory.getLogger(ExchangeRateService.class);
 
     private final ExchangeRateRepository exchangeRateRepository;
+    private final HazelcastInstance hanHazelcastInstance;
     private final ApplicationProperties applicationProperties;
     private final ScheduledExecutorService executorService;
 
@@ -33,10 +36,12 @@ public class ExchangeRateService implements InitializingService {
 
     @Autowired
     public ExchangeRateService(ExchangeRateRepository exchangeRateRepository,
+                               HazelcastInstance hanHazelcastInstance,
                                ApplicationProperties applicationProperties,
                                ScheduledExecutorService executorService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
+        this.hanHazelcastInstance = hanHazelcastInstance;
         this.applicationProperties = applicationProperties;
         this.executorService = executorService;
     }
@@ -47,7 +52,11 @@ public class ExchangeRateService implements InitializingService {
         executorService.schedule(this::retrieveExchangeRates, HanSettings.EXCHANGE_RATE_RETRIEVAL_DELAY_SECONDS, TimeUnit.SECONDS);
     }
 
-    @Scheduled(cron="0 0 6 * * *")
+    @Override
+    public void performStartOfDayTasks() {
+        retrieveExchangeRates();
+    }
+
     private void retrieveExchangeRates() {
         log.info("BEGIN ExchangeRateRetriever.retrieve");
         final int daysBack = applicationProperties.getFixer().getDaysBack();
@@ -70,6 +79,7 @@ public class ExchangeRateService implements InitializingService {
                     .setEurSgd(exchangeRates.getRate(Currency.SGD));
 
             exchangeRateRepository.save(exchangeRate);
+            exchangeRateMap().put(date, exchangeRate);
         }
 
         log.info("END ExchangeRateRetriever.retrieve");
@@ -85,5 +95,28 @@ public class ExchangeRateService implements InitializingService {
 
         log.info("retrieved exchange rates " + exchangeRates);
         return exchangeRates;
+    }
+
+    public BigDecimal getExchangeRate(LocalDate localDate, Currency currency) {
+
+        String date = HanUtil.formatExchangeRateDate(localDate);
+        IMap<String, ExchangeRate> map = exchangeRateMap();
+
+        ExchangeRate exchangeRate = map.get(date);
+        if (exchangeRate == null) {
+            exchangeRate = exchangeRateRepository.findById(date).orElse(null);
+
+            if (exchangeRate == null) {
+                throw new IllegalStateException("exchange rate not available for " + date);
+            }
+            map.put(date, exchangeRate);
+        }
+
+        double rate = exchangeRate.getRate(HanSettings.PORTFOLIO_BASE_CURRENCY, currency);
+        return BigDecimal.valueOf(rate);
+    }
+
+    private IMap<String, ExchangeRate> exchangeRateMap() {
+        return hanHazelcastInstance.getMap(HanSettings.HAZELCAST_EXCHANGE_RATE_MAP_NAME);
     }
 }
