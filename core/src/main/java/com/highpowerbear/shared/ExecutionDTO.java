@@ -1,4 +1,4 @@
-package com.highpowerbear.dto;
+package com.highpowerbear.shared;
 
 import com.ib.client.Types;
 

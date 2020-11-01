@@ -1,6 +1,6 @@
 package com.highpowerbear.hpbanalytics.common;
 
-import com.highpowerbear.dto.ExecutionDTO;
+import com.highpowerbear.shared.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.database.Execution;
 import org.mapstruct.Mapper;
 

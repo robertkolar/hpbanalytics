@@ -2,6 +2,7 @@ package com.highpowerbear.hpbanalytics.service;
 
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
+import com.highpowerbear.hpbanalytics.common.ExchangeRateMapper;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.ApplicationProperties;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
@@ -9,6 +10,7 @@ import com.highpowerbear.hpbanalytics.database.ExchangeRate;
 import com.highpowerbear.hpbanalytics.database.ExchangeRateRepository;
 import com.highpowerbear.hpbanalytics.enums.Currency;
 import com.highpowerbear.hpbanalytics.model.ExchangeRates;
+import com.highpowerbear.shared.ExchangeRateDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +31,7 @@ public class ExchangeRateService implements InitializingService, ScheduledTaskPe
 
     private final ExchangeRateRepository exchangeRateRepository;
     private final HazelcastInstance hanHazelcastInstance;
+    private final ExchangeRateMapper exchangeRateMapper;
     private final ApplicationProperties applicationProperties;
     private final ScheduledExecutorService executorService;
 
@@ -37,11 +40,13 @@ public class ExchangeRateService implements InitializingService, ScheduledTaskPe
     @Autowired
     public ExchangeRateService(ExchangeRateRepository exchangeRateRepository,
                                HazelcastInstance hanHazelcastInstance,
+                               ExchangeRateMapper exchangeRateMapper,
                                ApplicationProperties applicationProperties,
                                ScheduledExecutorService executorService) {
 
         this.exchangeRateRepository = exchangeRateRepository;
         this.hanHazelcastInstance = hanHazelcastInstance;
+        this.exchangeRateMapper = exchangeRateMapper;
         this.applicationProperties = applicationProperties;
         this.executorService = executorService;
     }
@@ -79,7 +84,7 @@ public class ExchangeRateService implements InitializingService, ScheduledTaskPe
                     .setEurSgd(exchangeRates.getRate(Currency.SGD));
 
             exchangeRateRepository.save(exchangeRate);
-            exchangeRateMap().put(date, exchangeRate);
+            exchangeRateMap().put(date, exchangeRateMapper.entityToDto(exchangeRate));
         }
 
         log.info("END ExchangeRateRetriever.retrieve");
@@ -100,23 +105,22 @@ public class ExchangeRateService implements InitializingService, ScheduledTaskPe
     public BigDecimal getExchangeRate(LocalDate localDate, Currency currency) {
 
         String date = HanUtil.formatExchangeRateDate(localDate);
-        IMap<String, ExchangeRate> map = exchangeRateMap();
+        IMap<String, ExchangeRateDTO> map = exchangeRateMap();
 
-        ExchangeRate exchangeRate = map.get(date);
-        if (exchangeRate == null) {
-            exchangeRate = exchangeRateRepository.findById(date).orElse(null);
+        if (map.get(date) == null) {
+            ExchangeRate entity = exchangeRateRepository.findById(date).orElse(null);
 
-            if (exchangeRate == null) {
+            if (entity == null) {
                 throw new IllegalStateException("exchange rate not available for " + date);
             }
-            map.put(date, exchangeRate);
+            map.put(date, exchangeRateMapper.entityToDto(entity));
         }
 
-        double rate = exchangeRate.getRate(HanSettings.PORTFOLIO_BASE_CURRENCY, currency);
+        double rate = map.get(date).getRate(HanSettings.PORTFOLIO_BASE_CURRENCY.name(), currency.name());
         return BigDecimal.valueOf(rate);
     }
 
-    private IMap<String, ExchangeRate> exchangeRateMap() {
+    private IMap<String, ExchangeRateDTO> exchangeRateMap() {
         return hanHazelcastInstance.getMap(HanSettings.HAZELCAST_EXCHANGE_RATE_MAP_NAME);
     }
 }

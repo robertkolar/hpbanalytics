@@ -3,7 +3,7 @@ package com.highpowerbear.hpbanalytics.service;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.HazelcastInstanceNotActiveException;
 import com.hazelcast.core.IQueue;
-import com.highpowerbear.dto.ExecutionDTO;
+import com.highpowerbear.shared.ExecutionDTO;
 import com.highpowerbear.hpbanalytics.common.ExecutionMapper;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
 import com.highpowerbear.hpbanalytics.config.HanSettings;
