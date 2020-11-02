@@ -105,19 +105,28 @@ public class ExchangeRateService implements InitializingService, ScheduledTaskPe
     public BigDecimal getExchangeRate(LocalDate localDate, Currency currency) {
 
         String date = HanUtil.formatExchangeRateDate(localDate);
+        ExchangeRateDTO dto = getExchangeRateDTO(date);
+
+        if (dto == null) {
+            String previousDate = HanUtil.formatExchangeRateDate(localDate.minusDays(1));
+            log.warn("exchange rate not available for " + date + ", trying previous day " + previousDate);
+
+            dto = getExchangeRateDTO(previousDate);
+            if (dto == null) {
+                throw new IllegalStateException("exchange rate not available for " + date + " or " + previousDate);
+            }
+        }
+        double rate = dto.getRate(HanSettings.PORTFOLIO_BASE_CURRENCY.name(), currency.name());
+        return BigDecimal.valueOf(rate);
+    }
+
+    private ExchangeRateDTO getExchangeRateDTO(String date) {
         IMap<String, ExchangeRateDTO> map = exchangeRateMap();
 
         if (map.get(date) == null) {
-            ExchangeRate entity = exchangeRateRepository.findById(date).orElse(null);
-
-            if (entity == null) {
-                throw new IllegalStateException("exchange rate not available for " + date);
-            }
-            map.put(date, exchangeRateMapper.entityToDto(entity));
+            exchangeRateRepository.findById(date).ifPresent(entity -> map.put(date, exchangeRateMapper.entityToDto(entity)));
         }
-
-        double rate = map.get(date).getRate(HanSettings.PORTFOLIO_BASE_CURRENCY.name(), currency.name());
-        return BigDecimal.valueOf(rate);
+        return map.get(date);
     }
 
     private IMap<String, ExchangeRateDTO> exchangeRateMap() {
