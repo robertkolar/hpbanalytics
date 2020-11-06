@@ -24,6 +24,7 @@ public class HanSettings {
     public static final int HAZELCAST_EXECUTION_QUEUE_MAX_SZE = 1000;
     public static final int HAZELCAST_CONSUMER_START_DELAY_SECONDS = 10;
     public static final String HAZELCAST_EXCHANGE_RATE_MAP_NAME = "exchangeRateMap";
+    public static final String HAZELCAST_STATISTICS_MAP_NAME = "statisticsMap";
     public static final int HAZELCAST_EXCHANGE_RATE_MAP_TIME_MAX_IDLE_SECONDS = 604800; // 1 week
 
     public static final String DB_DATABASE = "hpbanalytics";

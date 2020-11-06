@@ -1,5 +1,6 @@
 package com.highpowerbear.hpbanalytics.model;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -7,7 +8,8 @@ import java.time.LocalDateTime;
  *
  * Created by robertk on 4/26/2015.
  */
-public class Statistics {
+public class Statistics implements Serializable {
+    private static final long serialVersionUID = 8464224239795026258L;
 
     private final int id;
     private final LocalDateTime periodDate;

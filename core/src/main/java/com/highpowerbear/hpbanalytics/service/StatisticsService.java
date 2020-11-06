@@ -1,6 +1,9 @@
 package com.highpowerbear.hpbanalytics.service;
 
+import com.hazelcast.core.HazelcastInstance;
+import com.hazelcast.core.IMap;
 import com.highpowerbear.hpbanalytics.common.HanUtil;
+import com.highpowerbear.hpbanalytics.config.HanSettings;
 import com.highpowerbear.hpbanalytics.config.WsTopic;
 import com.highpowerbear.hpbanalytics.database.*;
 import com.highpowerbear.hpbanalytics.enums.Currency;
@@ -30,32 +33,32 @@ public class StatisticsService {
     private static final Logger log = LoggerFactory.getLogger(StatisticsService.class);
 
     private final TradeRepository tradeRepository;
+    private final HazelcastInstance hanHazelcastInstance;
     private final MessageService messageService;
     private final TradeCalculationService tradeCalculationService;
-
-    private final Map<String, List<Statistics>> statisticsMap = new HashMap<>(); // caching statistics to prevent excessive recalculation
 
     private final String ALL = "ALL";
 
     @Autowired
     public StatisticsService(TradeRepository tradeRepository,
+                             HazelcastInstance hanHazelcastInstance,
                              MessageService messageService,
                              TradeCalculationService tradeCalculationService) {
 
         this.tradeRepository = tradeRepository;
+        this.hanHazelcastInstance = hanHazelcastInstance;
         this.messageService = messageService;
         this.tradeCalculationService = tradeCalculationService;
     }
 
     public List<Statistics> getStatistics(ChronoUnit interval, String tradeType, String secType, String currency, String underlying, Integer maxPoints) {
 
-        List<Statistics> statisticsList = statisticsMap.get(statisticsKey(interval, tradeType, secType, currency, underlying));
+        List<Statistics> statisticsList = statisticsMap().get(statisticsKey(interval, tradeType, secType, currency, underlying));
         if (statisticsList == null) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
 
         int size = statisticsList.size();
-
         if (maxPoints == null || size < maxPoints) {
             maxPoints = size;
         }
@@ -76,8 +79,8 @@ public class StatisticsService {
         List<Trade> trades = tradeRepository.findAll(filter, Sort.by(Sort.Direction.ASC, "openDate"));
 
         log.info("found " + trades.size() + " trades matching the filter criteria, calculating statistics...");
-        List<Statistics> stats = doCalculate(trades, interval);
-        statisticsMap.put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);
+        List<Statistics> stats = calculate(trades, interval);
+        statisticsMap().put(statisticsKey(interval, tradeType, secType, currency, underlying), stats);
 
         log.info("END statistics calculation for interval=" + interval + ", included " + trades.size() + " trades");
 
@@ -100,7 +103,7 @@ public class StatisticsService {
         return param == null || ALL.equals(param) ? null : T.valueOf(enumType, param);
     }
 
-    private List<Statistics> doCalculate(List<Trade> trades, ChronoUnit interval) {
+    private List<Statistics> calculate(List<Trade> trades, ChronoUnit interval) {
         List<Statistics> stats = new ArrayList<>();
 
         if (trades == null || trades.isEmpty()) {
@@ -237,5 +240,9 @@ public class StatisticsService {
         }
 
         return localDate.atStartOfDay();
+    }
+
+    private IMap<String, List<Statistics>> statisticsMap() {
+        return hanHazelcastInstance.getMap(HanSettings.HAZELCAST_EXCHANGE_RATE_MAP_NAME);
     }
 }
