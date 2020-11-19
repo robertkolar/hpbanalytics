@@ -243,6 +243,6 @@ public class StatisticsService {
     }
 
     private IMap<String, List<Statistics>> statisticsMap() {
-        return hanHazelcastInstance.getMap(HanSettings.HAZELCAST_EXCHANGE_RATE_MAP_NAME);
+        return hanHazelcastInstance.getMap(HanSettings.HAZELCAST_STATISTICS_MAP_NAME);
     }
 }
